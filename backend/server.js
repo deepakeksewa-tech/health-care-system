@@ -15,7 +15,7 @@ connectDB();
 const app = express();
 app.use(cookieParser());
 app.use(cors({
-  origin: "http://localhost:5173", // React/Vite URL
+  origin: "https://health-care-system-seven.vercel.app/", // React/Vite URL
   credentials: true,
 }));
 

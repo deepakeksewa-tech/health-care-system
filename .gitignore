@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Environment variables - IMPORTANT
+.env
+.env.local
+.env.development
+.env.production
+
+# Build folders
+dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# System files
+.DS_Store
+
+# VS Code
+.vscode/

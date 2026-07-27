@@ -14,10 +14,23 @@ connectDB();
 
 const app = express();
 app.use(cookieParser());
-app.use(cors({
-  origin: "https://health-care-system-seven.vercel.app", // React/Vite URL
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (
+      !origin ||
+      origin === "http://localhost:5173" ||
+      origin === "https://health-care-system-seven.vercel.app" ||
+      origin.endsWith(".vercel.app")
+    ) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
-}));
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

@@ -14,23 +14,11 @@ connectDB();
 
 const app = express();
 app.use(cookieParser());
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (
-      !origin ||
-      origin === "http://localhost:5173" ||
-      origin === "https://health-care-system-seven.vercel.app" ||
-      origin.endsWith(".vercel.app")
-    ) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-};
 
-app.use(cors(corsOptions));
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

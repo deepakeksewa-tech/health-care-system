@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import fs from 'fs';
-
+import { payment } from '../models/payment.model.js';
 import cloudinary from '../config/cloudinary.js';
 import {DoctorRegistration, DoctorBasic, DoctorWeekly,DoctorLocation } from '../models/doctor.model.js';
 import {Patient,userModel} from '../models/patient.model.js';
@@ -295,6 +295,25 @@ export const PatientAppointment = async (req, res) => {
       razorpayPaymentId,
       razorpaySignature
     });
+ const amo=Number(bookingAmount)
+    if (isNaN(amo) || amo <= 0) {
+  return res.status(400).json({
+    success: false,
+    message: "Invalid booking amount",
+  });
+}
+    const pay=await payment.findOne({userId:doctorId});
+    if(!pay){
+      await payment.create({userId:doctorId,money:amo})
+      return res.status(200).send({
+        success:true,
+        message:"money updated",
+      })
+    }
+   
+    pay.money=pay.money+amo;
+    await pay.save();
+
 
     // 5. Fetch Doctor Location & User Info
     const location = await DoctorLocation.findOne({ doctorId }).populate('doctorId');

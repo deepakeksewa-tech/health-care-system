@@ -56,7 +56,7 @@ Support Team
 `
     })
   })
-  console.log(sendMail);
+ 
   return  res.status(200).send({
   success:true,
   message:"the otp send successfully",
@@ -85,7 +85,7 @@ export const checkOtp=async(req,res)=>{
       message:"firstly please click on the forget password then it will send you the otp"
     })
   }
-  console.log(find);
+  
   if(find.otp==userOTP){
     await find.deleteOne();
     
@@ -181,7 +181,7 @@ Support Team
         }),
       }
     );
-  console.log(sendMail);
+
   return  res.status(200).send({
   success:true,
   message:"the otp send successfully",
@@ -210,7 +210,7 @@ export const PatientcheckOtp=async(req,res)=>{
       message:"firstly please click on the forget password then it will send you the otp"
     })
   }
-  console.log(find);
+
   if(find.otp==userOTP){
     await find.deleteOne();
     
@@ -278,34 +278,40 @@ export const Adminpassword=async(req,res)=>{
   })
  
   
-const sendMail = await fetch(`https://deepak171.app.n8n.cloud/webhook/fa1b2de0-1463-4a4b-8e2c-4caa0c896f3a`, {
-  method: "POST",
-  credentials: "include",
-  headers: {
-    "Content-Type": "application/json" // Note: standard format uses uppercase 'T' and slash '/'
-  },
-  body: JSON.stringify({
-    mail: find.gmail,
-    subject: "Appointment Confirmation – Thank You for Booking!",
-    message: `
-    Hello ${find.name || "Valued Customer"},
+const sendMail = await fetch(
+  "https://deepak171.app.n8n.cloud/webhook/fa1b2de0-1463-4a4b-8e2c-4caa0c896f3a",
+  {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      mail: find.gmail,
+      subject: "Your One-Time Password (OTP) for Verification",
+      message: `
+Hello ${find.name || "User"},
 
-    Thank you for booking an appointment with us! We have successfully received your request.
+Your One-Time Password (OTP) for verification is:
 
-    Here are your appointment details:
-    • Status: Confirmed 
-    • Location Link
+🔐 OTP: ${otp}
 
-    If you need to verify or modify your booking, please use the OTP code provided above.
+This OTP is valid for the next 10 minutes.
 
-    If you have any questions or need to reschedule, feel free to reach out to our support team. We look forward to serving you!
+Please do not share this OTP with anyone. Our team will never ask you for your OTP or password.
 
-    Best regards,  
-    Support Team
-        `
-  })
-});
-  console.log(sendMail);
+If you did not request this verification, you can safely ignore this email.
+
+Thank you for choosing MEDSEWA.
+
+Best regards,
+MEDSEWA Support Team
+      `,
+    }),
+  }
+);
+
+
   return  res.status(200).send({
   success:true,
   message:"the otp send successfully",
@@ -330,7 +336,7 @@ export const AdmincheckOtp=async(req,res)=>{
       message:"firstly please click on the forget password then it will send you the otp"
     })
   }
-  console.log(find);
+
   if(find.otp==userOTP){
     await find.deleteOne();
     

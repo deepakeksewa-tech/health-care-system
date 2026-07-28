@@ -27,10 +27,6 @@ app.get("/", (req, res) => {
   res.send("Backend Running");
 });
 
-app.get("/api/admin/test", (req, res) => {
-  res.json({ message: "Admin API working" });
-});
-
 // Mounted Routes
 app.use("/api/doctors", doctorRoutes);
 app.use("/api/admin", adminRoutes);

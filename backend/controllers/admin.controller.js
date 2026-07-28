@@ -68,7 +68,7 @@ Doctor Consultancy Platform`,
 );
 
 const data = await sendingMail.json();
-console.log(data);
+
   return res.status(200).send({
     success:true,
     message:"doctor verification rejected successfully"

@@ -27,9 +27,17 @@ const Header = ({ doctorInfo }) => (
       <span className="text-sm font-medium text-gray-600">
         {doctorInfo?.name ? `Dr. ${doctorInfo.name}` : "Doctor Dashboard"}
       </span>
-      <div className="w-9 h-9 rounded-full bg-[#058b7c]/10 text-[#058b7c] font-semibold flex items-center justify-center border border-[#058b7c]/20">
-        {doctorInfo?.name ? doctorInfo.name.split(" ").map(n => n[0]).join("") : "DR"}
-      </div>
+<div className="w-9 h-9 rounded-full bg-[#058b7c]/10 text-[#058b7c] font-semibold flex items-center justify-center border border-[#058b7c]/20">
+  {doctorInfo?.image ? (
+    <img
+      src={doctorInfo.image}
+      alt="doctor"
+      className="w-full h-full rounded-full object-cover"
+    />
+  ) : (
+    "DR"
+  )}
+</div>
     </div>
   </header>
 );
@@ -41,15 +49,45 @@ const Dashboard = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [selectedAppointment, setSelectedAppointment] = useState(null);
-
+  const [walletMoney, setwalletMoney] = useState(0);
   // Dynamic Data States
   const [appointments, setAppointments] = useState([]);
-  const [doctorInfo, setDoctorInfo] = useState(null);
+  const [doctorInfo, setDoctorInfo] = useState({
+  name: "",
+  image: "",
+});
   const [loading, setLoading] = useState(false);
 
   // API Base URL
   const API_BASE_URL = import.meta.env.VITE_API_URL ;
 
+async function getName(){
+      const response=await fetch(`${API_BASE_URL}/api/doctors/get/name/image`,{
+      method:"GET",
+      credentials:"include",
+      headers:{
+        "Content-Type":"application/json"
+      }
+    })
+    const data=await response.json();
+    if(data.success){
+      setDoctorInfo({name:data.name,image:data.image})
+    }
+}
+
+ async function handlewithdraw(){
+    const response=await fetch(`${API_BASE_URL}/api/doctors/widthraw/money`,{
+      method:"GET",
+      credentials:"include",
+      headers:{
+        "Content-Type":"application/json"
+      }
+    })
+    const data=await response.json();
+    if(data.success){
+      setwalletMoney(0);
+    }
+  }
   // Fetch Appointments
   const fetchDashboardData = async () => {
     try {
@@ -85,6 +123,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
+    getName();
   }, []);
 
   // Verify Password Endpoint
@@ -111,6 +150,7 @@ const Dashboard = () => {
         setCheckMoney(true);
         setShowPassword(false);
         setPassword("");
+        setwalletMoney(data.data);
       } else {
         alert(data.message || "Invalid Security Password");
       }
@@ -157,10 +197,7 @@ const Dashboard = () => {
               Manage your clinical appointments, earnings, and consultations.
             </p>
           </div>
-          <div className="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-xs text-slate-600 font-medium shadow-2xs">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            Live Updates Active
-          </div>
+
         </div>
 
         {/* Metrics Grid */}
@@ -180,7 +217,7 @@ const Dashboard = () => {
             </div>
             <div className="mt-4 flex items-baseline justify-between">
               <span className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
-                {checkMoney ? "₹2,500.00" : "••••••••"}
+                {checkMoney ? `₹${walletMoney}` : "••••••••"}
               </span>
               <span className="text-xs font-semibold text-[#058b7c] group-hover:underline">
                 Tap to View →
@@ -430,7 +467,7 @@ const Dashboard = () => {
               {checkMoney ? (
                 <div className="py-2">
                   <span className="text-4xl font-extrabold text-[#058b7c]">
-                    ₹2,500.00
+                    ₹{walletMoney}
                   </span>
                   <p className="text-xs text-slate-500 mt-2">
                     Available for direct bank withdrawal.
@@ -481,6 +518,7 @@ const Dashboard = () => {
                 <button
                   className="w-full bg-[#058b7c] hover:bg-[#047266] text-white py-3 rounded-xl font-semibold text-sm transition-colors shadow-xs"
                   onClick={() => {
+                    handlewithdraw();
                     alert("Funds settlement initiated. Direct deposit takes 24 hours.");
                     closeWalletModal();
                   }}

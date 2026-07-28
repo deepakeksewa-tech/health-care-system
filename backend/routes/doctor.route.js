@@ -3,7 +3,7 @@ import express from "express";
 import upload from "../middleware/multer.js";
 import authMiddleware  from '../middleware/registraionMiddleware.js'
 import adminMiddleware from '../middleware/AdminMiddleware.js'
-import { verifyPassword,getAppointment,getName,LocationSetup,specialization,category,ReadSpecialization,ReadCategory,createBasicDoctor ,weeklySchedule,createRegistrationDoctor,DoctorLogin} from "../controllers/doctor.controller.js";
+import { verifyPassword,creditedMoney,getAppointment,getName,LocationSetup,specialization,category,ReadSpecialization,ReadCategory,createBasicDoctor ,weeklySchedule,createRegistrationDoctor,DoctorLogin} from "../controllers/doctor.controller.js";
 
 const router = express.Router();
 
@@ -18,5 +18,6 @@ router.post("/category",adminMiddleware,category)
 router.get("/ReadCategory",adminMiddleware,ReadCategory)
 router.post("/verify/password",adminMiddleware,verifyPassword);
 router.get("/get/all/appointments",adminMiddleware,getAppointment);
+router.get("/widthraw/money",adminMiddleware,creditedMoney)
 router.post("/DoctorLogin",DoctorLogin)
 export default router;

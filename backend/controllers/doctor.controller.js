@@ -4,6 +4,7 @@ import fs from 'fs'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { Patient, userModel } from "../models/patient.model.js";
+import { payment } from "../models/payment.model.js";
 // create the row for the registration details for the doctor 
 export const createRegistrationDoctor = async (req, res) => {
     try {
@@ -354,7 +355,7 @@ export const getAppointment=async(req,res)=>{
             message:"Doctor not found"
         })
     }
-    console.log(check.id);
+
     
     const find=await Patient.find({doctorId:check._id});
     if(find.length==0){
@@ -384,9 +385,59 @@ export const verifyPassword=async(req,res)=>{
             message:"Password not matched"
         })
     }
+    
+    const check=await DoctorBasic.findOne({doctorId:id});
+    if(!check){
+        return res.status(400).send({
+            success:false,
+            message:"doctor not found"
+        })
+    }
+    const finding=await payment.findOne({userId:check._id});
+    if(!finding){
+        return res.status(400).send({
+            success:false,
+            message:"no doctor found",
+            data:0
+        })
+    }
     return res.status(200).send({
         success:true,
-        message:"Password matched successfully"
+        message:"THE DOCTOR DEBUT MONEY IS",
+        data:finding.money
     })
+}
 
+
+
+
+export const creditedMoney=async(req,res)=>{
+    const id=req.id;
+    const check=await DoctorBasic.findOne({doctorId:id});
+    if(!check){
+        return res.status(400).send({
+            success:true,
+            message:"Doctor not found"
+        })
+    }
+    const finding=await payment.findOne({userId:check._id});
+    if(!finding){
+        return res.status(400).send({
+            success:false,
+            message:"Doctor not found"
+        })
+    }
+    if (finding.money <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No money available in wallet",
+      });
+    }
+
+    finding.money=0;
+    await finding.save();
+    return res.status(200).send({
+        success:true,
+        message:"The doctor credited the money in our account"
+    })
 }

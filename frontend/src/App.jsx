@@ -23,6 +23,10 @@ import MainPage from './MainPage'
 import DoctorPassword from './ForgetPassword/DoctorPassword'
 import PatientPassword from './ForgetPassword/PatientPassword'
 import AdminPassword from './ForgetPassword/AdminPassword'
+import MedicineSignup from './Medicine/MedicineSignup'
+import MedicineLogin from './Medicine/MedicineLogin'
+import MedicineDashboard from './Medicine/MedicineDashboard'
+
 const App = () => {
   return (
     <BrowserRouter>
@@ -56,7 +60,12 @@ const App = () => {
     <Route path='/forgot-password-doctor' element={<DoctorPassword/>}/>
     <Route path='/forgot-password-patient' element={<PatientPassword/>}/>
     <Route path='/forgot-password-admin' element={<AdminPassword/>}/>
-    </Routes>
+
+    {/* ---------------- Medicine --------------------- */}
+    <Route path='/Medicine/Signup' element={<MedicineSignup/>}/>
+    <Route path='/Medicine/Login' element={<MedicineLogin/>}/>
+    <Route path='/Medicine/Dashboard' element={<MedicineDashboard/>}/>
+      </Routes>
 
   
     </BrowserRouter>

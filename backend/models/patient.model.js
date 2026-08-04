@@ -121,9 +121,47 @@ const PatientSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export const PatientModel = mongoose.model("Patient", PatientSchema);
 
+const PatientMedicineSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Patient",
+    required: true,
+  },
+  PatientName:{
+    type:String,
+    required:true
+  },
+  contactNumber:{
+    type:String,  
+    required:true
+  },
+  Address:{
+    type:String,
+    required:true
+  },
+  PrescriptionImage:{
+    type:String,
+    default:""
+  },
+  PrescriptionText:{
+    type:String,
+    default:""
+  },
+  status:{
+    type:String,
+    default:"Pending",
+    enum:["Pending","Processing","Out For Delivery","Delivered","Cancelled"]
+  } ,
+  ownerId:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "MedicineSeller",
+    required: true,
+  }
+
+});
+const PatientMedicine = mongoose.model("PatientMedicine", PatientMedicineSchema);
 const Patient= mongoose.model("Patient", PatientSchema);
 const userModel=mongoose.model("userModel",userSchema)
 
-export {userModel,Patient};
+export {userModel,Patient,PatientMedicine};

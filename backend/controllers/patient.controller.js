@@ -436,3 +436,96 @@ export const bookingDetails = async (req, res) => {
     });
   }
 };
+
+export const PatientMedicineDetails = async (req, res) => {
+  try {
+    const id = req.id;
+    const find = await Patient.find({ userId: id });
+    if (find.length === 0) {
+      return res.status(400).send({
+        success: false,
+        message: "There is no booking",
+        data: []
+      });
+    }
+    const patientMedicineDetails = await PatientMedicine.find({ userId: id });
+    return res.status(200).send({
+      success: true,
+      message: "The bookings are:",
+      data: find,
+      patientMedicineDetails
+    });
+  } catch (error) {
+    return res.status(500).send({
+      success: false,
+      message: error.message || "Internal Server Error"
+    });
+  }
+}
+
+
+
+export const savePatientMedicineDetails = async (req, res) => {
+  try {
+    const userId = req.id;
+    const { PatientName, contactNumber, Address, PrescriptionText, ownerId } = req.body;
+
+    // 1. Check required text fields
+    if (!PatientName || !contactNumber || !Address || !ownerId) {
+      // Agar image aayi thi par fields missing hain, toh local temp file delete kar do
+      if (req.file && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      return res.status(400).json({
+        success: false,
+        message: "PatientName, contactNumber, Address and ownerId are required"
+      });
+    }
+
+    let prescriptionImageUrl = "";
+
+    // 2. Upload image to Cloudinary ONLY IF an image file was provided
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "Prescriptions"
+      });
+
+      prescriptionImageUrl = result.secure_url;
+
+      // Local temp file ko delete karo upload ke baad
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+    }
+
+    // 3. Save to Database
+    const newPatientMedicine = new PatientMedicine({
+      userId,
+      PatientName,
+      contactNumber,
+      Address,
+      PrescriptionImage: prescriptionImageUrl, // Photo hai toh Cloudinary URL, nahi toh empty string
+      PrescriptionText: PrescriptionText || "",
+      ownerId
+    });
+
+    await newPatientMedicine.save();
+
+    return res.status(201).json({
+      success: true,
+      message: "Patient medicine details saved successfully",
+      data: newPatientMedicine
+    });
+
+  } catch (error) {
+    // Error aane par temp file clean karo
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal Server Error"
+    });
+  }
+};

@@ -12,6 +12,7 @@ import {Patient,userModel} from '../models/patient.model.js';
 // ==========================================
 // 1. SIGNUP CONTROLLER
 // ==========================================
+const sendingGmail=process.env.N8N_WEBHOOK;
 export const signup = async (req, res) => {
   try {
     const name = req.body.name;
@@ -32,7 +33,7 @@ export const signup = async (req, res) => {
     });
 
     // Send Mail Webhook (Non-blocking)
-    fetch("https://deepak171.app.n8n.cloud/webhook/fa1b2de0-1463-4a4b-8e2c-4caa0c896f3a", {
+    fetch(`${sendingGmail}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -363,7 +364,7 @@ export const PatientAppointment = async (req, res) => {
 
     // 8. Trigger n8n Webhook
     try {
-      const sendEmail = await fetch("https://deepak171.app.n8n.cloud/webhook/ee785f76-44be-47c5-a66c-fbafdd66214d", {
+      const sendEmail = await fetch(`${sendingGmail}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

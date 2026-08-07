@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken'
 import { Patient, userModel } from "../models/patient.model.js";
 import { payment } from "../models/payment.model.js";
 // create the row for the registration details for the doctor 
+
 export const createRegistrationDoctor = async (req, res) => {
     try {
         if (!req.file) {
@@ -32,6 +33,7 @@ export const createRegistrationDoctor = async (req, res) => {
                 success:false
             })
         }
+     
         const doctor = await DoctorRegistration.create({
             name: req.body.name,
             registrationNo:req.body.registrationNo,
@@ -41,7 +43,10 @@ export const createRegistrationDoctor = async (req, res) => {
             stateMedicalCouncil:req.body.stateMedicalCouncil,
             gmail:req.body.gmail.toLowerCase()
         });
-        const sendingMail=await fetch('https://deepak171.app.n8n.cloud/webhook/fa1b2de0-1463-4a4b-8e2c-4caa0c896f3a',{
+        
+        const mail=process.env.N8N_WEBHOOK;
+
+        const sendingMail=await fetch(`${mail}`,{
             method:"POST",
             credentials:"include",
             headers:{
@@ -68,13 +73,16 @@ Verification Team
 Doctor Consultancy Platform`
 })
         })
+        
         const data=await sendingMail.json()
         return res.status(201).json({
             success: true,
             doctor
         });
     }
+
     catch (error) {
+        console.log(error);
         return res.status(500).json({
             success: false,
             message: error.message
@@ -130,7 +138,7 @@ export const createBasicDoctor = async (req, res) => {
         
           res.cookie("token", token, {
             httpOnly: true,
-            secure: false, // true in production with HTTPS
+            secure: true, // true in production with HTTPS
             sameSite: "lax",
             maxAge: 24 * 60 * 60 * 1000,
           });
@@ -248,7 +256,7 @@ export const DoctorLogin=async(req,res)=>{
     const token=await jwt.sign({id:finding._id},process.env.JWT_TOKEN)
     res.cookie("token", token, {
     httpOnly: true,
-    secure: false, // true in production with HTTPS
+    secure: true, // true in production with HTTPS
     sameSite: "lax",
     maxAge: 24 * 60 * 60 * 1000,
   });

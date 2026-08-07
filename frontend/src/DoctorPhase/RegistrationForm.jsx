@@ -93,7 +93,8 @@ const RegistrationForm = () => {
         });
 
         const data = await response.json();
-
+        console.log(data);
+        
         if (data.success) {
           toast.success(data.message || "Registration Successful!");
           navigate('/AfterRegistration');

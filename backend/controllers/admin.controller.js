@@ -6,6 +6,7 @@ import { Patient, userModel } from '../models/patient.model.js';
 
 // --------------------------- Doctor Data -------------------------------------------------
 // list of pending verification doctor list 
+
 export const ReadRegistration=async(req,res)=>{
   const  data=await DoctorRegistration.find({verificationStatus:"Pending"}).select("-password");
   if(data.length==0){
@@ -33,7 +34,7 @@ export const RejectRegistration=async(req,res)=>{
   check.verificationStatus='Rejected'
   check.save();
   const sendingMail = await fetch(
-  "https://deepak171.app.n8n.cloud/webhook/fa1b2de0-1463-4a4b-8e2c-4caa0c896f3a",
+  `${process.env.N8N_WEBHOOK}`,
   {
     method: "POST",
     credentials: "include",
@@ -97,7 +98,7 @@ export const AcceptRegistration=async(req,res)=>{
     }
   )
  const sendingMail = await fetch(
-  "https://deepak171.app.n8n.cloud/webhook/fa1b2de0-1463-4a4b-8e2c-4caa0c896f3a",
+  `${process.env.N8N_WEBHOOK}`,
   {
     method: "POST",
     credentials: "include",
@@ -115,7 +116,7 @@ Your account has been successfully verified.
 
 To complete your registration, please click the link below and fill in the remaining details:
 
-http://localhost:5173/BasicDetails/${token}
+${process.env.FRONTEND_URL}/BasicDetails/${token}
 
 Please complete this process as soon as possible. If the link does not work, copy and paste it into your browser.
 
@@ -183,7 +184,7 @@ export const AdminCreate=async(req,res)=>{
   }
   const bcryptpassword=await bcrypt.hash("12345",Number(process.env.HASHROUND))
   const save=await AdminModel.create({gmail,password:bcryptpassword});
-  const n8n=await fetch('https://deepak171.app.n8n.cloud/webhook/fa1b2de0-1463-4a4b-8e2c-4caa0c896f3a',
+  const n8n=await fetch(`${process.env.N8N_WEBHOOK}`,
     {
       method:"POST",
         headers: {
@@ -266,7 +267,7 @@ export const checkPassword=async(req,res)=>{
 
   res.cookie("token", token, {
     httpOnly: true,
-    secure: false, // true in production with HTTPS
+    secure: true, // true in production with HTTPS
     sameSite: "lax",
     maxAge: 24 * 60 * 60 * 1000,
   });

@@ -5,7 +5,7 @@ import crypto from "crypto";
 import {ForgetPassword} from '../models/forgetPassword.model.js';
 import { userModel } from '../models/patient.model.js';
 import { AdminModel } from '../models/admin.model.js';
-
+const sendingGmail=process.env.N8N_WEBHOOK;
 export const password=async(req,res)=>{
   const find=await DoctorRegistration.findOne({gmail:req.body.gmail});
   if(!find){
@@ -27,8 +27,9 @@ export const password=async(req,res)=>{
     userId:find._id,otp
   })
  
+
   
-  const sendMail=await fetch(`https://deepak171.app.n8n.cloud/webhook/fa1b2de0-1463-4a4b-8e2c-4caa0c896f3a`,{
+  const sendMail=await fetch(`${process.env.N8N_WEBHOOK}`,{
     method:"POST",
     credentials:"include",
     headers:{
@@ -150,7 +151,7 @@ export const Patientpassword=async(req,res)=>{
   })
  
   
-  const sendMail=await fetch(`https://deepak171.app.n8n.cloud/webhook/fa1b2de0-1463-4a4b-8e2c-4caa0c896f3a`,{
+  const sendMail=await fetch(`${sendingGmail}`,{
     method:"POST",
     credentials:"include",
     headers:{

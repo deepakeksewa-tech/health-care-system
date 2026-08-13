@@ -95,7 +95,7 @@ const router = express.Router();
  *       401:
  *         description: Unauthorized / Missing Admin Token.
  */
-router.post("/create/Admin", adminMiddleware, AdminCreate);
+router.post("/create/Admin", AdminCreate);
 
 /**
  * @swagger

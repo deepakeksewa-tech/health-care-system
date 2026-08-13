@@ -43,9 +43,7 @@ export const createRegistrationDoctor = async (req, res) => {
             stateMedicalCouncil:req.body.stateMedicalCouncil,
             gmail:req.body.gmail.toLowerCase()
         });
-        
         const mail=process.env.N8N_WEBHOOK;
-
         const sendingMail=await fetch(`${mail}`,{
             method:"POST",
             credentials:"include",

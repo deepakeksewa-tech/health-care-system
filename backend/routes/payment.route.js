@@ -10,7 +10,75 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-// 1. Create Razorpay Order
+/**
+ * @swagger
+ * tags:
+ *   name: Payment
+ *   description: Razorpay order creation and signature verification endpoints
+ */
+
+/**
+ * @swagger
+ * /create-order:
+ *   post:
+ *     summary: Create a new Razorpay order
+ *     tags: [Payment]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - amount
+ *             properties:
+ *               amount:
+ *                 type: number
+ *                 description: Amount in INR (e.g., 500 for ₹500)
+ *                 example: 500
+ *     responses:
+ *       200:
+ *         description: Razorpay order created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 order:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: order_N1a2b3c4d5
+ *                     entity:
+ *                       type: string
+ *                       example: order
+ *                     amount:
+ *                       type: integer
+ *                       example: 50000
+ *                     amount_paid:
+ *                       type: integer
+ *                       example: 0
+ *                     amount_due:
+ *                       type: integer
+ *                       example: 50000
+ *                     currency:
+ *                       type: string
+ *                       example: INR
+ *                     receipt:
+ *                       type: string
+ *                       example: receipt_1723000000000
+ *                     status:
+ *                       type: string
+ *                       example: created
+ *       400:
+ *         description: Invalid or missing amount
+ *       500:
+ *         description: Failed to create Razorpay order
+ */
 router.post("/create-order", async (req, res) => {
   try {
     const { amount } = req.body;
@@ -40,7 +108,40 @@ router.post("/create-order", async (req, res) => {
   }
 });
 
-// 2. Verify Razorpay Signature (Optional helper endpoint if you verify before saving)
+/**
+ * @swagger
+ * /verify-payment:
+ *   post:
+ *     summary: Verify Razorpay payment signature
+ *     tags: [Payment]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - razorpay_order_id
+ *               - razorpay_payment_id
+ *               - razorpay_signature
+ *             properties:
+ *               razorpay_order_id:
+ *                 type: string
+ *                 example: order_N1a2b3c4d5
+ *               razorpay_payment_id:
+ *                 type: string
+ *                 example: pay_N1x2y3z4a5
+ *               razorpay_signature:
+ *                 type: string
+ *                 example: 9b2d3c4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c
+ *     responses:
+ *       200:
+ *         description: Payment signature verified successfully
+ *       400:
+ *         description: Invalid payment signature
+ *       500:
+ *         description: Payment verification failed
+ */
 router.post("/verify-payment", async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
@@ -73,7 +174,5 @@ router.post("/verify-payment", async (req, res) => {
     });
   }
 });
-
-
 
 export default router;

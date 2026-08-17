@@ -116,9 +116,8 @@ const PatientLogin = () => {
                 alt="MEDSEWA Logo"
                 className="object-contain"
               />
-              <span className="text-2xl font-bold tracking-tight text-slate-900">
-                MED<span className="text-[#058b7c]">SEWA</span>
-              </span>
+             <span className="text-2xl font-bold tracking-tight text-[#058b7c]">MED</span>
+              <span className="text-2xl font-bold tracking-tight text-slate-900">SEWA</span>
             </div>
             <h1 className="text-xl font-bold text-slate-900">
               Sign in to your account

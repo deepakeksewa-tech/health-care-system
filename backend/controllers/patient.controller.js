@@ -3,50 +3,57 @@ import bcrypt from 'bcrypt';
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import fs from 'fs';
-import { payment } from '../models/payment.model.js';
-import cloudinary from '../config/cloudinary.js';
-import {DoctorRegistration, DoctorBasic, DoctorWeekly,DoctorLocation } from '../models/doctor.model.js';
-import {Patient,userModel} from '../models/patient.model.js';
 
+// Models
+import { payment } from '../models/payment.model.js';
+import { DoctorRegistration, DoctorBasic, DoctorWeekly, DoctorLocation } from '../models/doctor.model.js';
+import { Patient, userModel, PatientMedicine } from '../models/patient.model.js';
+import cloudinary from '../config/cloudinary.js';
+
+// Helper: Secure Timing-Safe String Comparison
+const safeCompare = (a, b) => {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+};
 
 // ==========================================
 // 1. SIGNUP CONTROLLER
 // ==========================================
-const sendingGmail=process.env.N8N_WEBHOOK;
 export const signup = async (req, res) => {
   try {
-    const name = req.body.name;
-    const gmail = req.body.gmail ? req.body.gmail.toLowerCase() : "";
-    const contact = req.body.contact;
-    const password = await bcrypt.hash(req.body.password, Number(process.env.HASHROUND || 10));
+    const { name, contact, password } = req.body;
+    const gmail = req.body.gmail ? req.body.gmail.toLowerCase().trim() : "";
 
     const check = await userModel.findOne({ gmail });
     if (check) {
-      return res.status(400).json({
-        success: false,
-        message: "User already exists"
-      });
+      return res.status(400).json({ success: false, message: "User already exists" });
     }
 
+    const hashedPassword = await bcrypt.hash(password, Number(process.env.HASHROUND || 10));
     const save = await userModel.create({
-      name, gmail, contact, password
+      name,
+      gmail,
+      contact,
+      password: hashedPassword
     });
 
-    // Send Mail Webhook (Non-blocking)
-    fetch(`${sendingGmail}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        mail: save.gmail,
-        subject: "Thank You for Logging In - MEDSEWA",
-        message: `Dear ${save.name || "User"},\n\nThank you for signing up on MEDSEWA!\n\nBest regards,\nThe MEDSEWA Team`
-      }),
-    }).catch(err => console.error("Webhook mail error:", err));
+    // Webhook (non-blocking)
+    if (process.env.N8N_WEBHOOK) {
+      fetch(process.env.N8N_WEBHOOK, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mail: save.gmail,
+          subject: "Thank You for Logging In - MEDSEWA",
+          message: `Dear ${save.name || "User"},\n\nThank you for signing up on MEDSEWA!\n\nBest regards,\nThe MEDSEWA Team`
+        }),
+      }).catch(err => console.error("Webhook mail error:", err));
+    }
 
-    return res.status(200).json({
-      success: true,
-      message: "User created successfully"
-    });
+    return res.status(200).json({ success: true, message: "User created successfully" });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -57,86 +64,78 @@ export const signup = async (req, res) => {
 // ==========================================
 export const login = async (req, res) => {
   try {
-    const g = req.body.gmail || "";
-    const gmail = g.toLowerCase().trim();
-    const password = req.body.password;
+    const gmail = (req.body.gmail || "").toLowerCase().trim();
+    const { password } = req.body;
 
     const check = await userModel.findOne({ gmail });
     if (!check) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter correct credentials"
-      });
+      return res.status(400).json({ success: false, message: "Please enter correct credentials" });
     }
 
     const checkPassword = await bcrypt.compare(password, check.password);
     if (!checkPassword) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter correct password"
-      });
+      return res.status(400).json({ success: false, message: "Please enter correct credentials" });
     }
 
     const token = jwt.sign({ id: check._id }, process.env.JWT_TOKEN, { expiresIn: '24h' });
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false, // production mein HTTPS apply hone par true karein
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    return res.status(200).json({
-      success: true,
-      message: "Login successful"
-    });
+    return res.status(200).json({ success: true, message: "Login successful" });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
 
 // ==========================================
-// 3. READ DOCTORS FOR PATIENT
+// 3. READ DOCTORS FOR PATIENT (BY DATE)
 // ==========================================
 export const ReadDoctorForPatient = async (req, res) => {
   try {
+    const { date } = req.query; // Format: "YYYY-MM-DD"
+    let targetDate;
+    let formattedDateStr = "";
+
+    if (date) {
+      formattedDateStr = date.split('T')[0];
+      const [year, month, day] = formattedDateStr.split('-').map(Number);
+      targetDate = new Date(year, month - 1, day);
+    } else {
+      targetDate = new Date();
+      formattedDateStr = targetDate.toISOString().split('T')[0];
+    }
+
+    const targetDay = targetDate.toLocaleDateString("en-US", { weekday: "long" });
     const weeklySchedule = await DoctorWeekly.find().populate("doctorId");
-    const now = new Date();
-    const today = now.toLocaleDateString("en-IN", { weekday: "long" });
-    const currentTime = now.toLocaleTimeString("en-IN", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
 
     const data = [];
     weeklySchedule.forEach((doctor) => {
+      if (!doctor.doctorId) return;
+
       doctor.weekly.forEach((schedule) => {
         if (
-          schedule.day === today &&
-          schedule.status === true &&
-          schedule.start <= currentTime &&
-          schedule.end >= currentTime
+          schedule.day.toLowerCase() === targetDay.toLowerCase() &&
+          schedule.status === true
         ) {
-          data.push({
-            doctor: doctor.doctorId,
-            schedule: schedule
+          data.push({ 
+            doctor: doctor.doctorId, 
+            schedule,
+            date: formattedDateStr
           });
         }
       });
     });
 
-    if (data.length === 0) {
-      return res.status(200).json({
-        success: true,
-        message: "No doctors available right now",
-        data: []
-      });
-    }
-
     return res.status(200).json({
       success: true,
       data,
-      message: "Doctor list fetched successfully"
+      message: data.length
+        ? `Doctors available for ${targetDay} fetched successfully`
+        : `No doctors available on ${targetDay}`
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
@@ -148,64 +147,77 @@ export const ReadDoctorForPatient = async (req, res) => {
 // ==========================================
 export const GetSingleDoctor = async (req, res) => {
   try {
-    const id = req.params.id;
+    const { id } = req.params;
     const find = await DoctorBasic.findById(id);
     if (!find) {
-      return res.status(400).json({
-        message: "Doctor not found",
-        success: false
-      });
+      return res.status(400).json({ success: false, message: "Doctor not found" });
     }
 
-    return res.status(200).json({
-      message: "Doctor found successfully",
-      success: true,
-      data: find
-    });
+    return res.status(200).json({ success: true, message: "Doctor found successfully", data: find });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
 
 // ==========================================
-// 5. GET SCHEDULE DOCTOR
+// 5. GET SCHEDULE DOCTOR (BY DATE & BOOKED SLOTS)
 // ==========================================
 export const GetScheduleDoctor = async (req, res) => {
   try {
-    const id = req.params.id;
-    const find = await DoctorWeekly.findOne({ doctorId: id });
-    if (!find) {
-      return res.status(400).json({
-        success: false,
-        message: "Doctor schedule is not set",
-        data: {}
+    const { id } = req.params;
+    const { date } = req.query;
+
+    let targetDate;
+    let formattedDateStr = "";
+
+    if (date) {
+      formattedDateStr = date.split('T')[0];
+      const [year, month, day] = formattedDateStr.split('-').map(Number);
+      targetDate = new Date(year, month - 1, day);
+    } else {
+      targetDate = new Date();
+      formattedDateStr = targetDate.toISOString().split('T')[0];
+    }
+
+    const targetDay = targetDate.toLocaleDateString("en-US", { weekday: "long" });
+
+    // 1. Doctor ka Weekly Schedule dhoondhein
+    const doctorSchedule = await DoctorWeekly.findOne({ doctorId: id });
+    if (!doctorSchedule) {
+      return res.status(400).json({ success: false, message: "Doctor schedule is not set", data: [] });
+    }
+
+    // 2. Us day ka active schedule filter karein
+    const daySchedule = doctorSchedule.weekly.find(
+      s => s.day.toLowerCase() === targetDay.toLowerCase() && s.status === true
+    );
+
+    if (!daySchedule) {
+      return res.status(200).json({
+        success: true,
+        message: `Doctor is not available on ${targetDay}`,
+        schedule: null,
+        bookedSlots: []
       });
     }
 
-    const now = new Date();
-    const today = now.toLocaleDateString("en-IN", { weekday: "long" });
-    const currentTime = now.toLocaleTimeString("en-IN", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
+    // 3. Selected Date par pehle se book hue slots fetch karein
+    const existingBookings = await Patient.find({
+      doctorId: id,
+      bookingDate: formattedDateStr,
+      status: { $ne: "Cancelled" }
+    }).select("slotTime");
 
-    const data = [];
-    find.weekly.forEach((schedule) => {
-      if (
-        schedule.day === today &&
-        schedule.status === true &&
-        schedule.start <= currentTime &&
-        schedule.end >= currentTime
-      ) {
-        data.push({ schedule: schedule });
-      }
-    });
+    const bookedSlots = existingBookings.map(b => b.slotTime);
 
     return res.status(200).json({
       success: true,
-      message: "Doctor schedule for today fetched successfully",
-      data
+      message: `Doctor schedule for ${targetDay} fetched successfully`,
+      schedule: {
+        start: daySchedule.start,
+        end: daySchedule.end
+      },
+      bookedSlots
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
@@ -216,22 +228,9 @@ export const GetScheduleDoctor = async (req, res) => {
 // 6. CREATE PATIENT APPOINTMENT
 // ==========================================
 export const PatientAppointment = async (req, res) => {
+  let localFilePath = req.file?.path;
+
   try {
-    let reportUrl = "";
-
-    // 1. Cloudinary File Upload
-    if (req.file) {
-      const uploadedReport = await cloudinary.uploader.upload(req.file.path, {
-        folder: "Patients"
-      });
-      reportUrl = uploadedReport.secure_url;
-
-      if (fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
-      }
-    }
-
-    // 2. Extract Data
     const userId = req.id;
     const doctorId = req.params.id;
     const {
@@ -250,32 +249,78 @@ export const PatientAppointment = async (req, res) => {
       razorpaySignature
     } = req.body;
 
-    // Fixed NaN Issue with default fallbacks
     const age = Number(req.body.age) || 0;
     const bookingAmount = Number(amount || fee) || 0;
 
-    // 3. Razorpay Signature Verification
-    if (razorpayOrderId && razorpayPaymentId && razorpaySignature) {
-      const body = razorpayOrderId + "|" + razorpayPaymentId;
-      const expectedSignature = crypto
-        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-        .update(body.toString())
-        .digest("hex");
+    if (isNaN(bookingAmount) || bookingAmount <= 0) {
+      if (localFilePath && fs.existsSync(localFilePath)) fs.unlinkSync(localFilePath);
+      return res.status(400).json({ success: false, message: "Invalid booking amount" });
+    }
+   const meet = await fetch(
+  "https://n8n-szld.onrender.com/webhook/37afe49c-f094-4729-8b74-eceeabb6ae61",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      
+    })
+  }
+);
 
-      if (expectedSignature !== razorpaySignature) {
-        return res.status(400).send({
-          success: false,
-          message: "Payment verification failed! Invalid signature."
-        });
-      }
-    } else {
-      return res.status(400).send({
+const result = await meet.json();
+
+console.log(result.meetingLink);
+
+    // 1. Double Booking Check
+    const existingBooking = await Patient.findOne({
+      doctorId,
+      bookingDate,
+      slotTime,
+      status: { $ne: "Cancelled" }
+    });
+
+    if (existingBooking) {
+      if (localFilePath && fs.existsSync(localFilePath)) fs.unlinkSync(localFilePath);
+      return res.status(400).json({
         success: false,
-        message: "Payment details (Razorpay Order ID / Payment ID / Signature) are missing."
+        message: "This slot is already booked for the selected date. Please select another slot."
       });
     }
 
-    // 4. Save Appointment to DB
+    // 2. Verify Payment Signature BEFORE external side effects
+    if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
+      if (localFilePath && fs.existsSync(localFilePath)) fs.unlinkSync(localFilePath);
+      return res.status(400).json({
+        success: false,
+        message: "Payment details missing."
+      });
+    }
+
+    const body = `${razorpayOrderId}|${razorpayPaymentId}`;
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(body)
+      .digest("hex");
+
+    if (!safeCompare(expectedSignature, razorpaySignature)) {
+      if (localFilePath && fs.existsSync(localFilePath)) fs.unlinkSync(localFilePath);
+      return res.status(400).json({
+        success: false,
+        message: "Payment verification failed! Invalid signature."
+      });
+    }
+
+    // 3. Upload file to Cloudinary after verification passes
+    let reportUrl = "";
+    if (localFilePath) {
+      const uploadedReport = await cloudinary.uploader.upload(localFilePath, { folder: "Patients" });
+      reportUrl = uploadedReport.secure_url;
+      if (fs.existsSync(localFilePath)) fs.unlinkSync(localFilePath);
+    }
+
+    // 4. Save Appointment
     const save = await Patient.create({
       userId,
       doctorId,
@@ -294,29 +339,20 @@ export const PatientAppointment = async (req, res) => {
       amount: bookingAmount,
       razorpayOrderId,
       razorpayPaymentId,
-      razorpaySignature
+      razorpaySignature,
+      meetingLink:result.meetingLink
     });
- const amo=Number(bookingAmount)
-    if (isNaN(amo) || amo <= 0) {
-  return res.status(400).json({
-    success: false,
-    message: "Invalid booking amount",
-  });
-}
-    const pay=await payment.findOne({userId:doctorId});
-    if(!pay){
-      await payment.create({userId:doctorId,money:amo})
-      return res.status(200).send({
-        success:true,
-        message:"money updated",
-      })
+
+    // 5. Update Doctor Payment Earnings
+    let pay = await payment.findOne({ userId: doctorId });
+    if (!pay) {
+      await payment.create({ userId: doctorId, money: bookingAmount });
+    } else {
+      pay.money += bookingAmount;
+      await pay.save();
     }
-   
-    pay.money=pay.money+amo;
-    await pay.save();
 
-
-    // 5. Fetch Doctor Location & User Info
+    // 6. Fetch Metadata & Trigger Webhook
     const location = await DoctorLocation.findOne({ doctorId }).populate('doctorId');
     const user = await userModel.findById(userId);
 
@@ -328,86 +364,64 @@ export const PatientAppointment = async (req, res) => {
       ? `${location.streetAddress || ''}, Landmark: ${location.landmark || ''}, ${location.city || ''}, ${location.state || ''} - ${location.zip || ''}`
       : "Address not provided";
 
-    // 6. Fetch Doctor's Email
     let doctorEmail = "";
     if (location?.doctorId?.doctorId) {
       const doctorReg = await DoctorRegistration.findById(location.doctorId.doctorId);
       doctorEmail = doctorReg?.gmail || "";
     }
 
-    // 7. Format ISO String for Slot Time
-    let appointmentDateTime = "";
-    try {
-      if (slotTime.includes('AM') || slotTime.includes('PM')) {
-        const startTimeStr = slotTime.includes('-') ? slotTime.split('-')[0].trim() : slotTime.trim();
-        const [time, modifier] = startTimeStr.split(' ');
-        let [hours, minutes] = time.split(':');
-
-        if (modifier === 'PM' && hours !== '12') {
-          hours = parseInt(hours, 10) + 12;
-        }
-        if (modifier === 'AM' && hours === '12') {
-          hours = '00';
-        }
-
-        appointmentDateTime = new Date(`${bookingDate}T${String(hours).padStart(2, '0')}:${minutes}:00`).toISOString();
-      } else {
-        const cleanSlotTime = slotTime.includes('-') ? slotTime.split('-')[0].trim() : slotTime.trim();
-        appointmentDateTime = new Date(`${bookingDate}T${cleanSlotTime}:00`).toISOString();
-      }
-    } catch (err) {
-      console.error("ISO Conversion Error:", err);
-      appointmentDateTime = `${bookingDate}T00:00:00.000Z`;
-    }
-
     const isOnline = consultation?.toLowerCase().includes("online") || consultation?.toLowerCase().includes("video");
 
-    // 8. Trigger n8n Webhook
-    try {
-      const sendEmail = await fetch(`${sendingGmail}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          patientEmail: user?.gmail,
-          doctorEmail: doctorEmail,
-          patientName,
-          doctorName: location?.doctorId?.name || "Doctor",
-          contactNumber,
-          age,
-          gender,
-          bookingDate,
-          slotTime,
-          appointmentDateTime,
-          isOnline,
-          consultation,
-          paymentMode,
-          amount: bookingAmount,
-          symptoms,
-          reportUrl,
-          clinicAddress,
-          mapLink,
-          razorpayPaymentId
-        })
-      });
-      console.log("n8n Response Status:", sendEmail.status);
-    } catch (webhookErr) {
-      console.error("n8n Webhook Trigger Error:", webhookErr);
-    }
+   if (process.env.N8N_WEBHOOK) {
+  // 1. Patient Email Webhook
+  const patientWebhook = fetch(process.env.N8N_WEBHOOK, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      mail: user?.gmail,
+      subject: `Appointment Confirmed with Dr. ${location?.doctorId?.name || "Doctor"} - MEDSEWA`,
+      message: `Dear ${patientName},\n\nYour appointment has been successfully booked on MEDSEWA!\n\n📌 APPOINTMENT DETAILS:\n• Doctor: Dr. ${location?.doctorId?.name || "Doctor"}\n• Date: ${bookingDate}\n• Time Slot: ${slotTime}\n• Mode: ${consultation}\n\n📍 VENUE / LOCATION:\n${isOnline ? "Online Video Consultation" : `Clinic Address: ${clinicAddress}\nGoogle Maps: ${mapLink}`}\n\n💳 PAYMENT DETAILS:\n• Amount Paid: ₹${bookingAmount}\n• Payment ID: ${razorpayPaymentId}\n\nBest regards,\nMEDSEWA Team`,
+      doctorEmail,
+      patientName,
+      bookingDate,
+      slotTime,
+      amount: bookingAmount,
+      razorpayPaymentId
+    })
+  });
 
-    return res.status(200).send({
+  // 2. Doctor Email Webhook
+  const doctorWebhook = fetch(process.env.N8N_WEBHOOK, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      mail: doctorEmail,
+      subject: `New Appointment Booked: ${patientName} - MEDSEWA`,
+      message: `Dear Dr. ${location?.doctorId?.name || "Doctor"},\n\nA new appointment has been successfully booked by a patient on MEDSEWA!\n\n📌 APPOINTMENT DETAILS:\n• Patient Name: ${patientName}\n• Date: ${bookingDate}\n• Time Slot: ${slotTime}\n• Mode: ${consultation}\n\n📍 VENUE / LOCATION:\n${isOnline ? "Online Video Consultation" : `Clinic Address: ${clinicAddress}\nGoogle Maps: ${mapLink}`}\n\n💳 PAYMENT DETAILS:\n• Amount: ₹${bookingAmount}\n• Payment ID: ${razorpayPaymentId}\n\nBest regards,\nMEDSEWA Team`,
+      doctorEmail,
+      patientName,
+      bookingDate,
+      slotTime,
+      amount: bookingAmount,
+      razorpayPaymentId
+    })
+  });
+
+  // Dono requests ko parallelly fire kar do aur errors catch kar lo
+  Promise.all([patientWebhook, doctorWebhook])
+    .catch(err => console.error("n8n Webhook Error:", err));
+}
+
+    return res.status(200).json({
       success: true,
       message: "Booking done successfully and payment verified!",
       data: save._id
     });
 
   } catch (error) {
+    if (localFilePath && fs.existsSync(localFilePath)) fs.unlinkSync(localFilePath);
     console.error("Error in PatientAppointment:", error);
-    return res.status(500).send({
-      success: false,
-      message: error.message || "Internal Server Error"
-    });
+    return res.status(500).json({ success: false, message: error.message || "Internal Server Error" });
   }
 };
 
@@ -418,65 +432,43 @@ export const bookingDetails = async (req, res) => {
   try {
     const id = req.id;
     const find = await Patient.find({ userId: id });
-    if (find.length === 0) {
-      return res.status(400).send({
-        success: false,
-        message: "There is no booking",
-        data: []
-      });
+    if (!find.length) {
+      return res.status(400).json({ success: false, message: "There is no booking", data: [] });
     }
-    return res.status(200).send({
-      success: true,
-      message: "The bookings are:",
-      data: find
-    });
+    return res.status(200).json({ success: true, message: "The bookings are:", data: find });
   } catch (error) {
-    return res.status(500).send({
-      success: false,
-      message: error.message || "Internal Server Error"
-    });
+    return res.status(500).json({ success: false, message: error.message || "Internal Server Error" });
   }
 };
 
+// ==========================================
+// 8. PATIENT MEDICINE DETAILS CONTROLLERS
+// ==========================================
 export const PatientMedicineDetails = async (req, res) => {
   try {
     const id = req.id;
     const find = await Patient.find({ userId: id });
-    if (find.length === 0) {
-      return res.status(400).send({
-        success: false,
-        message: "There is no booking",
-        data: []
-      });
-    }
     const patientMedicineDetails = await PatientMedicine.find({ userId: id });
-    return res.status(200).send({
+
+    return res.status(200).json({
       success: true,
-      message: "The bookings are:",
+      message: "Details fetched successfully",
       data: find,
       patientMedicineDetails
     });
   } catch (error) {
-    return res.status(500).send({
-      success: false,
-      message: error.message || "Internal Server Error"
-    });
+    return res.status(500).json({ success: false, message: error.message || "Internal Server Error" });
   }
-}
-
-
+};
 
 export const savePatientMedicineDetails = async (req, res) => {
+  const localFilePath = req.file?.path;
   try {
     const userId = req.id;
     const { PatientName, contactNumber, Address, PrescriptionText, ownerId } = req.body;
 
-    // 1. Check required text fields
     if (!PatientName || !contactNumber || !Address || !ownerId) {
-      // Agar image aayi thi par fields missing hain, toh local temp file delete kar do
-      if (req.file && fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
-      }
+      if (localFilePath && fs.existsSync(localFilePath)) fs.unlinkSync(localFilePath);
       return res.status(400).json({
         success: false,
         message: "PatientName, contactNumber, Address and ownerId are required"
@@ -484,33 +476,21 @@ export const savePatientMedicineDetails = async (req, res) => {
     }
 
     let prescriptionImageUrl = "";
-
-    // 2. Upload image to Cloudinary ONLY IF an image file was provided
-    if (req.file) {
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "Prescriptions"
-      });
-
+    if (localFilePath) {
+      const result = await cloudinary.uploader.upload(localFilePath, { folder: "Prescriptions" });
       prescriptionImageUrl = result.secure_url;
-
-      // Local temp file ko delete karo upload ke baad
-      if (fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
-      }
+      if (fs.existsSync(localFilePath)) fs.unlinkSync(localFilePath);
     }
 
-    // 3. Save to Database
-    const newPatientMedicine = new PatientMedicine({
+    const newPatientMedicine = await PatientMedicine.create({
       userId,
       PatientName,
       contactNumber,
       Address,
-      PrescriptionImage: prescriptionImageUrl, // Photo hai toh Cloudinary URL, nahi toh empty string
+      PrescriptionImage: prescriptionImageUrl,
       PrescriptionText: PrescriptionText || "",
       ownerId
     });
-
-    await newPatientMedicine.save();
 
     return res.status(201).json({
       success: true,
@@ -519,14 +499,7 @@ export const savePatientMedicineDetails = async (req, res) => {
     });
 
   } catch (error) {
-    // Error aane par temp file clean karo
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
-
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Internal Server Error"
-    });
+    if (localFilePath && fs.existsSync(localFilePath)) fs.unlinkSync(localFilePath);
+    return res.status(500).json({ success: false, message: error.message || "Internal Server Error" });
   }
 };

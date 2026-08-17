@@ -1,5 +1,5 @@
 import React, { useState,useEffect } from "react";
-import Header from "../component/Header";
+import HeaderFront from "../component/HeaderFront";
 import { useNavigate } from "react-router-dom";
 import toast, { Toaster } from 'react-hot-toast';
 const SetWeeklySchedule = () => {
@@ -56,7 +56,7 @@ const SetWeeklySchedule = () => {
   toast.success(data.message);
 
   setTimeout(()=>{
-    navigate('/dashboard');
+    navigate('/login');
   },3000);
 }
 else{
@@ -83,7 +83,6 @@ else{
       const data=await response.json();
       setname(data.name);
       setimage(data.image);
-      
     }
     useEffect(() => {
       getDetails();
@@ -91,7 +90,7 @@ else{
 
   return (
     <div className="min-h-screen bg-gray-200">
-      <Header />
+      <HeaderFront />
       <Toaster />
  {
         loading &&(

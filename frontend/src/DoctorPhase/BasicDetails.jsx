@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Header from '../component/Header';
+import HeaderFront from '../component/HeaderFront';
 import { useNavigate, useParams } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 
@@ -9,7 +9,6 @@ const BasicDetails = () => {
   const { token } = useParams();
 
   // Form Field States
-  const [name, setName] = useState("");
   const [experience, setExperience] = useState("");
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -86,12 +85,6 @@ const BasicDetails = () => {
   const validate = () => {
     let localErrors = {};
 
-    if (!name.trim()) {
-      localErrors.name = "Full name is required";
-    } else if (name.trim().length < 3) {
-      localErrors.name = "Name must be at least 3 characters long";
-    }
-
     if (experience === "") {
       localErrors.experience = "Experience is required";
     } else if (Number(experience) < 0 || Number(experience) > 99) {
@@ -153,6 +146,7 @@ const BasicDetails = () => {
     try {
       setLoading(true);
 
+      // Agar user ne Category me "Other" bhara hai, toh pehle database me save karo
       if (category === "Other" && otherCategory.trim()) {
         await fetch(`${api}/api/doctors/Category`, {
           method: "POST",
@@ -162,6 +156,7 @@ const BasicDetails = () => {
         });
       }
 
+      // Agar user ne Specialization me "Other" bhara hai, toh pehle database me save karo
       if (specialization === "Other" && otherSpecialization.trim()) {
         await fetch(`${api}/api/doctors/Specialization`, {
           method: "POST",
@@ -171,12 +166,11 @@ const BasicDetails = () => {
         });
       }
 
-      const finalCategory = category === "Other" ? otherCategory.trim() : category;
-      const finalSpecialization = specialization === "Other" ? otherSpecialization.trim() : specialization;
+      const finalCategory = category === "Other" ? otherCategory.trim().toLowerCase() : category;
+      const finalSpecialization = specialization === "Other" ? otherSpecialization.trim().toLowerCase() : specialization;
       const formattedLanguages = currentLanguages.join(", ");
 
       const formData = new FormData();
-      formData.append("name", name);
       formData.append("experience", experience);
       formData.append("specification", finalSpecialization);
       formData.append("language", formattedLanguages);
@@ -246,7 +240,7 @@ const BasicDetails = () => {
   return (
     <div className="bg-gray-50 min-h-screen flex flex-col">
       <Toaster position="top-right" />
-      <Header />
+      <HeaderFront />
 
       {/* Loading Overlay */}
       {loading && (
@@ -270,48 +264,30 @@ const BasicDetails = () => {
 
             <form onSubmit={nextPhase} className="space-y-5">
               
-              {/* Profile Image & Name */}
-              <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
-                <div className="sm:col-span-4 flex flex-col items-center sm:items-start">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-2">
-                    Profile Photo <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative w-24 h-24 rounded-2xl border-2 border-dashed border-gray-300 hover:border-[#058b7c] transition flex items-center justify-center bg-gray-50 overflow-hidden cursor-pointer">
-                    {imagePreview ? (
-                      <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="text-center p-2">
-                        <svg className="w-6 h-6 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        <span className="text-[10px] text-gray-400 block mt-1">Upload</span>
-                      </div>
-                    )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="absolute inset-0 opacity-0 cursor-pointer"
-                    />
-                  </div>
-                  {errors.image && <p className="text-red-500 text-xs mt-1">{errors.image}</p>}
-                </div>
-
-                <div className="sm:col-span-8">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1.5">
-                    Full Name <span className="text-red-500">*</span>
-                  </label>
+              {/* Profile Image */}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-2">
+                  Profile Photo <span className="text-red-500">*</span>
+                </label>
+                <div className="relative w-24 h-24 rounded-2xl border-2 border-dashed border-gray-300 hover:border-[#058b7c] transition flex items-center justify-center bg-gray-50 overflow-hidden cursor-pointer">
+                  {imagePreview ? (
+                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="text-center p-2">
+                      <svg className="w-6 h-6 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                      <span className="text-[10px] text-gray-400 block mt-1">Upload</span>
+                    </div>
+                  )}
                   <input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    type="text"
-                    placeholder="Dr. John Doe"
-                    className={`w-full px-4 py-2.5 rounded-xl border text-sm text-gray-800 transition focus:outline-none focus:ring-2 ${
-                      errors.name ? 'border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-[#058b7c] focus:ring-[#058b7c]/20'
-                    }`}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="absolute inset-0 opacity-0 cursor-pointer"
                   />
-                  {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
                 </div>
+                {errors.image && <p className="text-red-500 text-xs mt-1">{errors.image}</p>}
               </div>
 
               {/* Experience & Contact Number */}
@@ -369,10 +345,10 @@ const BasicDetails = () => {
                   >
                     <option value="">Select Specialization</option>
                     {specializationList.map((item, index) => {
-                      const specVal = item.specilization || item.specialization || item.name;
+                      const specVal = item.specialization || item.specilization;
                       return (
                         <option key={item._id || index} value={specVal}>
-                          {specVal}
+                          {specVal ? specVal.charAt(0).toUpperCase() + specVal.slice(1) : ""}
                         </option>
                       );
                     })}
@@ -410,10 +386,10 @@ const BasicDetails = () => {
                   >
                     <option value="">Select Category</option>
                     {categoryList.map((item, index) => {
-                      const catVal = item.category || item.name;
+                      const catVal = item.category;
                       return (
                         <option key={item._id || index} value={catVal}>
-                          {catVal}
+                          {catVal ? catVal.charAt(0).toUpperCase() + catVal.slice(1) : ""}
                         </option>
                       );
                     })}

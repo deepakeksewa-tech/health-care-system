@@ -117,6 +117,10 @@ const PatientSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    meetingLink:{
+      type:String,
+      require:true
+    }
   },
   { timestamps: true }
 );

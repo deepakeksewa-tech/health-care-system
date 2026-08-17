@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { RxGear } from 'react-icons/rx';
+import { FiSettings } from 'react-icons/fi';
+import Logo from '../assets/Logo.png';
 import { 
   RxCross2, 
   RxCalendar, 
@@ -6,43 +9,57 @@ import {
   RxPerson, 
   RxActivityLog, 
   RxLockClosed,
-  RxCheck,
   RxCardStack,
-  RxMobile
+  RxExit,
+  RxChevronLeft,
+  RxChevronRight
 } from "react-icons/rx";
-import { IoWalletOutline } from "react-icons/io5";
+import { IoWalletOutline, IoFilterOutline } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
 
-// Header Component
-const Header = ({ doctorInfo }) => (
+// Header Component with Logout Button
+const Header = ({ onLogout, onSettingsClick }) => (
   <header className="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center shadow-xs">
-    <div className="flex items-center space-x-2">
-      <div className="w-8 h-8 bg-[#058b7c] rounded-lg flex items-center justify-center text-white font-bold text-lg">
-        M
-      </div>
+    {/* Logo Section */}
+    <div className="flex items-center space-x-3">
+      <img 
+        src={Logo} 
+        alt="MEDSEWA Logo" 
+        className="w-10 h-10 object-contain" 
+      />
       <span className="font-bold text-xl tracking-tight text-gray-900">
         MED<span className="text-[#058b7c]">SEWA</span>
       </span>
     </div>
+
+    {/* Right Section: Doctor Info, Settings & Logout */}
     <div className="flex items-center space-x-3">
-      <span className="text-sm font-medium text-gray-600">
-        {doctorInfo?.name ? `Dr. ${doctorInfo.name}` : "Doctor Dashboard"}
-      </span>
-<div className="w-9 h-9 rounded-full bg-[#058b7c]/10 text-[#058b7c] font-semibold flex items-center justify-center border border-[#058b7c]/20">
-  {doctorInfo?.image ? (
-    <img
-      src={doctorInfo.image}
-      alt="doctor"
-      className="w-full h-full rounded-full object-cover"
-    />
-  ) : (
-    "DR"
-  )}
-</div>
+      {/* Settings Button */}
+      <button
+        onClick={onSettingsClick}
+        className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 px-3 py-2 rounded-xl transition-colors cursor-pointer"
+        title="Settings"
+      >
+        <FiSettings className="w-4 h-4 text-gray-600" />
+        <span className="hidden md:inline">Settings</span>
+      </button>
+
+      {/* Logout Button */}
+      <button
+        onClick={onLogout}
+        className="flex items-center gap-1.5 text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 px-3 py-2 rounded-xl transition-colors cursor-pointer"
+        title="Logout"
+      >
+        <RxExit className="w-4 h-4" />
+        <span className="hidden md:inline">Logout</span>
+      </button>
     </div>
   </header>
 );
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  
   // State management
   const [checkMoney, setCheckMoney] = useState(false);
   const [walletModalOpen, setWalletModalOpen] = useState(false);
@@ -50,53 +67,95 @@ const Dashboard = () => {
   const [password, setPassword] = useState("");
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [walletMoney, setwalletMoney] = useState(0);
+
   // Dynamic Data States
   const [appointments, setAppointments] = useState([]);
-  const [doctorInfo, setDoctorInfo] = useState({
-  name: "",
-  image: "",
-});
+  const [doctorInfo, setDoctorInfo] = useState({ name: "", image: "" });
   const [loading, setLoading] = useState(false);
 
-  // API Base URL
-  const API_BASE_URL = import.meta.env.VITE_API_URL ;
+  // Filter & Pagination States
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
-async function getName(){
-      const response=await fetch(`${API_BASE_URL}/api/doctors/get/name/image`,{
-      method:"GET",
-      credentials:"include",
-      headers:{
-        "Content-Type":"application/json"
-      }
-    })
-    const data=await response.json();
-    if(data.success){
-      setDoctorInfo({name:data.name,image:data.image})
+  const handleSettings = () => {
+    navigate('/Doctor/Settings');
+  };
+  
+  const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+
+  // Handle Logout
+  const handleLogout = async () => {
+    try {
+      await fetch(`${API_BASE_URL}/api/doctors/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      window.location.href = "/login";
     }
-}
+  };
 
- async function handlewithdraw(){
-    const response=await fetch(`${API_BASE_URL}/api/doctors/widthraw/money`,{
-      method:"GET",
-      credentials:"include",
-      headers:{
-        "Content-Type":"application/json"
+  // Status Change Handler
+  const handleStatusChange = async (appointmentId, newStatus) => {
+    try {
+      setAppointments((prev) =>
+        prev.map((item) =>
+          (item._id || item.id) === appointmentId ? { ...item, status: newStatus } : item
+        )
+      );
+
+      await fetch(`${API_BASE_URL}/api/doctors/update/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ id: appointmentId, status: newStatus }),
+      });
+    } catch (error) {
+      console.error("Failed to update status:", error);
+    }
+  };
+
+  async function getName() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/doctors/get/name/image`, {
+        method: "GET",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" }
+      });
+      const data = await response.json();
+      if (data.success) {
+        setDoctorInfo({ name: data.name, image: data.image });
       }
-    })
-    const data=await response.json();
-    if(data.success){
-      setwalletMoney(0);
+    } catch (err) {
+      console.error(err);
     }
   }
-  // Fetch Appointments
+
+  async function handlewithdraw() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/doctors/widthraw/money`, {
+        method: "GET",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" }
+      });
+      const data = await response.json();
+      if (data.success) {
+        setwalletMoney(0);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/api/doctors/get/all/appointments`, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
       });
 
@@ -116,7 +175,7 @@ async function getName(){
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
       setAppointments([]);
-    }  finally {
+    } finally {
       setLoading(false);
     }
   };
@@ -126,7 +185,6 @@ async function getName(){
     getName();
   }, []);
 
-  // Verify Password Endpoint
   const handleVerifyPassword = async () => {
     if (!password) {
       alert("Please enter security password");
@@ -137,9 +195,7 @@ async function getName(){
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/api/doctors/verify/password`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ password }),
       });
@@ -162,10 +218,24 @@ async function getName(){
     }
   };
 
-  // Safe Calculations for Metrics
   const safeAppointmentsList = Array.isArray(appointments) ? appointments : [];
   const totalEarnings = safeAppointmentsList.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
   const totalPatients = safeAppointmentsList.length;
+
+  const filteredAppointments = safeAppointmentsList.filter((item) => {
+    if (statusFilter === "All") return true;
+    const itemStatus = (item.status || "Pending").toLowerCase();
+    return itemStatus === statusFilter.toLowerCase();
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filteredAppointments.length / itemsPerPage));
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedAppointments = filteredAppointments.slice(startIndex, startIndex + itemsPerPage);
+
+  const handleFilterChange = (status) => {
+    setStatusFilter(status);
+    setCurrentPage(1);
+  };
 
   const closeWalletModal = () => {
     setWalletModalOpen(false);
@@ -174,7 +244,6 @@ async function getName(){
     setPassword("");
   };
 
-  // Helper function to format date cleanly
   const formatDate = (dateStr) => {
     if (!dateStr) return "N/A";
     const parsed = new Date(dateStr);
@@ -183,10 +252,12 @@ async function getName(){
 
   return (
     <div className="bg-slate-50 min-h-screen text-slate-800 antialiased font-sans">
-      {/* Header */}
-      <Header doctorInfo={doctorInfo} />
-
+      <Header 
+        onLogout={handleLogout} 
+        onSettingsClick={handleSettings} 
+      />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        
         {/* Page Title Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-200 pb-6">
           <div>
@@ -197,12 +268,10 @@ async function getName(){
               Manage your clinical appointments, earnings, and consultations.
             </p>
           </div>
-
         </div>
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Wallet Card */}
           <div
             onClick={() => setWalletModalOpen(true)}
             className="group relative bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden"
@@ -225,7 +294,6 @@ async function getName(){
             </div>
           </div>
 
-          {/* Revenue Card */}
           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
@@ -242,7 +310,6 @@ async function getName(){
             </div>
           </div>
 
-          {/* Patients Count Card */}
           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
@@ -262,13 +329,32 @@ async function getName(){
 
         {/* Appointments Table Section */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
-          <div className="px-6 py-5 border-b border-slate-200 flex justify-between items-center">
-            <h2 className="text-lg font-bold text-slate-900">
-              Upcoming & Past Appointments
-            </h2>
-            <span className="text-xs text-slate-500 font-medium">
-              Showing {safeAppointmentsList.length} entries
-            </span>
+          <div className="px-6 py-5 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">
+                Appointments Overview
+              </h2>
+              <span className="text-xs text-slate-500 font-medium">
+                Showing {filteredAppointments.length} entries ({statusFilter} Filter)
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+              <IoFilterOutline className="text-slate-400 w-4 h-4 hidden sm:block" />
+              {["All", "Pending", "Ongoing", "Completed", "Cancelled"].map((status) => (
+                <button
+                  key={status}
+                  onClick={() => handleFilterChange(status)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
+                    statusFilter === status
+                      ? "bg-[#058b7c] text-white shadow-xs"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  }`}
+                >
+                  {status}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Desktop Table */}
@@ -281,7 +367,7 @@ async function getName(){
                   <th className="py-4 px-6">Symptoms</th>
                   <th className="py-4 px-6">Fee</th>
                   <th className="py-4 px-6">Payment</th>
-                  <th className="py-4 px-6">Status</th>
+                  <th className="py-4 px-6">Status (Select)</th>
                   <th className="py-4 px-6 text-right">Action</th>
                 </tr>
               </thead>
@@ -292,25 +378,25 @@ async function getName(){
                       Loading appointments...
                     </td>
                   </tr>
-                ) : safeAppointmentsList.length === 0 ? (
+                ) : paginatedAppointments.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="text-center py-8 text-slate-500">
-                      No appointments found.
+                      No {statusFilter.toLowerCase()} appointments found.
                     </td>
                   </tr>
                 ) : (
-                  safeAppointmentsList.map((item, index) => {
+                  paginatedAppointments.map((item, index) => {
+                    const id = item._id || item.id || index;
                     const displayDate = formatDate(item.bookingDate || item.date);
                     const displayTime = item.slotTime || item.time || "N/A";
                     const displayPatient = item.patientName || item.name || item.patient?.name || "N/A";
                     const displayPaymentMode = item.paymentMode || "Offline";
                     const displayPaymentStatus = item.paymentStatus || "Pending";
+                    const currentStatus = item.status || "Pending";
+                    const isStatusLocked = currentStatus === "Completed" || currentStatus === "Cancelled";
 
                     return (
-                      <tr
-                        key={item._id || item.id || index}
-                        className="hover:bg-slate-50/60 transition-colors"
-                      >
+                      <tr key={id} className="hover:bg-slate-50/60 transition-colors">
                         <td className="py-4 px-6 whitespace-nowrap">
                           <div className="font-semibold text-slate-800">{displayDate}</div>
                           <div className="text-xs text-slate-500">{displayTime}</div>
@@ -324,7 +410,6 @@ async function getName(){
                         <td className="py-4 px-6 font-semibold text-slate-900">
                           ₹{item.amount || 0}
                         </td>
-                        {/* New Payment Mode Column */}
                         <td className="py-4 px-6">
                           <div className="flex flex-col gap-0.5">
                             <span className="font-semibold text-slate-800 text-xs flex items-center gap-1">
@@ -340,27 +425,32 @@ async function getName(){
                           </div>
                         </td>
                         <td className="py-4 px-6">
-                          <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
-                              item.status === "Completed"
-                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
-                                : "bg-amber-50 text-amber-700 border border-amber-200/60"
+                          <select
+                            value={currentStatus}
+                            disabled={isStatusLocked}
+                            onChange={(e) => handleStatusChange(id, e.target.value)}
+                            className={`text-xs font-semibold px-3 py-1.5 rounded-xl border outline-none transition-colors ${
+                              isStatusLocked ? "opacity-60 cursor-not-allowed bg-slate-100 text-slate-500 border-slate-200" : "cursor-pointer"
+                            } ${
+                              currentStatus === "Completed"
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                : currentStatus === "Ongoing"
+                                ? "bg-blue-50 text-blue-700 border-blue-200"
+                                : currentStatus === "Cancelled"
+                                ? "bg-rose-50 text-rose-700 border-rose-200"
+                                : "bg-amber-50 text-amber-700 border-amber-200"
                             }`}
                           >
-                            <span
-                              className={`w-1.5 h-1.5 rounded-full ${
-                                item.status === "Completed"
-                                  ? "bg-emerald-500"
-                                  : "bg-amber-500"
-                              }`}
-                            />
-                            {item.status || "Scheduled"}
-                          </span>
+                            <option value="Pending" className="bg-white text-slate-800">Pending</option>
+                            <option value="Ongoing" className="bg-white text-slate-800">Ongoing</option>
+                            <option value="Completed" className="bg-white text-slate-800">Completed</option>
+                            <option value="Cancelled" className="bg-white text-slate-800">Cancelled</option>
+                          </select>
                         </td>
                         <td className="py-4 px-6 text-right">
                           <button
                             onClick={() => setSelectedAppointment(item)}
-                            className="bg-slate-100 hover:bg-[#058b7c] hover:text-white text-slate-700 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors"
+                            className="bg-slate-100 hover:bg-[#058b7c] hover:text-white text-slate-700 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
                           >
                             Details
                           </button>
@@ -377,18 +467,21 @@ async function getName(){
           <div className="lg:hidden divide-y divide-slate-100">
             {loading ? (
               <p className="text-center py-6 text-slate-500 text-sm">Loading...</p>
-            ) : safeAppointmentsList.length === 0 ? (
-              <p className="text-center py-6 text-slate-500 text-sm">No appointments found.</p>
+            ) : paginatedAppointments.length === 0 ? (
+              <p className="text-center py-6 text-slate-500 text-sm">No {statusFilter.toLowerCase()} appointments found.</p>
             ) : (
-              safeAppointmentsList.map((item, index) => {
+              paginatedAppointments.map((item, index) => {
+                const id = item._id || item.id || index;
                 const displayDate = formatDate(item.bookingDate || item.date);
                 const displayTime = item.slotTime || item.time || "N/A";
                 const displayPatient = item.patientName || item.name || item.patient?.name || "N/A";
                 const displayPaymentMode = item.paymentMode || "Offline";
                 const displayPaymentStatus = item.paymentStatus || "Pending";
-
+                const currentStatus = item.status || "Pending";
+                const isStatusLocked = currentStatus === "Completed" || currentStatus === "Cancelled";
+                
                 return (
-                  <div key={item._id || item.id || index} className="p-5 space-y-3">
+                  <div key={id} className="p-5 space-y-3">
                     <div className="flex justify-between items-start">
                       <div>
                         <h3 className="font-bold text-slate-900 text-base">
@@ -399,15 +492,20 @@ async function getName(){
                           <span className="flex items-center gap-1"><RxClock /> {displayTime}</span>
                         </p>
                       </div>
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-                          item.status === "Completed"
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                            : "bg-amber-50 text-amber-700 border border-amber-200"
+
+                      <select
+                        value={currentStatus}
+                        disabled={isStatusLocked}
+                        onChange={(e) => handleStatusChange(id, e.target.value)}
+                        className={`text-xs font-semibold px-2.5 py-1 rounded-xl border outline-none ${
+                          isStatusLocked ? "opacity-60 cursor-not-allowed bg-slate-100 text-slate-500 border-slate-200" : "bg-slate-50 border-slate-200"
                         }`}
                       >
-                        {item.status || "Scheduled"}
-                      </span>
+                        <option value="Pending">Pending</option>
+                        <option value="Ongoing">Ongoing</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                      </select>
                     </div>
 
                     <div className="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-1.5">
@@ -428,7 +526,7 @@ async function getName(){
 
                     <button
                       onClick={() => setSelectedAppointment(item)}
-                      className="w-full bg-[#058b7c] text-white py-2.5 rounded-xl text-xs font-semibold hover:bg-[#047266] transition-colors"
+                      className="w-full bg-[#058b7c] text-white py-2.5 rounded-xl text-xs font-semibold hover:bg-[#047266] transition-colors cursor-pointer"
                     >
                       View Details
                     </button>
@@ -437,6 +535,50 @@ async function getName(){
               })
             )}
           </div>
+
+          {/* PAGINATION CONTROLS */}
+          {filteredAppointments.length > 0 && (
+            <div className="px-6 py-4 bg-slate-50/80 border-t border-slate-200 flex items-center justify-between">
+              <span className="text-xs text-slate-500 font-medium">
+                Page <span className="font-bold text-slate-800">{currentPage}</span> of{" "}
+                <span className="font-bold text-slate-800">{totalPages}</span>
+              </span>
+
+              <div className="flex items-center space-x-1.5">
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="p-2 rounded-xl bg-white border border-slate-200 text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 transition-colors cursor-pointer"
+                  title="Previous Page"
+                >
+                  <RxChevronLeft className="w-4 h-4" />
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`w-8 h-8 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
+                      currentPage === pageNum
+                        ? "bg-[#058b7c] text-white shadow-2xs"
+                        : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-100"
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="p-2 rounded-xl bg-white border border-slate-200 text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 transition-colors cursor-pointer"
+                  title="Next Page"
+                >
+                  <RxChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </main>
 
@@ -453,7 +595,7 @@ async function getName(){
               </div>
               <button
                 onClick={closeWalletModal}
-                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
               >
                 <RxCross2 className="w-5 h-5" />
               </button>
@@ -502,7 +644,7 @@ async function getName(){
               {!checkMoney ? (
                 <button
                   disabled={loading}
-                  className="w-full bg-[#058b7c] hover:bg-[#047266] disabled:bg-gray-400 text-white py-3 rounded-xl font-semibold text-sm transition-colors shadow-xs"
+                  className="w-full bg-[#058b7c] hover:bg-[#047266] disabled:bg-gray-400 text-white py-3 rounded-xl font-semibold text-sm transition-colors shadow-xs cursor-pointer"
                   onClick={() => {
                     if (showPassword) handleVerifyPassword();
                     else setShowPassword(true);
@@ -516,7 +658,7 @@ async function getName(){
                 </button>
               ) : (
                 <button
-                  className="w-full bg-[#058b7c] hover:bg-[#047266] text-white py-3 rounded-xl font-semibold text-sm transition-colors shadow-xs"
+                  className="w-full bg-[#058b7c] hover:bg-[#047266] text-white py-3 rounded-xl font-semibold text-sm transition-colors shadow-xs cursor-pointer"
                   onClick={() => {
                     handlewithdraw();
                     alert("Funds settlement initiated. Direct deposit takes 24 hours.");
@@ -546,98 +688,109 @@ async function getName(){
               </div>
               <button
                 onClick={() => setSelectedAppointment(null)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
               >
                 <RxCross2 className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-6 space-y-4 text-sm">
+            <div className="p-6 space-y-4 text-sm max-h-[75vh] overflow-y-auto">
               <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
                 <div>
-                  <span className="text-xs text-slate-400 font-medium block">
-                    Date
-                  </span>
+                  <span className="text-xs text-slate-400 font-medium block">Date</span>
                   <span className="font-semibold text-slate-800">
                     {formatDate(selectedAppointment.bookingDate || selectedAppointment.date)}
                   </span>
                 </div>
                 <div>
-                  <span className="text-xs text-slate-400 font-medium block">
-                    Time Slot
-                  </span>
+                  <span className="text-xs text-slate-400 font-medium block">Time Slot</span>
                   <span className="font-semibold text-slate-800">
                     {selectedAppointment.slotTime || selectedAppointment.time || "N/A"}
                   </span>
                 </div>
                 <div>
-                  <span className="text-xs text-slate-400 font-medium block">
-                    Age / Gender
-                  </span>
+                  <span className="text-xs text-slate-400 font-medium block">Age / Gender</span>
                   <span className="font-semibold text-slate-800">
                     {selectedAppointment.age ? `${selectedAppointment.age} Yrs` : "N/A"}
                     {selectedAppointment.gender ? ` • ${selectedAppointment.gender}` : ""}
                   </span>
                 </div>
                 <div>
-                  <span className="text-xs text-slate-400 font-medium block">
-                    Type
-                  </span>
+                  <span className="text-xs text-slate-400 font-medium block">Consultation Fee</span>
                   <span className="font-semibold text-slate-800">
-                    {selectedAppointment.consultation || selectedAppointment.type || selectedAppointment.appointment || "General"}
+                    ₹{selectedAppointment.amount || 0}
+                  </span>
+                </div>
+                {/* Contact Number Field */}
+                <div className="col-span-2 pt-2 border-t border-slate-200/60">
+                  <span className="text-xs text-slate-400 font-medium block">Contact Number</span>
+                  <span className="font-semibold text-slate-800">
+                    {selectedAppointment.contactNumber || selectedAppointment.phone || selectedAppointment.patient?.contactNumber || selectedAppointment.patient?.phone || "N/A"}
                   </span>
                 </div>
               </div>
 
-              {/* Payment Section in Modal */}
-              <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                <div>
-                  <span className="text-xs text-slate-400 font-medium block">
-                    Payment Mode
-                  </span>
-                  <span className="font-semibold text-slate-800 flex items-center gap-1.5 mt-0.5">
-                    <RxCardStack className="text-[#058b7c]" />
-                    {selectedAppointment.paymentMode || "Offline"}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-xs text-slate-400 font-medium block">
-                    Payment Status
-                  </span>
-                  <span className={`inline-block font-semibold text-xs px-2 py-0.5 rounded-full mt-0.5 ${
-                    selectedAppointment.paymentStatus === "Paid" 
-                      ? "bg-emerald-100 text-emerald-700" 
-                      : "bg-amber-100 text-amber-700"
-                  }`}>
-                    {selectedAppointment.paymentStatus || "Pending"}
-                  </span>
-                </div>
-              </div>
-
-              {selectedAppointment.contactNumber && (
-                <div className="flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                  <RxMobile className="text-slate-400 w-4 h-4" />
-                  <span className="text-xs text-slate-500 font-medium">Contact:</span>
-                  <span className="text-xs font-semibold text-slate-800">{selectedAppointment.contactNumber}</span>
-                </div>
-              )}
-
-              <div>
-                <span className="text-xs text-slate-400 font-medium block mb-1">
-                  Reported Symptoms
-                </span>
-                <p className="text-slate-700 bg-white border border-slate-200 p-3 rounded-xl font-normal">
-                  {selectedAppointment.symptoms || "No symptoms listed."}
+              {/* Symptoms */}
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-1">
+                <span className="text-xs text-slate-400 font-medium block">Symptoms / Description</span>
+                <p className="text-slate-700 font-medium text-xs leading-relaxed">
+                  {selectedAppointment.symptoms || "No symptoms provided."}
                 </p>
               </div>
 
-              {selectedAppointment.status !== "Completed" && (
-                <div className="pt-2">
-                  <button className="w-full bg-[#058b7c] hover:bg-[#047266] text-white py-3 rounded-xl font-semibold text-sm transition-colors shadow-xs flex items-center justify-center gap-2">
-                    <RxCheck className="w-4 h-4" /> Join Telehealth Session
-                  </button>
+              {/* Meeting Link Section - Visible ONLY if status is Pending or Ongoing */}
+              {selectedAppointment.meetingLink && 
+               (selectedAppointment.status === "Pending" || selectedAppointment.status === "Ongoing" || !selectedAppointment.status) && (
+                <div className="bg-teal-50/60 p-4 rounded-2xl border border-teal-100 space-y-2">
+                  <span className="text-xs text-[#058b7c] font-bold uppercase tracking-wider block">Video Consultation</span>
+                  <a 
+                    href={selectedAppointment.meetingLink} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-[#058b7c] hover:bg-[#047266] px-4 py-2 rounded-xl transition-colors shadow-xs"
+                  >
+                    Join Video Call ↗
+                  </a>
                 </div>
               )}
+
+              {/* Status & Quick Action Note */}
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center justify-between">
+                <div>
+                  <span className="text-xs text-slate-400 font-medium block">Current Status</span>
+                  <span className={`text-xs font-bold inline-block mt-0.5 ${
+                    selectedAppointment.status === "Completed" ? "text-emerald-600" :
+                    selectedAppointment.status === "Ongoing" ? "text-blue-600" :
+                    selectedAppointment.status === "Cancelled" ? "text-rose-600" : "text-amber-600"
+                  }`}>
+                    {selectedAppointment.status || "Pending"}
+                  </span>
+                </div>
+
+                {(!selectedAppointment.status || selectedAppointment.status === "Pending") && (
+                  <button
+                    onClick={() => {
+                      handleStatusChange(selectedAppointment._id || selectedAppointment.id, "Ongoing");
+                      setSelectedAppointment(prev => ({ ...prev, status: "Ongoing" }));
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
+                  >
+                    Mark Ongoing
+                  </button>
+                )}
+
+                {selectedAppointment.status === "Ongoing" && (
+                  <button
+                    onClick={() => {
+                      handleStatusChange(selectedAppointment._id || selectedAppointment.id, "Completed");
+                      setSelectedAppointment(prev => ({ ...prev, status: "Completed" }));
+                    }}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
+                  >
+                    Mark Completed
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>

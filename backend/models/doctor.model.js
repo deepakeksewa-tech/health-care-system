@@ -57,7 +57,6 @@ const doctorBasicDetails=new mongoose.Schema({
         ref: "DoctorRegistration",
         required: true
     },
-    
     name:{
         type:String,
         required:true

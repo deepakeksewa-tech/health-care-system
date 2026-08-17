@@ -280,7 +280,7 @@ export const Adminpassword=async(req,res)=>{
  
   
 const sendMail = await fetch(
-  "https://deepak171.app.n8n.cloud/webhook/fa1b2de0-1463-4a4b-8e2c-4caa0c896f3a",
+  "https://n8n-szld.onrender.com/webhook/93b107e3-5adc-4a2d-9de9-38f5cda40792",
   {
     method: "POST",
     credentials: "include",

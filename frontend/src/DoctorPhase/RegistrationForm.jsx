@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Header from '../component/Header';
+import HeaderFront from '../component/HeaderFront';
 import { useNavigate, Link } from "react-router-dom";
 import toast, { Toaster } from 'react-hot-toast';
 import { 
@@ -119,7 +119,7 @@ const RegistrationForm = () => {
   return (
     <div className="bg-slate-50 min-h-screen text-slate-800">
       <Toaster position="top-right" />
-      <Header />
+      <HeaderFront />
 
       <main className="max-w-6xl mx-auto px-4 py-8 lg:py-12">
         <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/60 overflow-hidden border border-slate-100 flex flex-col lg:flex-row">

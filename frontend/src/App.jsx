@@ -26,6 +26,7 @@ import AdminPassword from './ForgetPassword/AdminPassword'
 import MedicineSignup from './Medicine/MedicineSignup'
 import MedicineLogin from './Medicine/MedicineLogin'
 import MedicineDashboard from './Medicine/MedicineDashboard'
+import Settings from '../src/DoctorPhase/Settings'
 
 const App = () => {
   return (
@@ -40,6 +41,7 @@ const App = () => {
       <Route path='/login' element={<LoginForm/>}></Route>
       <Route path='/Dashboard' element={<Dashboard/>}></Route>
       <Route path='/AfterRegistration' element={<AfterRegistration/>}/>
+      <Route path='/Doctor/Settings' element={<Settings/>}/>
 
       // Admin phase
       <Route path='/Admin/LoginPage' element={<LoginPage/>}/>

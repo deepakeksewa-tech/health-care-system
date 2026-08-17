@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "../component/Header";
+import HeaderFront from "../component/HeaderFront";
 import toast, { Toaster } from "react-hot-toast";
 
 import {
@@ -359,7 +359,7 @@ const LocationSetup = () => {
 
   return (
     <div className="min-h-screen bg-gray-200">
-      <Header />
+      <HeaderFront />
 
       <Toaster />
 
@@ -460,16 +460,9 @@ const LocationSetup = () => {
 
           <div className="mt-5">
 
-            <h2 className="font-bold text-gray-700">
-              Selected Address:
-              <span className="text-red-400">
-                *
-              </span>
-            </h2>
+            
 
-            <p className="p-3 rounded bg-gray-100 text-gray-800 mt-2">
-              {address || "Detecting address..."}
-            </p>
+            
 
             <div className="border-b border-gray-200 pb-12 mt-6">
 

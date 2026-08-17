@@ -6,7 +6,7 @@ import { Patient, userModel } from '../models/patient.model.js';
 
 // --------------------------- Doctor Data -------------------------------------------------
 // list of pending verification doctor list 
-
+const api=process.env.N8N_WEBHOOK;
 export const ReadRegistration=async(req,res)=>{
   const  data=await DoctorRegistration.find({verificationStatus:"Pending"}).select("-password");
   if(data.length==0){
@@ -34,7 +34,7 @@ export const RejectRegistration=async(req,res)=>{
   check.verificationStatus='Rejected'
   check.save();
   const sendingMail = await fetch(
-  `${process.env.N8N_WEBHOOK}`,
+  `${api}`,
   {
     method: "POST",
     credentials: "include",
@@ -87,7 +87,7 @@ export const AcceptRegistration=async(req,res)=>{
     })
   }
   check.verificationStatus='Verified'
-  check.save();
+  await check.save();
    const token = jwt.sign(
     {
       id: check._id,
@@ -97,8 +97,10 @@ export const AcceptRegistration=async(req,res)=>{
       expiresIn: "1d",
     }
   )
+console.log(`${api}`);
+
  const sendingMail = await fetch(
-  `${process.env.N8N_WEBHOOK}`,
+  `${api}`,
   {
     method: "POST",
     credentials: "include",
@@ -184,7 +186,7 @@ export const AdminCreate=async(req,res)=>{
   }
   const bcryptpassword=await bcrypt.hash("12345",Number(process.env.HASHROUND))
   const save=await AdminModel.create({gmail,password:bcryptpassword});
-  const n8n=await fetch(`${process.env.N8N_WEBHOOK}`,
+  const n8n=await fetch(`${api}`,
     {
       method:"POST",
         headers: {

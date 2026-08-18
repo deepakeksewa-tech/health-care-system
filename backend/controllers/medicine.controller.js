@@ -17,8 +17,8 @@ export const loginMedicineSeller = async (req, res) => {
 
     res.cookie("token", token, {
         httpOnly: true,
-        secure: false, // true in production with HTTPS
-        sameSite: "lax",
+        secure: true, // true in production with HTTPS
+        sameSite: "none",
         maxAge: 24 * 60 * 60 * 1000,
       })
       checkMedicineSeller.online=true
@@ -40,8 +40,8 @@ export const loginMedicineSeller = async (req, res) => {
       // Clear the token cookie
     res.clearCookie("token", {
       httpOnly: true,
-      secure: false, // Set to true in production with HTTPS
-      sameSite: "lax",
+      secure: true, // Set to true in production with HTTPS
+      sameSite: "none",
     });
     }
     catch (error) {

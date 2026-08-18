@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import HeaderFront from "../component/HeaderFront";
+import Header from "../component/Header";
 import { RxCross2 } from "react-icons/rx";
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
@@ -96,7 +96,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen">
-      <HeaderFront />
+      <Header />
       <Toaster />
       
       <div className="max-w-7xl mx-auto p-4 lg:p-8">

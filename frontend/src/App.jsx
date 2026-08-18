@@ -1,6 +1,6 @@
 import React from 'react'
 import Header from './component/Header'
-import { Analytics } from "@vercel/analytics/react"
+import { Analytics } from "@vercel/analytics/react";
 import RegistrationForm from './DoctorPhase/RegistrationForm'
 import LocationSetup from './DoctorPhase/LocationSetup'
 import BasicDetails from './DoctorPhase/BasicDetails'
@@ -31,9 +31,9 @@ import Settings from '../src/DoctorPhase/Settings'
 
 const App = () => {
   return (
-    
+    <>
+     
     <BrowserRouter>
-    <Analytics/>
     <Routes>
       <Route path='/' element={<MainPage/>}/>
       // Doctor Phase
@@ -74,6 +74,8 @@ const App = () => {
 
   
     </BrowserRouter>
+     <Analytics />
+    </>
   )
 }
 

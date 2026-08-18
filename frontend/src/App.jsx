@@ -31,7 +31,9 @@ import Settings from '../src/DoctorPhase/Settings'
 
 const App = () => {
   return (
+    
     <BrowserRouter>
+    <Analytics/>
     <Routes>
       <Route path='/' element={<MainPage/>}/>
       // Doctor Phase

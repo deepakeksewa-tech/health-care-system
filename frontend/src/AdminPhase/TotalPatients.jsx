@@ -27,6 +27,7 @@ const TotalPatient = () => {
         setTotalPatient(data.data);
       } else {
         toast.error(data.message || "Failed to fetch medical records.");
+        setTotalPatient([]);
       }
     } catch (error) {
       console.log(error);
@@ -123,7 +124,7 @@ const TotalPatient = () => {
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-100px)] space-y-5">
               {TotalPatient.length === 0 ? (
                 <div className="text-center py-12">
-                  <p className="text-slate-400 font-medium">Is patient ke liye koi medical record nahi mila.</p>
+                  <p className="text-slate-400 font-medium">No History</p>
                 </div>
               ) : (
                 TotalPatient.map((item, idx) => (

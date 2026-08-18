@@ -1,6 +1,5 @@
 import React from 'react'
 import Header from './component/Header'
-import { Analytics } from "@vercel/analytics/react";
 import RegistrationForm from './DoctorPhase/RegistrationForm'
 import LocationSetup from './DoctorPhase/LocationSetup'
 import BasicDetails from './DoctorPhase/BasicDetails'
@@ -74,7 +73,7 @@ const App = () => {
 
   
     </BrowserRouter>
-     <Analytics />
+    
     </>
   )
 }

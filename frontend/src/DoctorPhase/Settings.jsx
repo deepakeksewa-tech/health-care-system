@@ -14,7 +14,7 @@ import {
 } from 'react-icons/fi';
 
 // ⚙️ Backend API URL (Port 8000)
-const API_BASE_URL = "http://localhost:8000/api/doctors";
+const API_BASE_URL = "https://health-care-system-2-bo26.onrender.com/api/doctors";
 
 const Settings = ({ userRole = "doctor" }) => {
   const navigate = useNavigate();

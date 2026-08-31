@@ -9,6 +9,64 @@ const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
+
+/**
+ * @swagger
+ * tags:
+ *   - name: Razorpay Payments
+ *     description: Endpoints for creating orders and verifying payment signatures
+ */
+
+/**
+ * @swagger
+ * /api/payment/create-order:
+ *   post:
+ *     summary: Create a Razorpay Order
+ *     tags: [Razorpay Payments]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - amount
+ *             properties:
+ *               amount:
+ *                 type: number
+ *                 description: Amount in INR (Rupees)
+ *                 example: 500
+ *     responses:
+ *       200:
+ *         description: Order created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 order:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: "order_DBJOWzybf0sJbb"
+ *                     amount:
+ *                       type: number
+ *                       example: 50000
+ *                     currency:
+ *                       type: string
+ *                       example: "INR"
+ *                     receipt:
+ *                       type: string
+ *                       example: "receipt_1716182049000"
+ *       400:
+ *         description: Invalid or missing amount
+ *       500:
+ *         description: Failed to create Razorpay order
+ */
 router.post("/create-order", async (req, res) => {
   try {
     const { amount } = req.body;
@@ -37,6 +95,41 @@ router.post("/create-order", async (req, res) => {
     });
   }
 });
+
+/**
+ * @swagger
+ * /api/payment/verify-payment:
+ *   post:
+ *     summary: Verify Razorpay Payment Signature
+ *     tags: [Razorpay Payments]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - razorpay_order_id
+ *               - razorpay_payment_id
+ *               - razorpay_signature
+ *             properties:
+ *               razorpay_order_id:
+ *                 type: string
+ *                 example: "order_DBJOWzybf0sJbb"
+ *               razorpay_payment_id:
+ *                 type: string
+ *                 example: "pay_29QQoUBcxNqdf0"
+ *               razorpay_signature:
+ *                 type: string
+ *                 example: "9ef4b489d81d45c50c05df1c2d0f0d2c67..."
+ *     responses:
+ *       200:
+ *         description: Payment verified successfully
+ *       400:
+ *         description: Invalid payment signature
+ *       500:
+ *         description: Payment verification failed
+ */
 router.post("/verify-payment", async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
@@ -69,4 +162,5 @@ router.post("/verify-payment", async (req, res) => {
     });
   }
 });
+
 export default router;

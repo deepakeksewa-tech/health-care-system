@@ -27,7 +27,7 @@ import MedicineSignup from './Medicine/MedicineSignup'
 import MedicineLogin from './Medicine/MedicineLogin'
 import MedicineDashboard from './Medicine/MedicineDashboard'
 import Settings from '../src/DoctorPhase/Settings'
-
+import Medicine_Section from './Patient/Medicine_Section'
 const App = () => {
   return (
     <>
@@ -55,8 +55,6 @@ const App = () => {
       // Patient Phase
       <Route path='/Patient/Login' element={<PatientLogin/>}/>
       <Route path='/Patient/Signup' element={<PatientSignup/>}/>
-      {/* <Route path='/Patient/Medicine' element={<PatientMedicine/>}/> */}
-      {/* <Route path='/Patient/Laboratory' element={<PatientLaboratory/>}/> */}
       <Route path='/Patient/Dashboard' element={<PatientDashboard/>}/>
       <Route path='/Patient/DoctorList' element={<PatientDoctorList/>}/>
       <Route path='/Patient/DoctorSlot/:id' element={<PatientDoctorSlots/>}/>
@@ -69,6 +67,7 @@ const App = () => {
     <Route path='/Medicine/Signup' element={<MedicineSignup/>}/>
     <Route path='/Medicine/Login' element={<MedicineLogin/>}/>
     <Route path='/Medicine/Dashboard' element={<MedicineDashboard/>}/>
+    <Route path='/Medicince/Patient/Dashboard' element={<Medicine_Section/>}/>
       </Routes>
 
   

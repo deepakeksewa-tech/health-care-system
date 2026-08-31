@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-const adminMiddleware = (req, res, next) => {
+const UserMiddleware = (req, res, next) => {
   try {
     const token = req.cookies.token;    
     if (!token) {
@@ -14,13 +14,10 @@ const adminMiddleware = (req, res, next) => {
     if(decoded.role!=="Admin"){
       return res.status(401).send({
         success:false,
-        message:"You are not authorized to Enter the Admin Phase"
+        message:"You are not authorized to Enter the User Phase"
       })
     }
     req.id = decoded.id;
- 
-    
-
     next();
   } catch (error) {
     return res.status(401).json({
@@ -30,4 +27,4 @@ const adminMiddleware = (req, res, next) => {
   }
 };
 
-export default adminMiddleware;
+export default UserMiddleware;

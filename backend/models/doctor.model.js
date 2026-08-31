@@ -44,6 +44,10 @@ const doctorRegistrationDetailsSchema = new mongoose.Schema({
     timeCreated: {
     type: Date,
     default: Date.now
+},
+role:{
+    type:String,
+    default:"Doctor"
 }
   },
 );

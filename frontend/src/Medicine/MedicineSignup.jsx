@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Logo from '../assets/Logo.png'
 import toast, { Toaster } from 'react-hot-toast'
 import { useNavigate, Link } from 'react-router-dom'
-import { User, Mail, Phone, Lock, Eye, EyeOff, Store } from 'lucide-react'
+import { User, Mail, Phone, Lock, Eye, EyeOff, Store, CheckCircle2 } from 'lucide-react'
 
 const MedicineSignup = () => {
   const api = import.meta.env.VITE_API_URL
@@ -17,6 +17,17 @@ const MedicineSignup = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
 
+  // Verification States (Reset to initial default states)
+  const [emailOtpSent, setEmailOtpSent] = useState(false)
+  const [emailOtp, setEmailOtp] = useState('')
+  const [isEmailVerified, setIsEmailVerified] = useState(false)
+  const [emailLoading, setEmailLoading] = useState(false)
+
+  const [phoneOtpSent, setPhoneOtpSent] = useState(false)
+  const [phoneOtp, setPhoneOtp] = useState('')
+  const [isPhoneVerified, setIsPhoneVerified] = useState(false)
+  const [phoneLoading, setPhoneLoading] = useState(false)
+
   // Validation Error State
   const [errors, setErrors] = useState({})
 
@@ -24,35 +35,34 @@ const MedicineSignup = () => {
   const validate = () => {
     const newErrors = {}
 
-    // Name Validation
     if (!name.trim()) {
       newErrors.name = 'Full name is required.'
     } else if (name.trim().length < 3) {
       newErrors.name = 'Name must be at least 3 characters long.'
     }
 
-    // Shop Name Validation
     if (!shopName.trim()) {
       newErrors.shopName = 'Shop name is required.'
     }
 
-    // Email Validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!gmail.trim()) {
       newErrors.gmail = 'Email address is required.'
     } else if (!emailRegex.test(gmail)) {
       newErrors.gmail = 'Please enter a valid email address.'
+    } else if (!isEmailVerified) {
+      newErrors.gmail = 'Please verify your email address.'
     }
 
-    // Phone/Contact Validation
     const phoneRegex = /^[0-9]{10}$/
     if (!contact.trim()) {
       newErrors.contact = 'Phone number is required.'
     } else if (!phoneRegex.test(contact.replace(/\s+/g, ''))) {
       newErrors.contact = 'Please enter a valid 10-digit phone number.'
+    } else if (!isPhoneVerified) {
+      newErrors.contact = 'Please verify your phone number.'
     }
 
-    // Password Validation
     if (!password) {
       newErrors.password = 'Password is required.'
     } else if (password.length < 6) {
@@ -63,11 +73,73 @@ const MedicineSignup = () => {
     return Object.keys(newErrors).length === 0
   }
 
+  // Handle Static Send Email OTP
+  const handleSendEmailOtp = () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!gmail.trim() || !emailRegex.test(gmail)) {
+      setErrors(prev => ({ ...prev, gmail: 'Enter a valid email first.' }))
+      return
+    }
+
+    setEmailLoading(true)
+    setTimeout(() => {
+      setEmailOtpSent(true)
+      setEmailLoading(false)
+      toast.success('Static OTP sent to email! (Use: 123456)')
+    }, 600)
+  }
+
+  // Handle Static Verify Email OTP
+  const handleVerifyEmailOtp = () => {
+    if (!emailOtp) {
+      toast.error('Enter the email verification code.')
+      return
+    }
+
+    if (emailOtp === '123456') {
+      setIsEmailVerified(true)
+      toast.success('Email verified successfully!')
+    } else {
+      toast.error('Invalid OTP. Use static code: 123456')
+    }
+  }
+
+  // Handle Static Send Phone OTP
+  const handleSendPhoneOtp = () => {
+    const phoneRegex = /^[0-9]{10}$/
+    if (!contact.trim() || !phoneRegex.test(contact)) {
+      setErrors(prev => ({ ...prev, contact: 'Enter a valid 10-digit number first.' }))
+      return
+    }
+
+    setPhoneLoading(true)
+    setTimeout(() => {
+      setPhoneOtpSent(true)
+      setPhoneLoading(false)
+      toast.success('Static OTP sent to phone! (Use: 123456)')
+    }, 600)
+  }
+
+  // Handle Static Verify Phone OTP
+  const handleVerifyPhoneOtp = () => {
+    if (!phoneOtp) {
+      toast.error('Enter the phone verification code.')
+      return
+    }
+
+    if (phoneOtp === '123456') {
+      setIsPhoneVerified(true)
+      toast.success('Phone number verified successfully!')
+    } else {
+      toast.error('Invalid OTP. Use static code: 123456')
+    }
+  }
+
   async function handleSignup(e) {
     e.preventDefault()
 
     if (!validate()) {
-      toast.error('Please fix the errors in the form.')
+      toast.error('Please fix the errors and complete verifications.')
       return
     }
 
@@ -134,10 +206,10 @@ const MedicineSignup = () => {
 
       {/* Form Section */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
-        <div className="w-full max-w-md space-y-8 bg-white p-8 sm:p-10 rounded-3xl border border-slate-200/80 shadow-sm">
+        <div className="w-full max-w-md space-y-6 bg-white p-8 sm:p-10 rounded-3xl border border-slate-200/80 shadow-sm">
           
           {/* Logo Heading */}
-          <div className="space-y-3 text-center">
+          <div className="space-y-2 text-center">
             <div className="inline-flex items-center justify-center gap-2">
               <img
                 height={42}
@@ -154,7 +226,7 @@ const MedicineSignup = () => {
               Create a Medicine Seller Account
             </h1>
             <p className="text-xs text-slate-500">
-              Enter your personal details to register.
+              Enter your personal details and verify to register.
             </p>
           </div>
 
@@ -163,9 +235,7 @@ const MedicineSignup = () => {
             
             {/* Full Name Input */}
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-700 block">
-                Full Name
-              </label>
+              <label className="text-xs font-semibold text-slate-700 block">Full Name</label>
               <div className="relative">
                 <User className="absolute left-3.5 top-3.5 text-slate-400 w-4 h-4" />
                 <input
@@ -175,24 +245,18 @@ const MedicineSignup = () => {
                     if (errors.name) setErrors({ ...errors, name: null })
                   }}
                   className={`w-full pl-10 pr-4 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none transition-all ${
-                    errors.name
-                      ? 'border-red-400 focus:ring-2 focus:ring-red-100'
-                      : 'border-slate-200 focus:bg-white focus:ring-2 focus:ring-[#058b7c]/20 focus:border-[#058b7c]'
+                    errors.name ? 'border-red-400 focus:ring-2 focus:ring-red-100' : 'border-slate-200 focus:bg-white focus:ring-2 focus:ring-[#058b7c]/20 focus:border-[#058b7c]'
                   }`}
                   type="text"
                   placeholder="John Doe"
                 />
               </div>
-              {errors.name && (
-                <p className="text-red-500 text-xs mt-1">{errors.name}</p>
-              )}
+              {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
             </div>
 
             {/* Shop Name Input */}
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-700 block">
-                Shop Name
-              </label>
+              <label className="text-xs font-semibold text-slate-700 block">Shop Name</label>
               <div className="relative">
                 <Store className="absolute left-3.5 top-3.5 text-slate-400 w-4 h-4" />
                 <input
@@ -202,78 +266,142 @@ const MedicineSignup = () => {
                     if (errors.shopName) setErrors({ ...errors, shopName: null })
                   }}
                   className={`w-full pl-10 pr-4 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none transition-all ${
-                    errors.shopName
-                      ? 'border-red-400 focus:ring-2 focus:ring-red-100'
-                      : 'border-slate-200 focus:bg-white focus:ring-2 focus:ring-[#058b7c]/20 focus:border-[#058b7c]'
+                    errors.shopName ? 'border-red-400 focus:ring-2 focus:ring-red-100' : 'border-slate-200 focus:bg-white focus:ring-2 focus:ring-[#058b7c]/20 focus:border-[#058b7c]'
                   }`}
                   type="text"
                   placeholder="Apothecary Pharmacy"
                 />
               </div>
-              {errors.shopName && (
-                <p className="text-red-500 text-xs mt-1">{errors.shopName}</p>
+              {errors.shopName && <p className="text-red-500 text-xs mt-1">{errors.shopName}</p>}
+            </div>
+
+            {/* Email Input with Verification */}
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-700 block">Email Address</label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Mail className="absolute left-3.5 top-3.5 text-slate-400 w-4 h-4" />
+                  <input
+                    value={gmail}
+                    disabled={isEmailVerified}
+                    onChange={(e) => {
+                      setGmail(e.target.value)
+                      if (errors.gmail) setErrors({ ...errors, gmail: null })
+                    }}
+                    className={`w-full pl-10 pr-4 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none transition-all ${
+                      errors.gmail ? 'border-red-400 focus:ring-2 focus:ring-red-100' : 'border-slate-200 focus:bg-white focus:ring-2 focus:ring-[#058b7c]/20 focus:border-[#058b7c]'
+                    } ${isEmailVerified ? 'bg-emerald-50/50 border-emerald-300 text-emerald-800' : ''}`}
+                    type="email"
+                    placeholder="name@example.com"
+                  />
+                </div>
+                {!isEmailVerified ? (
+                  <button
+                    type="button"
+                    onClick={handleSendEmailOtp}
+                    disabled={emailLoading}
+                    className="px-4 bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium rounded-xl transition-all shrink-0 cursor-pointer disabled:opacity-50"
+                  >
+                    {emailLoading ? 'Sending...' : emailOtpSent ? 'Resend' : 'Verify'}
+                  </button>
+                ) : (
+                  <div className="flex items-center px-3 bg-emerald-100 text-emerald-700 rounded-xl text-xs font-semibold gap-1">
+                    <CheckCircle2 size={14} /> Verified
+                  </div>
+                )}
+              </div>
+              {errors.gmail && <p className="text-red-500 text-xs mt-1">{errors.gmail}</p>}
+
+              {/* Email OTP Input Box */}
+              {emailOtpSent && !isEmailVerified && (
+                <div className="flex flex-col gap-1 mt-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      maxLength={6}
+                      value={emailOtp}
+                      onChange={(e) => setEmailOtp(e.target.value)}
+                      placeholder="Enter static OTP: 123456"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:bg-white focus:border-[#058b7c]"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleVerifyEmailOtp}
+                      className="px-4 bg-[#058b7c] hover:bg-[#047266] text-white text-xs font-medium rounded-xl transition-all shrink-0 cursor-pointer"
+                    >
+                      Confirm
+                    </button>
+                  </div>
+                  <span className="text-[10px] text-slate-400">Hint: Use code 123456</span>
+                </div>
               )}
             </div>
 
-            {/* Email Input */}
+            {/* Contact Input with Verification */}
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-700 block">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-3.5 text-slate-400 w-4 h-4" />
-                <input
-                  value={gmail}
-                  onChange={(e) => {
-                    setGmail(e.target.value)
-                    if (errors.gmail) setErrors({ ...errors, gmail: null })
-                  }}
-                  className={`w-full pl-10 pr-4 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none transition-all ${
-                    errors.gmail
-                      ? 'border-red-400 focus:ring-2 focus:ring-red-100'
-                      : 'border-slate-200 focus:bg-white focus:ring-2 focus:ring-[#058b7c]/20 focus:border-[#058b7c]'
-                  }`}
-                  type="email"
-                  placeholder="name@example.com"
-                />
+              <label className="text-xs font-semibold text-slate-700 block">Phone Number</label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Phone className="absolute left-3.5 top-3.5 text-slate-400 w-4 h-4" />
+                  <input
+                    value={contact}
+                    disabled={isPhoneVerified}
+                    onChange={(e) => {
+                      setContact(e.target.value)
+                      if (errors.contact) setErrors({ ...errors, contact: null })
+                    }}
+                    className={`w-full pl-10 pr-4 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none transition-all ${
+                      errors.contact ? 'border-red-400 focus:ring-2 focus:ring-red-100' : 'border-slate-200 focus:bg-white focus:ring-2 focus:ring-[#058b7c]/20 focus:border-[#058b7c]'
+                    } ${isPhoneVerified ? 'bg-emerald-50/50 border-emerald-300 text-emerald-800' : ''}`}
+                    type="tel"
+                    placeholder="9876543210"
+                  />
+                </div>
+                {!isPhoneVerified ? (
+                  <button
+                    type="button"
+                    onClick={handleSendPhoneOtp}
+                    disabled={phoneLoading}
+                    className="px-4 bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium rounded-xl transition-all shrink-0 cursor-pointer disabled:opacity-50"
+                  >
+                    {phoneLoading ? 'Sending...' : phoneOtpSent ? 'Resend' : 'Verify'}
+                  </button>
+                ) : (
+                  <div className="flex items-center px-3 bg-emerald-100 text-emerald-700 rounded-xl text-xs font-semibold gap-1">
+                    <CheckCircle2 size={14} /> Verified
+                  </div>
+                )}
               </div>
-              {errors.gmail && (
-                <p className="text-red-500 text-xs mt-1">{errors.gmail}</p>
-              )}
-            </div>
+              {errors.contact && <p className="text-red-500 text-xs mt-1">{errors.contact}</p>}
 
-            {/* Contact Input */}
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-700 block">
-                Phone Number
-              </label>
-              <div className="relative">
-                <Phone className="absolute left-3.5 top-3.5 text-slate-400 w-4 h-4" />
-                <input
-                  value={contact}
-                  onChange={(e) => {
-                    setContact(e.target.value)
-                    if (errors.contact) setErrors({ ...errors, contact: null })
-                  }}
-                  className={`w-full pl-10 pr-4 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none transition-all ${
-                    errors.contact
-                      ? 'border-red-400 focus:ring-2 focus:ring-red-100'
-                      : 'border-slate-200 focus:bg-white focus:ring-2 focus:ring-[#058b7c]/20 focus:border-[#058b7c]'
-                  }`}
-                  type="tel"
-                  placeholder="9876543210"
-                />
-              </div>
-              {errors.contact && (
-                <p className="text-red-500 text-xs mt-1">{errors.contact}</p>
+              {/* Phone OTP Input Box */}
+              {phoneOtpSent && !isPhoneVerified && (
+                <div className="flex flex-col gap-1 mt-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      maxLength={6}
+                      value={phoneOtp}
+                      onChange={(e) => setPhoneOtp(e.target.value)}
+                      placeholder="Enter static OTP: 123456"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:bg-white focus:border-[#058b7c]"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleVerifyPhoneOtp}
+                      className="px-4 bg-[#058b7c] hover:bg-[#047266] text-white text-xs font-medium rounded-xl transition-all shrink-0 cursor-pointer"
+                    >
+                      Confirm
+                    </button>
+                  </div>
+                  <span className="text-[10px] text-slate-400">Hint: Use code 123456</span>
+                </div>
               )}
             </div>
 
             {/* Password Input */}
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-700 block">
-                Password
-              </label>
+              <label className="text-xs font-semibold text-slate-700 block">Password</label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-3.5 text-slate-400 w-4 h-4" />
                 <input
@@ -283,9 +411,7 @@ const MedicineSignup = () => {
                     if (errors.password) setErrors({ ...errors, password: null })
                   }}
                   className={`w-full pl-10 pr-10 py-2.5 bg-slate-50 border rounded-xl text-sm outline-none transition-all ${
-                    errors.password
-                      ? 'border-red-400 focus:ring-2 focus:ring-red-100'
-                      : 'border-slate-200 focus:bg-white focus:ring-2 focus:ring-[#058b7c]/20 focus:border-[#058b7c]'
+                    errors.password ? 'border-red-400 focus:ring-2 focus:ring-red-100' : 'border-slate-200 focus:bg-white focus:ring-2 focus:ring-[#058b7c]/20 focus:border-[#058b7c]'
                   }`}
                   type={showPassword ? 'text' : 'password'}
                   placeholder="At least 6 characters"
@@ -298,9 +424,7 @@ const MedicineSignup = () => {
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
-              {errors.password && (
-                <p className="text-red-500 text-xs mt-1">{errors.password}</p>
-              )}
+              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
             </div>
 
             {/* Submit Button */}
@@ -324,10 +448,7 @@ const MedicineSignup = () => {
           <div className="text-center pt-2">
             <p className="text-xs text-slate-500">
               Already have an account?{' '}
-              <Link
-                to="/medicine/login"
-                className="text-[#058b7c] font-bold hover:underline"
-              >
+              <Link to="/medicine/login" className="text-[#058b7c] font-bold hover:underline">
                 Sign In
               </Link>
             </p>

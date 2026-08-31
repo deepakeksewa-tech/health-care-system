@@ -3,6 +3,7 @@ import {AdminModel} from "../models/admin.model.js"
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken';
 import { Patient, userModel } from '../models/patient.model.js';
+import { Medicine, MedicineSeller } from "../models/medicine.model.js";
 
 // --------------------------- Doctor Data -------------------------------------------------
 // list of pending verification doctor list 
@@ -91,6 +92,7 @@ export const AcceptRegistration=async(req,res)=>{
    const token = jwt.sign(
     {
       id: check._id,
+      role:check.role
     },
     process.env.JWT_TOKEN,
     {
@@ -260,6 +262,7 @@ export const checkPassword=async(req,res)=>{
     const token = jwt.sign(
     {
       id: checking._id,
+      role:"Admin"
     },
     process.env.JWT_TOKEN,
     {
@@ -353,3 +356,20 @@ export const doctorHistory=async(req,res)=>{
         data:find
     })
 }
+
+//  get all Medicine Seller
+export const GetAllMedSeller=async(req,res)=>{
+  const finding=await MedicineSeller.find();
+  if(!finding){
+    return res.status(400).send({
+      success:false,
+      message:"There is no medicine Seller"
+    })
+  }
+  return res.status(200).send({
+    success:true,
+    message:"Medicine Seller founded",
+    data:finding
+  })
+}
+

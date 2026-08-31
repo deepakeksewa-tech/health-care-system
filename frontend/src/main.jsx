@@ -4,10 +4,12 @@ import './index.css'
 import { Analytics } from "@vercel/analytics/react";
 import "leaflet/dist/leaflet.css";
 import App from './App.jsx'
+import { GoogleOAuthProvider } from '@react-oauth/google'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
-    <Analytics />
-  </StrictMode>,
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <App />
+    </GoogleOAuthProvider>
+  </StrictMode>
 )

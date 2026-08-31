@@ -77,7 +77,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ success: false, message: "Please enter correct credentials" });
     }
 
-    const token = jwt.sign({ id: check._id }, process.env.JWT_TOKEN, { expiresIn: '24h' });
+    const token = jwt.sign({ id: check._id ,role:check.role}, process.env.JWT_TOKEN, { expiresIn: '24h' });
     res.cookie("token", token, {
       httpOnly: true,
       secure: true,

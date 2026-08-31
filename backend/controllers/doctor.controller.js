@@ -223,7 +223,7 @@ export const DoctorLogin = async(req,res)=>{
         })
     }
 
-    const token = jwt.sign({id: finding._id}, process.env.JWT_TOKEN);
+    const token = jwt.sign({id: finding._id,role:finding.role}, process.env.JWT_TOKEN);
     res.cookie("token", token, {
         httpOnly: true,
         secure: true,

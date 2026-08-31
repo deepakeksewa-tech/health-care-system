@@ -11,6 +11,7 @@ import forgetPasswordRoutes from "./routes/forgetPassword.route.js";
 import paymentRoutes from "./routes/payment.route.js"; // <-- Added payment route
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./swagger.js";
+import sellerMedicineRoutes from './routes/sellerMed.route.js';
 connectDB();
 
 
@@ -18,7 +19,7 @@ const app = express();
 app.use(cookieParser());
 
 app.use(cors({
-  origin: "https://health-care-system-zeta.vercel.app",
+  origin:["https://health-care-system-zeta.vercel.app","http://localhost:5173"],
   credentials: true
 }));
 app.use(express.json());
@@ -38,8 +39,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/patient", patientRoutes);
 app.use("/api/forget", forgetPasswordRoutes);
 app.use("/api/payment", paymentRoutes); // <-- Razorpay endpoints live here
-
-
+app.use("/Med/Seller",sellerMedicineRoutes)
 
 
 

@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-const adminMiddleware = (req, res, next) => {
+const MedSellerMiddleware = (req, res, next) => {
   try {
     const token = req.cookies.token;    
     if (!token) {
@@ -11,10 +11,10 @@ const adminMiddleware = (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_TOKEN);
-    if(decoded.role!=="Admin"){
+    if(decoded.role!=="MedSeller"){
       return res.status(401).send({
         success:false,
-        message:"You are not authorized to Enter the Admin Phase"
+        message:"You are not authorized to Enter the Medicine Seller Phase"
       })
     }
     req.id = decoded.id;
@@ -30,4 +30,4 @@ const adminMiddleware = (req, res, next) => {
   }
 };
 
-export default adminMiddleware;
+export default MedSellerMiddleware;

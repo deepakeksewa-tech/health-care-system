@@ -96,35 +96,58 @@ export const login = async (req, res) => {
 // ==========================================
 export const ReadDoctorForPatient = async (req, res) => {
   try {
-    const { date } = req.query; // Format: "YYYY-MM-DD"
-    let targetDate;
-    let formattedDateStr = "";
+    const { date } = req.query;
+
+    let formattedDateStr;
 
     if (date) {
-      formattedDateStr = date.split('T')[0];
-      const [year, month, day] = formattedDateStr.split('-').map(Number);
-      targetDate = new Date(year, month - 1, day);
+      // YYYY-MM-DD only
+      formattedDateStr = date.split("T")[0];
     } else {
-      targetDate = new Date();
-      formattedDateStr = targetDate.toISOString().split('T')[0];
+      // Current date in India
+      formattedDateStr = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Kolkata",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(new Date());
     }
 
-    const targetDay = targetDate.toLocaleDateString("en-US", { weekday: "long" });
-    const weeklySchedule = await DoctorWeekly.find().populate("doctorId");
+    // IMPORTANT:
+    // YYYY-MM-DD ko UTC date ke roop mein parse karo
+    const targetDate = new Date(`${formattedDateStr}T00:00:00.000Z`);
+
+    // Weekday UTC se nikalo
+    const targetDay = targetDate.toLocaleDateString("en-US", {
+      weekday: "long",
+      timeZone: "UTC",
+    });
+
+    console.log("=================================");
+    console.log("Received date:", date);
+    console.log("Formatted date:", formattedDateStr);
+    console.log("Target day:", targetDay);
+    console.log("=================================");
+
+    const weeklySchedule = await DoctorWeekly
+      .find()
+      .populate("doctorId");
 
     const data = [];
+
     weeklySchedule.forEach((doctor) => {
       if (!doctor.doctorId) return;
 
       doctor.weekly.forEach((schedule) => {
         if (
+          schedule.day &&
           schedule.day.toLowerCase() === targetDay.toLowerCase() &&
           schedule.status === true
         ) {
-          data.push({ 
-            doctor: doctor.doctorId, 
+          data.push({
+            doctor: doctor.doctorId,
             schedule,
-            date: formattedDateStr
+            date: formattedDateStr,
           });
         }
       });
@@ -135,10 +158,16 @@ export const ReadDoctorForPatient = async (req, res) => {
       data,
       message: data.length
         ? `Doctors available for ${targetDay} fetched successfully`
-        : `No doctors available on ${targetDay}`
+        : `No doctors available on ${targetDay}`,
     });
+
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    console.error("ReadDoctorForPatient Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 

@@ -6,7 +6,7 @@ const AfterRegistration = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
     <HeaderFront/>
-      <main className="flex-1 flex items-center justify-center p-6">
+      <main className="flex-1 flex items-center  justify-center p-6">
         <div className="max-w-xl w-full bg-white rounded-3xl p-8 sm:p-12 shadow-sm border border-gray-100 text-center">
           
           {/* Status Icon */}

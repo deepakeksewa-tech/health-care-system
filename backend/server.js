@@ -19,7 +19,7 @@ const app = express();
 app.use(cookieParser());
 
 app.use(cors({
-  origin:["https://health-care-system-zeta.vercel.app","http://localhost:5173"],
+  origin:["https://health-care-system-zeta.vercel.app","https://health-care-system-wy16-one.vercel.app/","http://localhost:5173"],
   credentials: true
 }));
 app.use(express.json());

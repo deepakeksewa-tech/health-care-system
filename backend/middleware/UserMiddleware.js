@@ -11,7 +11,7 @@ const UserMiddleware = (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_TOKEN);
-    if(decoded.role!=="Admin"){
+    if(decoded.role!=="User"){
       return res.status(401).send({
         success:false,
         message:"You are not authorized to Enter the User Phase"

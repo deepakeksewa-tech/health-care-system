@@ -158,7 +158,7 @@ export const ReadDoctorForPatient = async (req, res) => {
       data,
       message: data.length
         ? `Doctors available for ${targetDay} fetched successfully`
-        : `No doctors available on ${targetDay}`,
+        : `No doctors available on ${date}`,
     });
 
   } catch (error) {

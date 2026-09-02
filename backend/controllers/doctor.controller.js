@@ -517,16 +517,18 @@ export const updateDoctorSettings = async (req, res) => {
         return res.status(500).json({ success: false, message: err.message });
     }
 };
-// 🔄 Update Weekly Schedule (Strict Data Parsing Fix)
+
+
+// 🔄 Update Weekly Schedule Controller (Validation Fix)
 export const updateWeeklyOff = async (req, res) => {
     try {
         const doctorBasicId = req.id;
         const { weekly } = req.body; 
 
-        if (!weekly || !Array.isArray(weekly)) {
+        if (!weekly || !Array.isArray(weekly) || weekly.length === 0) {
             return res.status(400).json({ 
                 success: false, 
-                message: "Weekly schedule must be an array" 
+                message: "Weekly array cannot be empty or missing" 
             });
         }
 
@@ -538,27 +540,33 @@ export const updateWeeklyOff = async (req, res) => {
             });
         }
 
-        // Data clean & normalize conversion
-        const cleanedWeekly = weekly.map(item => ({
-            day: String(item.day || ""),
-            start: String(item.start || ""),
-            end: String(item.end || ""),
-            status: Boolean(item.status === true || item.status === "true")
-        }));
+        // Key mapping validation fallback
+        const formattedWeekly = weekly.map((item, index) => {
+            const dayName = item.day || item.Day;
+            if (!dayName) {
+                throw new Error(`Day name is missing at position ${index}`);
+            }
+            return {
+                day: String(dayName),
+                start: String(item.start || ""),
+                end: String(item.end || ""),
+                status: Boolean(item.status)
+            };
+        });
 
-        const doctorWeekly = await DoctorWeekly.findOneAndUpdate(
+        const updatedSchedule = await DoctorWeekly.findOneAndUpdate(
             { doctorId: doctorBasic._id },
-            { $set: { weekly: cleanedWeekly } },
+            { $set: { weekly: formattedWeekly } },
             { new: true, upsert: true, runValidators: true }
         );
 
         return res.status(200).json({ 
             success: true, 
             message: "Weekly schedule updated successfully", 
-            weekly: doctorWeekly.weekly 
+            weekly: updatedSchedule.weekly 
         });
     } catch (err) {
         console.error("Weekly schedule update error:", err);
-        return res.status(500).json({ success: false, message: err.message });
+        return res.status(400).json({ success: false, message: err.message });
     }
 };

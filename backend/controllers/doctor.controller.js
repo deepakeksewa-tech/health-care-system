@@ -517,7 +517,11 @@ export const updateDoctorSettings = async (req, res) => {
         return res.status(500).json({ success: false, message: err.message });
     }
 };
-// 🔄 Update Weekly Schedule Controller (Fixed Status & Time Logic)
+
+
+
+
+// 🔄 Update Weekly Schedule Controller
 export const updateWeeklyOff = async (req, res) => {
     try {
         const doctorBasicId = req.id;
@@ -540,39 +544,25 @@ export const updateWeeklyOff = async (req, res) => {
 
         const standardDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-        // Clean & process weekly data properly
         const sanitizedWeekly = standardDays.map((dayName) => {
-            // Day matching
             const foundItem = weekly.find(
                 (item) => item && item.day && item.day.trim().toLowerCase() === dayName.toLowerCase()
             );
 
-            if (foundItem) {
-                // Exact status evaluation (handles string "true", boolean true, number 1)
-                const isStatusTrue = 
-                    foundItem.status === true || 
-                    foundItem.status === "true" || 
-                    foundItem.status === 1 || 
-                    foundItem.status === "1";
+            // Boolean status check (Handles boolean true, string "true", or number 1)
+            const isWorking = foundItem 
+                ? (foundItem.status === true || foundItem.status === "true" || foundItem.status === 1) 
+                : false;
 
-                return {
-                    day: dayName,
-                    start: foundItem.start !== undefined && foundItem.start !== null ? String(foundItem.start) : "",
-                    end: foundItem.end !== undefined && foundItem.end !== null ? String(foundItem.end) : "",
-                    status: isStatusTrue // 👈 Properly resolves True / False
-                };
-            }
-
-            // Fallback for missing days
             return {
                 day: dayName,
-                start: "",
-                end: "",
-                status: false
+                // Backend level default fallback if timing is empty
+                start: foundItem ? String(foundItem.start || (isWorking ? "10:00 AM" : "")) : "",
+                end: foundItem ? String(foundItem.end || (isWorking ? "06:00 PM" : "")) : "",
+                status: isWorking
             };
         });
 
-        // Database Update Query
         const updatedSchedule = await DoctorWeekly.findOneAndUpdate(
             { doctorId: doctorBasic._id },
             { $set: { weekly: sanitizedWeekly } },

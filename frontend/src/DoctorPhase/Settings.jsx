@@ -70,11 +70,15 @@ const Settings = ({ userRole = "doctor" }) => {
 
         let updatedSchedule = daysOfWeek.map((day) => {
           const match = weekly && Array.isArray(weekly) ? weekly.find((item) => item.day === day) : null;
+          
+          const isWorking = match ? (match.status === true || match.status === "true" || match.status === 1) : false;
+
           return {
             day: day,
-            start: match?.start || "",
-            end: match?.end || "",
-            status: match ? Boolean(match.status) : false,
+            // Agar pehle se timing nahi hai aur working mode hai, tabhi default time padega
+            start: match?.start || (isWorking ? "10:00 AM" : ""),
+            end: match?.end || (isWorking ? "06:00 PM" : ""),
+            status: isWorking,
           };
         });
 
@@ -93,7 +97,7 @@ const Settings = ({ userRole = "doctor" }) => {
     } catch (err) {
       console.error("❌ Error fetching settings:", err);
       setErrorMsg("Failed to connect to the server.");
-    }finally {
+    } finally {
       setLoading(false);
     }
   };
@@ -106,10 +110,18 @@ const Settings = ({ userRole = "doctor" }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // 🎯 Dynamic Toggle Handler: Jab Working ON hoga tab hi default time set hoga
   const handleDayStatusToggle = (dayName) => {
     const updatedSchedule = formData.weeklySchedule.map((item) => {
       if (item.day === dayName) {
-        return { ...item, status: !item.status };
+        const newStatus = !item.status;
+        return { 
+          ...item, 
+          status: newStatus,
+          // Working turn ON hone par default fallback 10:00 AM - 06:00 PM apply hoga agar value khali hai
+          start: newStatus ? (item.start && item.start.trim() ? item.start : "10:00 AM") : item.start,
+          end: newStatus ? (item.end && item.end.trim() ? item.end : "06:00 PM") : item.end
+        };
       }
       return item;
     });
@@ -127,7 +139,7 @@ const Settings = ({ userRole = "doctor" }) => {
   };
 
   // ----------------------------------------------------
-  // 💾 SAVE SETTINGS (FIXED)
+  // 💾 SAVE SETTINGS
   // ----------------------------------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -137,11 +149,11 @@ const Settings = ({ userRole = "doctor" }) => {
     try {
       const token = localStorage.getItem("token");
 
-      // FIX 1: Clean and pass weekly schedule inside payload
       const formattedWeekly = formData.weeklySchedule.map(item => ({
         day: String(item.day),
-        start: String(item.start || ""),
-        end: String(item.end || ""),
+        // Fallback default time pass hoga payload me
+        start: String(item.start || (item.status ? "10:00 AM" : "")),
+        end: String(item.end || (item.status ? "06:00 PM" : "")),
         status: Boolean(item.status)
       }));
 
@@ -151,7 +163,7 @@ const Settings = ({ userRole = "doctor" }) => {
         fee: formData.consultationFee,
         contactNo: formData.phone,
         specification: formData.specialization,
-        weekly: formattedWeekly // 👈 Added missing weekly schedule to payload
+        weekly: formattedWeekly
       };
 
       const res = await fetch(`${API_BASE_URL}/api/doctors/settings`, {

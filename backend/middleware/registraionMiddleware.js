@@ -13,7 +13,12 @@ function authMiddleware(req,res,next){
     const decoded = jwt.verify(token, process.env.JWT_TOKEN);
 
     req.id = decoded.id;
-  
+    if(decoded.role!=="Doctor"){
+      return res.status(401).send({
+        success:false,  
+      message:"You are not authorized to Enter the Doctor Phase"
+      })
+    }
 
     next();
   } catch (error) {

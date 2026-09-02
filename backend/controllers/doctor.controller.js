@@ -223,7 +223,11 @@ export const DoctorLogin = async(req,res)=>{
         })
     }
 
-    const token = jwt.sign({id: finding._id,role:finding.role}, process.env.JWT_TOKEN);
+    const token = jwt.sign(
+            { id: finding._id, role: finding.role || "Doctor" }, 
+            process.env.JWT_TOKEN,
+            { expiresIn: "7d" }
+        );
     res.cookie("token", token, {
         httpOnly: true,
         secure: true,
@@ -455,28 +459,22 @@ export const creditedMoney = async(req,res)=>{
 }
 
 // 📥 Get Doctor Settings (Fixed find -> findOne)
-// 📥 Get Doctor Settings (Populates gmail from DoctorRegistration)
 export const getDoctorSettings = async (req, res) => {
     try {
-        const doctorRegId = req.id; 
+        const doctorBasicId = req.id; 
 
-        // 1. Fetch DoctorBasic by DoctorRegistration ID
-        const doctorBasic = await DoctorBasic.findOne({ doctorId: doctorRegId });
+        const doctorBasic = await DoctorBasic.findOne({ doctorId: doctorBasicId });
         if (!doctorBasic) {
-            return res.status(404).json({ success: false, message: "Doctor profile details not found" });
+            return res.status(404).json({ success: false, message: "Doctor not found" });
         }
 
-        // 2. Fetch Gmail from DoctorRegistration (Fixes undefined email bug)
-        const doctorRegistration = await DoctorRegistration.findById(doctorRegId);
-
-        // 3. Fetch DoctorWeekly Schedule
         const doctorWeekly = await DoctorWeekly.findOne({ doctorId: doctorBasic._id });
 
         return res.status(200).json({
             success: true,
             data: {
                 name: doctorBasic.name,
-                gmail: doctorRegistration ? doctorRegistration.gmail : "",
+                gmail: doctorBasic.gmail,
                 contactNo: doctorBasic.contactNo,
                 specification: doctorBasic.specification,
                 experience: doctorBasic.experience,

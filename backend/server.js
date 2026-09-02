@@ -41,19 +41,27 @@ app.use("/api/forget", forgetPasswordRoutes);
 app.use("/api/payment", paymentRoutes); // <-- Razorpay endpoints live here
 app.use("/Med/Seller",sellerMedicineRoutes)
 
-
 app.get("/api/logout", (req, res) => {
-  // Clear cookie ki jagah directly expire set karo
+  // Clear Cookie by setting past expiration date
   res.cookie("token", "", {
-    expires: new Date(0), // Past date set kar rahe hain jisse browser isey delete kar de
+    expires: new Date(0),
     maxAge: 0,
     path: "/",
     httpOnly: true,
-    secure: false, // Development localhost ke liye false rakho
-    sameSite: "lax", 
+    // Production (HTTPS / Cross-domain Vercel) me secure: true aur sameSite: "none" HONA ZARURI HAI
+    secure: process.env.NODE_ENV === "production" || true, 
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", 
   });
 
-  res.status(200).json({ success: true, message: "Logged out successfully" });
+  // Dual protection: res.clearCookie bhi saath me run kar dete hain
+  res.clearCookie("token", {
+    path: "/",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production" || true,
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  });
+
+  return res.status(200).json({ success: true, message: "Logged out successfully" });
 });
 
 

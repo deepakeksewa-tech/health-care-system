@@ -484,7 +484,7 @@ router.post("/specialization", DoctorMiddleware, specialization);
  *       200:
  *         description: List of specializations
  */
-router.get("/ReadSpecialization", DoctorMiddleware, ReadSpecialization);
+router.get("/ReadSpecialization", ReadSpecialization);
 
 /**
  * @swagger
@@ -525,6 +525,6 @@ router.post("/category", DoctorMiddleware, category);
  *       200:
  *         description: List of categories
  */
-router.get("/ReadCategory", DoctorMiddleware, ReadCategory);
+router.get("/ReadCategory", ReadCategory);
 
 export default router;

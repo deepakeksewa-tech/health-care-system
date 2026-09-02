@@ -148,7 +148,7 @@ const BasicDetails = () => {
 
       // Agar user ne Category me "Other" bhara hai, toh pehle database me save karo
       if (category === "Other" && otherCategory.trim()) {
-        await fetch(`${api}/api/doctors/Category`, {
+        await fetch(`${api}/api/doctors/category`, {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
@@ -158,7 +158,7 @@ const BasicDetails = () => {
 
       // Agar user ne Specialization me "Other" bhara hai, toh pehle database me save karo
       if (specialization === "Other" && otherSpecialization.trim()) {
-        await fetch(`${api}/api/doctors/Specialization`, {
+        await fetch(`${api}/api/doctors/specialization`, {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },

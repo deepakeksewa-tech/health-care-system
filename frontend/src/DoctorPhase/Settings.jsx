@@ -13,17 +13,8 @@ import {
   FiLoader
 } from 'react-icons/fi';
 
-// ⚙️ Backend API Base URL
+// ⚙️ Backend API URL (Port 8000)
 const API_BASE_URL = "https://health-care-system-2-bo26.onrender.com/api/doctors";
-
-// 🔐 Centralized Axios Instance setup for HttpOnly Cookie handling across all API requests
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  withCredentials: true, // Guarantees browser attaches HttpOnly Auth Cookies on requests
-  headers: {
-    'Content-Type': 'application/json',
-  }
-});
 
 const Settings = ({ userRole = "doctor" }) => {
   const navigate = useNavigate();
@@ -50,6 +41,11 @@ const Settings = ({ userRole = "doctor" }) => {
 
   const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
+  // axios config with credentials to pass cookies automatically
+  const axiosConfig = {
+    withCredentials: true,
+  };
+
   // ----------------------------------------------------
   // 📥 2. FETCH SETTINGS ON MOUNT
   // ----------------------------------------------------
@@ -62,18 +58,16 @@ const Settings = ({ userRole = "doctor" }) => {
   const fetchDoctorSettings = async () => {
     try {
       setLoading(true);
-      setErrorMsg("");
+      const res = await axios.get(`${API_BASE_URL}/settings`, axiosConfig);
 
-      // 🔐 API GET Request passing HttpOnly Cookies via custom instance
-      const res = await api.get('/settings');
-
+      // 🔍 PRINT FULL BACKEND RESPONSE ON CONSOLE
       console.log("📥 Full Backend Response:", res.data);
-      console.log("📦 Response Data Object:", res.data?.data);
+      console.log("📦 Response Data Object:", res.data.data);
 
-      if (res.data?.success) {
+      if (res.data.success) {
         const { name, gmail, contactNo, specification, experience, fee, image, weekly } = res.data.data;
 
-        // Extract off days (where status is false)
+        // Database ke { day, start, end, status } array se off days nikalna (jiska status false ho)
         const weeklyOffDays = weekly && Array.isArray(weekly)
           ? weekly.filter(item => item.status === false).map(item => item.day)
           : [];
@@ -94,8 +88,8 @@ const Settings = ({ userRole = "doctor" }) => {
       }
     } catch (err) {
       console.error("❌ Error fetching settings:", err);
-      setErrorMsg(err.response?.data?.message || "Failed to load settings. Please authenticate again.");
-    } font-medium {
+      setErrorMsg(err.response?.data?.message || "Failed to load settings.");
+    } finally {
       setLoading(false);
     }
   };
@@ -129,12 +123,13 @@ const Settings = ({ userRole = "doctor" }) => {
   // ✏️ HANDLERS & API CALLS
   // ----------------------------------------------------
 
+  // General Input Change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Profile Image Handling (Preview Setup)
+  // Profile Image Handling (Preview)
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -151,23 +146,23 @@ const Settings = ({ userRole = "doctor" }) => {
 
     setFormData((prev) => ({ ...prev, weeklyOff: updatedWeeklyOff }));
 
+    // Database ke exact schema (`day, start, end, status`) ke mutabiq payload banana
     const fullWeeklySchedule = daysOfWeek.map((d) => {
       const isOff = updatedWeeklyOff.includes(d);
       return {
         day: d,
         start: "10:00 AM",
         end: "06:00 PM",
-        status: !isOff
+        status: !isOff // Agar off list me hai toh false, warna true
       };
     });
 
     try {
-      // 🔐 API PUT Request with automatic HttpOnly Cookie transmission
-      const res = await api.put('/weekly-off', { weekly: fullWeeklySchedule });
+      const res = await axios.put(`${API_BASE_URL}/weekly-off`, { weekly: fullWeeklySchedule }, axiosConfig);
       console.log("🔄 Weekly Off Updated Response:", res.data);
     } catch (err) {
       console.error("❌ Failed to update weekly off:", err);
-      alert(err.response?.data?.message || "Failed to update weekly off on server");
+      alert("Failed to update weekly off on server");
     }
   };
 
@@ -187,12 +182,10 @@ const Settings = ({ userRole = "doctor" }) => {
       };
 
       console.log("📤 Sending Settings Payload:", payload);
-      
-      // 🔐 API PUT Request passing HttpOnly Auth Cookies
-      const res = await api.put('/settings', payload);
+      const res = await axios.put(`${API_BASE_URL}/settings`, payload, axiosConfig);
       console.log("📥 Settings Update Response:", res.data);
 
-      if (res.data?.success) {
+      if (res.data.success) {
         setIsSaved(true);
         setTimeout(() => setIsSaved(false), 3000);
       }

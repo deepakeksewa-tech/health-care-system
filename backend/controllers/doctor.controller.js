@@ -518,33 +518,38 @@ export const updateDoctorSettings = async (req, res) => {
     }
 };
 
-// 🔄 Update Weekly Schedule (Fixed model reference bug)
+/// 🔄 Update Weekly Schedule Controller (Updated)
 export const updateWeeklyOff = async (req, res) => {
     try {
         const doctorBasicId = req.id;
         const { weekly } = req.body; 
 
+        if (!weekly || !Array.isArray(weekly)) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Weekly array format expected in request body" 
+            });
+        }
+
         const doctorBasic = await DoctorBasic.findOne({ doctorId: doctorBasicId });
         if (!doctorBasic) {
-            return res.status(404).json({ success: false, message: "Doctor basic details not found" });
-        }
-
-        let doctorWeekly = await DoctorWeekly.findOne({ doctorId: doctorBasic._id });
-
-        if (!doctorWeekly) {
-            doctorWeekly = await DoctorWeekly.create({
-                doctorId: doctorBasic._id,
-                weekly
+            return res.status(404).json({ 
+                success: false, 
+                message: "Doctor basic details not found" 
             });
-        } else {
-            doctorWeekly.weekly = weekly;
-            await doctorWeekly.save();
         }
+
+        // Upsert operation to save weekly schedules
+        const updatedSchedule = await DoctorWeekly.findOneAndUpdate(
+            { doctorId: doctorBasic._id },
+            { $set: { weekly: weekly } },
+            { new: true, upsert: true, runValidators: true }
+        );
 
         return res.status(200).json({ 
             success: true, 
             message: "Weekly schedule updated successfully", 
-            weekly: doctorWeekly.weekly 
+            weekly: updatedSchedule.weekly 
         });
     } catch (err) {
         console.error("Weekly schedule update error:", err);

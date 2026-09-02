@@ -13,13 +13,12 @@ import {
   FiClock
 } from 'react-icons/fi';
 
-// ⚙️ Base URL Fix (Endpoint prefix remove kar diya hai)
-const API_BASE_URL = "https://health-care-system-2-bo26.onrender.com";
+// ⚙️ Updated API Base URL
+const API_BASE_URL = "https://health-care-system-vv00.onrender.com";
 
 const Settings = ({ userRole = "doctor" }) => {
   const navigate = useNavigate();
 
-  // 1. State Management
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
@@ -30,12 +29,9 @@ const Settings = ({ userRole = "doctor" }) => {
   const [formData, setFormData] = useState({
     name: "",
     specialization: "",
-    email: "",
     phone: "",
     experience: "",
     profileImage: "",
-    clinicName: "MedSewa Care Center",
-    clinicAddress: "",
     consultationFee: "",
     weeklySchedule: daysOfWeek.map((day) => ({
       day,
@@ -59,70 +55,60 @@ const Settings = ({ userRole = "doctor" }) => {
       setLoading(true);
       setErrorMsg("");
 
-      // LocalStorage se token retrieve karein
       const token = localStorage.getItem("token");
 
       const res = await fetch(`${API_BASE_URL}/api/doctors/settings`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}` // Token header mandatory hai
+          "Authorization": `Bearer ${token}`
         },
         credentials: "include"
       });
 
       const result = await res.json();
-      console.log("📥 Backend Fetch Result:", result);
+      console.log("📥 Backend Response:", result);
 
       if (res.ok && result.success) {
-        const { name, gmail, contactNo, specification, experience, fee, image, weekly } = result.data || {};
+        const { name, contactNo, specification, experience, fee, image, weekly } = result.data || {};
 
+        // API Response ke weekly schedule ko local format me map karna
         let updatedSchedule = daysOfWeek.map((day) => {
           const match = weekly && Array.isArray(weekly) ? weekly.find((item) => item.day === day) : null;
           return {
             day: day,
-            start: match?.start || "10:00 AM",
-            end: match?.end || "06:00 PM",
-            status: match ? match.status : true,
+            start: match?.start || "",
+            end: match?.end || "",
+            status: match ? match.status : false,
           };
         });
 
-        setFormData((prev) => ({
-          ...prev,
+        setFormData({
           name: name || "",
-          email: gmail || "",
           phone: contactNo || "",
           specialization: specification || "",
           experience: experience || "",
           consultationFee: fee || "",
           profileImage: image || "",
           weeklySchedule: updatedSchedule,
-        }));
+        });
       } else {
-        setErrorMsg(result.message || "Failed to load doctor settings.");
+        setErrorMsg(result.message || "Failed to fetch details.");
       }
     } catch (err) {
       console.error("❌ Error fetching settings:", err);
-      setErrorMsg("Server se connect nahi ho paya.");
+      setErrorMsg("Failed to connect to the server.");
     } finally {
       setLoading(false);
     }
   };
 
   // ----------------------------------------------------
-  // ✏️ HANDLERS & SAVE FUNCTION
+  // ✏️ HANDLERS
   // ----------------------------------------------------
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setFormData((prev) => ({ ...prev, profileImage: imageUrl }));
-    }
   };
 
   const handleDayStatusToggle = (dayName) => {
@@ -145,6 +131,9 @@ const Settings = ({ userRole = "doctor" }) => {
     setFormData((prev) => ({ ...prev, weeklySchedule: updatedSchedule }));
   };
 
+  // ----------------------------------------------------
+  // 💾 SAVE SETTINGS
+  // ----------------------------------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -176,11 +165,11 @@ const Settings = ({ userRole = "doctor" }) => {
         setIsSaved(true);
         setTimeout(() => setIsSaved(false), 3000);
       } else {
-        setErrorMsg(result.message || "Settings save nahi ho payi.");
+        setErrorMsg(result.message || "Settings update nahi ho paaye.");
       }
     } catch (err) {
-      console.error("❌ Error saving settings:", err);
-      setErrorMsg("Failed to save settings.");
+      console.error("❌ Error updating settings:", err);
+      setErrorMsg("Failed to save changes.");
     } finally {
       setSaving(false);
     }
@@ -190,7 +179,7 @@ const Settings = ({ userRole = "doctor" }) => {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
         <FiLoader className="w-8 h-8 text-[#058b7c] animate-spin mb-3" />
-        <p className="text-sm font-semibold text-gray-600">Doctor details load ho rahi hain...</p>
+        <p className="text-sm font-semibold text-gray-600">Loading Doctor Profile...</p>
       </div>
     );
   }
@@ -210,14 +199,14 @@ const Settings = ({ userRole = "doctor" }) => {
             </button>
             <div>
               <h1 className="text-xl font-bold text-gray-900">Doctor Profile Settings</h1>
-              <p className="text-xs text-gray-500">Manage personal and clinic details</p>
+              <p className="text-xs text-gray-500">Manage profile and schedule details</p>
             </div>
           </div>
           
           {isSaved && (
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-3.5 py-2 rounded-xl">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3.5 py-2 rounded-xl">
               <FiCheckCircle className="w-4 h-4 text-emerald-600" />
-              Saved Successfully!
+              Settings Saved!
             </div>
           )}
         </div>
@@ -228,16 +217,30 @@ const Settings = ({ userRole = "doctor" }) => {
           </div>
         )}
 
-        {/* Form */}
+        {/* Main Form */}
         <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-8">
           
-          {/* Profile Details */}
+          {/* Section 1: Profile Info */}
           <div>
             <div className="flex items-center space-x-2 text-[#058b7c] font-bold text-base mb-6">
               <span className="p-2 bg-[#058b7c]/10 rounded-lg"><FiUser className="w-5 h-5" /></span>
               <h2>Personal Information</h2>
             </div>
             
+            <div className="flex items-center space-x-5 mb-6">
+              <div className="relative w-20 h-20 rounded-2xl bg-[#058b7c]/10 border-2 border-dashed border-[#058b7c]/30 flex items-center justify-center overflow-hidden">
+                {formData.profileImage ? (
+                  <img src={formData.profileImage} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-[#058b7c] font-bold text-2xl">DR</span>
+                )}
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-800">{formData.name || "Doctor"}</p>
+                <p className="text-xs text-gray-500 capitalize">{formData.specialization || "Specialist"}</p>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label className="block text-xs font-semibold text-gray-600 uppercase mb-1.5">Doctor Name</label>
@@ -262,9 +265,9 @@ const Settings = ({ userRole = "doctor" }) => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-600 uppercase mb-1.5">Experience</label>
+                <label className="block text-xs font-semibold text-gray-600 uppercase mb-1.5">Experience (Years)</label>
                 <input
-                  type="text"
+                  type="number"
                   name="experience"
                   value={formData.experience}
                   onChange={handleChange}
@@ -296,13 +299,73 @@ const Settings = ({ userRole = "doctor" }) => {
             </div>
           </div>
 
+          <hr className="border-gray-100" />
+
+          {/* Section 2: Timings */}
+          <div>
+            <div className="flex items-center space-x-2 text-[#058b7c] font-bold text-base mb-6">
+              <span className="p-2 bg-[#058b7c]/10 rounded-lg"><FiCalendar className="w-5 h-5" /></span>
+              <h2>Weekly Timings & Off Days</h2>
+            </div>
+
+            <div className="space-y-3">
+              {formData.weeklySchedule.map((item) => (
+                <div 
+                  key={item.day}
+                  className={`p-4 rounded-2xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 ${
+                    item.status ? "bg-white border-gray-200" : "bg-rose-50/40 border-rose-100"
+                  }`}
+                >
+                  <div className="flex items-center justify-between md:w-48">
+                    <span className="text-sm font-bold text-gray-800">{item.day}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleDayStatusToggle(item.day)}
+                      className={`px-3 py-1 rounded-xl text-xs font-semibold cursor-pointer ${
+                        item.status 
+                          ? "bg-emerald-100 text-emerald-800 border border-emerald-300" 
+                          : "bg-rose-500 text-white"
+                      }`}
+                    >
+                      {item.status ? "Working" : "Day Off"}
+                    </button>
+                  </div>
+
+                  {item.status ? (
+                    <div className="flex items-center gap-2">
+                      <FiClock className="w-4 h-4 text-gray-400" />
+                      <input
+                        type="text"
+                        value={item.start}
+                        onChange={(e) => handleTimeChange(item.day, 'start', e.target.value)}
+                        placeholder="e.g. 10:00 AM"
+                        className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium w-32 focus:bg-white focus:border-[#058b7c] outline-none"
+                      />
+                      <span className="text-gray-400 text-xs">to</span>
+                      <input
+                        type="text"
+                        value={item.end}
+                        onChange={(e) => handleTimeChange(item.day, 'end', e.target.value)}
+                        placeholder="e.g. 06:00 PM"
+                        className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium w-32 focus:bg-white focus:border-[#058b7c] outline-none"
+                      />
+                    </div>
+                  ) : (
+                    <span className="text-xs font-medium text-rose-500 italic">Closed on {item.day}s</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Action Footer */}
           <div className="flex justify-end pt-4 border-t border-gray-100">
             <button
               type="submit"
               disabled={saving}
               className="flex items-center gap-2 bg-[#058b7c] hover:bg-[#047266] text-white px-8 py-3 rounded-2xl font-semibold text-sm transition-all shadow-md cursor-pointer disabled:opacity-50"
             >
-              {saving ? <FiLoader className="w-4 h-4 animate-spin" /> : <FiSave className="w-4 h-4" />} Save Changes
+              {saving ? <FiLoader className="w-4 h-4 animate-spin" /> : <FiSave className="w-4 h-4" />} Save Settings
             </button>
           </div>
 

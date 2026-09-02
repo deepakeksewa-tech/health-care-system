@@ -5,34 +5,44 @@ import Logo from '../assets/Logo.png'
 const Header = () => {
   const navigate = useNavigate()
 
-  // Dynamic back navigation (Goes back 1 step in history)
+  // Dynamic back navigation
   const handleGoBack = () => {
     navigate(-1)
   }
 
   // Logout handler
-const handleLogout = async () => {
-  try {
-    const response = await fetch('/api/logout', { 
-      method: 'GET', // Backend me app.get hai toh yahan bhi GET karein
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include'
-    });
+  const handleLogout = async () => {
+    try {
+      // Direct full URL handle karna safe hota hai agar Vite/CORS proxy issue ho
+      const response = await fetch('/api/logout', { 
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
 
-    const data = await response.json();
-    console.log(data);
-    
-    if (data.success) {
-      console.log(data.message);
-      // 'replace: true' se browser back history clean ho jati hai
-      navigate('/', { replace: true }); 
+      const data = await response.json();
+      console.log("Logout response data:", data);
+      
+      if (data.success) {
+        // 1. Alert Message Screen Par Dikhayega
+        alert(data.message || "Logged out successfully!");
+        
+        // 2. Clear Any Local Storage / Session Storage (Just in case)
+        localStorage.clear();
+        sessionStorage.clear();
+
+        // 3. 'replace: true' se history stack clear ho jata hai taaki back jaane se profile dubara na khule
+        navigate('/', { replace: true }); 
+      } else {
+        alert("Logout failed: " + (data.message || "Something went wrong"));
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      alert("Network Error: Could not connect to server for logout.");
     }
-  } catch (error) {
-    console.error("Logout error:", error);
-  }
-};
+  };
 
   // Logo home redirect
   const handleHomeRedirect = () => {

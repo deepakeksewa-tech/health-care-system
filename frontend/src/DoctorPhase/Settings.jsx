@@ -93,7 +93,7 @@ const Settings = ({ userRole = "doctor" }) => {
     } catch (err) {
       console.error("❌ Error fetching settings:", err);
       setErrorMsg("Failed to connect to the server.");
-    } font-finally {
+    }finally {
       setLoading(false);
     }
   };

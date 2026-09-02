@@ -11,9 +11,12 @@ const Header = () => {
   }
 
   // Logout handler
-  const handleLogout = () => {
-    localStorage.clear()
-    navigate('/Patient/Login')
+  const handleLogout = async() => {
+    await fetch('/api/logout', { 
+    method: 'POST', 
+    credentials: 'include' // Important: cross-origin requests ke liye
+  });
+    navigate('/')
   }
 
   // Logo home redirect

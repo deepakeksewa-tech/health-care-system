@@ -42,7 +42,14 @@ app.use("/api/payment", paymentRoutes); // <-- Razorpay endpoints live here
 app.use("/Med/Seller",sellerMedicineRoutes)
 
 
-
+app.get("/api/logout", (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: true, // Set to true in production
+    sameSite: "strict",
+  });
+  res.status(200).json({ success: true, message: "Logged out successfully" });
+}); 
 
 
 const PORT = process.env.PORT || 5000;

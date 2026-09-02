@@ -63,19 +63,16 @@ const Settings = ({ userRole = "doctor" }) => {
       });
 
       const result = await res.json();
-      console.log("📥 Backend Response:", result);
 
       if (res.ok && result.success) {
         const { name, contactNo, specification, experience, fee, image, weekly } = result.data || {};
 
         let updatedSchedule = daysOfWeek.map((day) => {
           const match = weekly && Array.isArray(weekly) ? weekly.find((item) => item.day === day) : null;
-          
           const isWorking = match ? (match.status === true || match.status === "true" || match.status === 1) : false;
 
           return {
             day: day,
-            // Agar pehle se timing nahi hai aur working mode hai, tabhi default time padega
             start: match?.start || (isWorking ? "10:00 AM" : ""),
             end: match?.end || (isWorking ? "06:00 PM" : ""),
             status: isWorking,
@@ -110,7 +107,6 @@ const Settings = ({ userRole = "doctor" }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 🎯 Dynamic Toggle Handler: Jab Working ON hoga tab hi default time set hoga
   const handleDayStatusToggle = (dayName) => {
     const updatedSchedule = formData.weeklySchedule.map((item) => {
       if (item.day === dayName) {
@@ -118,7 +114,6 @@ const Settings = ({ userRole = "doctor" }) => {
         return { 
           ...item, 
           status: newStatus,
-          // Working turn ON hone par default fallback 10:00 AM - 06:00 PM apply hoga agar value khali hai
           start: newStatus ? (item.start && item.start.trim() ? item.start : "10:00 AM") : item.start,
           end: newStatus ? (item.end && item.end.trim() ? item.end : "06:00 PM") : item.end
         };
@@ -139,7 +134,7 @@ const Settings = ({ userRole = "doctor" }) => {
   };
 
   // ----------------------------------------------------
-  // 💾 SAVE SETTINGS
+  // 💾 SAVE SETTINGS (CALLING 2 SEPARATE APIs)
   // ----------------------------------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -148,42 +143,59 @@ const Settings = ({ userRole = "doctor" }) => {
 
     try {
       const token = localStorage.getItem("token");
+      const headers = {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      };
 
+      // 1️⃣ Payload for Doctor Profile Info
+      const profilePayload = {
+        name: formData.name,
+        experience: formData.experience,
+        fee: formData.consultationFee,
+        contactNo: formData.phone,
+        specification: formData.specialization
+      };
+
+      // 2️⃣ Payload for Weekly Off Schedule
       const formattedWeekly = formData.weeklySchedule.map(item => ({
         day: String(item.day),
-        // Fallback default time pass hoga payload me
         start: String(item.start || (item.status ? "10:00 AM" : "")),
         end: String(item.end || (item.status ? "06:00 PM" : "")),
         status: Boolean(item.status)
       }));
 
-      const payload = {
-        name: formData.name,
-        experience: formData.experience,
-        fee: formData.consultationFee,
-        contactNo: formData.phone,
-        specification: formData.specialization,
+      const weeklyPayload = {
         weekly: formattedWeekly
       };
 
-      const res = await fetch(`${API_BASE_URL}/api/doctors/settings`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        credentials: "include",
-        body: JSON.stringify(payload),
-      });
+      // 🚀 Both APIs calling in Parallel via Promise.all
+      // Note: Endpoint URLs apne backend routes ke hisab se confirm kar lena
+      const [profileRes, weeklyRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/doctors/profile`, {
+          method: "PUT",
+          headers,
+          credentials: "include",
+          body: JSON.stringify(profilePayload)
+        }),
+        fetch(`${API_BASE_URL}/api/doctors/weekly-off`, {
+          method: "PUT",
+          headers,
+          credentials: "include",
+          body: JSON.stringify(weeklyPayload)
+        })
+      ]);
 
-      const result = await res.json();
+      const profileData = await profileRes.json();
+      const weeklyData = await weeklyRes.json();
 
-      if (res.ok && result.success) {
+      if (profileRes.ok && weeklyRes.ok) {
         setIsSaved(true);
         setTimeout(() => setIsSaved(false), 3000);
       } else {
-        setErrorMsg(result.message || "Settings update nahi ho paaye.");
+        setErrorMsg(profileData.message || weeklyData.message || "Something went wrong while saving.");
       }
+
     } catch (err) {
       console.error("❌ Error updating settings:", err);
       setErrorMsg("Failed to save changes.");

@@ -43,12 +43,16 @@ app.use("/Med/Seller",sellerMedicineRoutes)
 
 
 app.get("/api/logout", (req, res) => {
-  res.clearCookie("token", {
-    path: "/", // Path add karna ZARURI hai
+  // Clear cookie ki jagah directly expire set karo
+  res.cookie("token", "", {
+    expires: new Date(0), // Past date set kar rahe hain jisse browser isey delete kar de
+    maxAge: 0,
+    path: "/",
     httpOnly: true,
-    secure: true, // Express/Node local localhost par bina HTTPS ke Secure cookies clear nahi karta
-    sameSite: "strict",
+    secure: false, // Development localhost ke liye false rakho
+    sameSite: "lax", 
   });
+
   res.status(200).json({ success: true, message: "Logged out successfully" });
 });
 

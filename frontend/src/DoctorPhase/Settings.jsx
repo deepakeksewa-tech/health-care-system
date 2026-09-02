@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { 
   FiArrowLeft, 
   FiSave, 
@@ -10,10 +9,11 @@ import {
   FiCamera,
   FiCheckCircle,
   FiLock,
-  FiLoader
+  FiLoader,
+  FiClock
 } from 'react-icons/fi';
 
-// ⚙️ Backend API URL (Port 8000)
+// ⚙️ Backend API URL
 const API_BASE_URL = "https://health-care-system-2-bo26.onrender.com/api/doctors";
 
 const Settings = ({ userRole = "doctor" }) => {
@@ -25,6 +25,8 @@ const Settings = ({ userRole = "doctor" }) => {
   const [isSaved, setIsSaved] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
+  const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
   const [formData, setFormData] = useState({
     name: "",
     specialization: "",
@@ -35,19 +37,17 @@ const Settings = ({ userRole = "doctor" }) => {
     clinicName: "MedSewa Care Center",
     clinicAddress: "",
     consultationFee: "",
-    timings: "10:00 AM - 06:00 PM",
-    weeklyOff: [],
+    // Default Schedule Array
+    weeklySchedule: daysOfWeek.map((day) => ({
+      day,
+      start: "10:00 AM",
+      end: "06:00 PM",
+      status: true // true = Working Day, false = Off Day
+    }))
   });
 
-  const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-
-  // axios config with credentials to pass cookies automatically
-  const axiosConfig = {
-    withCredentials: true,
-  };
-
   // ----------------------------------------------------
-  // 📥 2. FETCH SETTINGS ON MOUNT
+  // 📥 2. FETCH SETTINGS ON MOUNT (Using fetch)
   // ----------------------------------------------------
   useEffect(() => {
     if (userRole === "doctor") {
@@ -58,21 +58,30 @@ const Settings = ({ userRole = "doctor" }) => {
   const fetchDoctorSettings = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API_BASE_URL}/settings`, axiosConfig);
+      const res = await fetch(`${API_BASE_URL}/settings`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include", // Cookie send karne ke liye
+      });
 
-      // 🔍 PRINT FULL BACKEND RESPONSE ON CONSOLE
-      console.log("📥 Full Backend Response:", res.data);
-      console.log("📦 Response Data Object:", res.data.data);
+      const result = await res.json();
+      console.log("📥 Full Backend Response:", result);
 
-      if (res.data.success) {
-        const { name, gmail, contactNo, specification, experience, fee, image, weekly } = res.data.data;
+      if (res.ok && result.success) {
+        const { name, gmail, contactNo, specification, experience, fee, image, weekly } = result.data;
 
-        // Database ke { day, start, end, status } array se off days nikalna (jiska status false ho)
-        const weeklyOffDays = weekly && Array.isArray(weekly)
-          ? weekly.filter(item => item.status === false).map(item => item.day)
-          : [];
-
-        console.log("📅 Computed Weekly Off Days:", weeklyOffDays);
+        // Merge fetched weekly data with default schedule structure
+        let updatedSchedule = daysOfWeek.map((day) => {
+          const match = weekly && Array.isArray(weekly) ? weekly.find((item) => item.day === day) : null;
+          return {
+            day: day,
+            start: match?.start || "10:00 AM",
+            end: match?.end || "06:00 PM",
+            status: match ? match.status : true,
+          };
+        });
 
         setFormData((prev) => ({
           ...prev,
@@ -83,12 +92,14 @@ const Settings = ({ userRole = "doctor" }) => {
           experience: experience || "",
           consultationFee: fee || "",
           profileImage: image || "",
-          weeklyOff: weeklyOffDays,
+          weeklySchedule: updatedSchedule,
         }));
+      } else {
+        setErrorMsg(result.message || "Failed to load settings.");
       }
     } catch (err) {
       console.error("❌ Error fetching settings:", err);
-      setErrorMsg(err.response?.data?.message || "Failed to load settings.");
+      setErrorMsg("Failed to connect to the server.");
     } finally {
       setLoading(false);
     }
@@ -123,13 +134,11 @@ const Settings = ({ userRole = "doctor" }) => {
   // ✏️ HANDLERS & API CALLS
   // ----------------------------------------------------
 
-  // General Input Change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Profile Image Handling (Preview)
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -138,35 +147,52 @@ const Settings = ({ userRole = "doctor" }) => {
     }
   };
 
-  // Toggle Weekly Off Days & Sync to Backend
-  const toggleWeeklyOff = async (day) => {
-    const updatedWeeklyOff = formData.weeklyOff.includes(day)
-      ? formData.weeklyOff.filter((d) => d !== day)
-      : [...formData.weeklyOff, day];
-
-    setFormData((prev) => ({ ...prev, weeklyOff: updatedWeeklyOff }));
-
-    // Database ke exact schema (`day, start, end, status`) ke mutabiq payload banana
-    const fullWeeklySchedule = daysOfWeek.map((d) => {
-      const isOff = updatedWeeklyOff.includes(d);
-      return {
-        day: d,
-        start: "10:00 AM",
-        end: "06:00 PM",
-        status: !isOff // Agar off list me hai toh false, warna true
-      };
+  // Status (On/Off) toggle karne ka handler
+  const handleDayStatusToggle = (dayName) => {
+    const updatedSchedule = formData.weeklySchedule.map((item) => {
+      if (item.day === dayName) {
+        return { ...item, status: !item.status };
+      }
+      return item;
     });
 
+    setFormData((prev) => ({ ...prev, weeklySchedule: updatedSchedule }));
+    syncWeeklyOffToBackend(updatedSchedule);
+  };
+
+  // Start/End Time Change karne ka handler
+  const handleTimeChange = (dayName, field, value) => {
+    const updatedSchedule = formData.weeklySchedule.map((item) => {
+      if (item.day === dayName) {
+        return { ...item, [field]: value };
+      }
+      return item;
+    });
+
+    setFormData((prev) => ({ ...prev, weeklySchedule: updatedSchedule }));
+  };
+
+  // Schedule Sync with Backend API using Fetch
+  const syncWeeklyOffToBackend = async (scheduleToSync) => {
     try {
-      const res = await axios.put(`${API_BASE_URL}/weekly-off`, { weekly: fullWeeklySchedule }, axiosConfig);
-      console.log("🔄 Weekly Off Updated Response:", res.data);
+      const res = await fetch(`${API_BASE_URL}/weekly-off`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ weekly: scheduleToSync }),
+      });
+
+      const result = await res.json();
+      console.log("🔄 Weekly Schedule Updated Response:", result);
     } catch (err) {
-      console.error("❌ Failed to update weekly off:", err);
-      alert("Failed to update weekly off on server");
+      console.error("❌ Failed to update weekly schedule:", err);
+      alert("Failed to update schedule on server");
     }
   };
 
-  // Save Settings Submit
+  // Save General Profile Settings using Fetch
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -182,16 +208,29 @@ const Settings = ({ userRole = "doctor" }) => {
       };
 
       console.log("📤 Sending Settings Payload:", payload);
-      const res = await axios.put(`${API_BASE_URL}/settings`, payload, axiosConfig);
-      console.log("📥 Settings Update Response:", res.data);
 
-      if (res.data.success) {
+      const res = await fetch(`${API_BASE_URL}/settings`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
+
+      const result = await res.json();
+
+      if (res.ok && result.success) {
+        // Schedule time updates bhi sath me save karein
+        await syncWeeklyOffToBackend(formData.weeklySchedule);
         setIsSaved(true);
         setTimeout(() => setIsSaved(false), 3000);
+      } else {
+        setErrorMsg(result.message || "Failed to save settings.");
       }
     } catch (err) {
       console.error("❌ Error saving settings:", err);
-      setErrorMsg(err.response?.data?.message || "Failed to save settings.");
+      setErrorMsg("Failed to save settings. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -225,7 +264,7 @@ const Settings = ({ userRole = "doctor" }) => {
             </button>
             <div>
               <h1 className="text-xl font-bold text-gray-900">Doctor Settings & Schedule</h1>
-              <p className="text-xs text-gray-500">Manage profile, clinic fees, and weekly off schedule</p>
+              <p className="text-xs text-gray-500">Manage profile, clinic fees, and weekly timings</p>
             </div>
           </div>
           
@@ -342,37 +381,64 @@ const Settings = ({ userRole = "doctor" }) => {
 
           <hr className="border-gray-100" />
 
-          {/* Section 3: Weekly Off Schedule */}
+          {/* Section 3: Weekly Timings & Schedule Setup */}
           <div>
             <div className="flex items-center space-x-2 text-[#058b7c] font-bold text-base mb-6">
               <span className="p-2 bg-[#058b7c]/10 rounded-lg"><FiCalendar className="w-5 h-5" /></span>
-              <h2>Weekly Schedule Setup</h2>
+              <h2>Weekly Timings & Off Days</h2>
             </div>
 
-            {/* Weekly Off Days */}
-            <div className="bg-gray-50/60 p-4 rounded-2xl border border-gray-100">
-              <label className="block text-xs font-bold text-gray-700 uppercase mb-3">
-                Weekly Fixed Off Days
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {daysOfWeek.map((day) => {
-                  const isOff = formData.weeklyOff.includes(day);
-                  return (
+            <div className="space-y-3">
+              {formData.weeklySchedule.map((item) => (
+                <div 
+                  key={item.day}
+                  className={`p-4 rounded-2xl border transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 ${
+                    item.status 
+                      ? "bg-white border-gray-200" 
+                      : "bg-rose-50/40 border-rose-100"
+                  }`}
+                >
+                  {/* Day Toggle Button */}
+                  <div className="flex items-center justify-between md:w-48">
+                    <span className="text-sm font-bold text-gray-800">{item.day}</span>
                     <button
-                      key={day}
                       type="button"
-                      onClick={() => toggleWeeklyOff(day)}
-                      className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                        isOff
-                          ? "bg-rose-500 text-white shadow-xs"
-                          : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-100"
+                      onClick={() => handleDayStatusToggle(item.day)}
+                      className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                        item.status
+                          ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                          : "bg-rose-500 text-white"
                       }`}
                     >
-                      {day} {isOff && "✓"}
+                      {item.status ? "Working" : "Day Off"}
                     </button>
-                  );
-                })}
-              </div>
+                  </div>
+
+                  {/* Time Inputs (Shown only if Working) */}
+                  {item.status ? (
+                    <div className="flex items-center gap-2">
+                      <FiClock className="w-4 h-4 text-gray-400" />
+                      <input
+                        type="text"
+                        value={item.start}
+                        onChange={(e) => handleTimeChange(item.day, 'start', e.target.value)}
+                        placeholder="Start Time (e.g. 10:00 AM)"
+                        className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium w-32 focus:bg-white focus:border-[#058b7c] outline-none"
+                      />
+                      <span className="text-gray-400 text-xs">to</span>
+                      <input
+                        type="text"
+                        value={item.end}
+                        onChange={(e) => handleTimeChange(item.day, 'end', e.target.value)}
+                        placeholder="End Time (e.g. 06:00 PM)"
+                        className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-medium w-32 focus:bg-white focus:border-[#058b7c] outline-none"
+                      />
+                    </div>
+                  ) : (
+                    <span className="text-xs font-medium text-rose-500 italic">Clinic Closed on {item.day}s</span>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
 

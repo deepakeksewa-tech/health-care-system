@@ -4,16 +4,12 @@ import {
   FiArrowLeft, 
   FiSave, 
   FiUser, 
-  FiHome, 
   FiCalendar, 
-  FiCamera,
   FiCheckCircle,
-  FiLock,
   FiLoader,
   FiClock
 } from 'react-icons/fi';
 
-// ⚙️ Updated API Base URL
 const API_BASE_URL = "https://health-care-system-vv00.onrender.com";
 
 const Settings = ({ userRole = "doctor" }) => {
@@ -72,14 +68,13 @@ const Settings = ({ userRole = "doctor" }) => {
       if (res.ok && result.success) {
         const { name, contactNo, specification, experience, fee, image, weekly } = result.data || {};
 
-        // API Response ke weekly schedule ko local format me map karna
         let updatedSchedule = daysOfWeek.map((day) => {
           const match = weekly && Array.isArray(weekly) ? weekly.find((item) => item.day === day) : null;
           return {
             day: day,
             start: match?.start || "",
             end: match?.end || "",
-            status: match ? match.status : false,
+            status: match ? Boolean(match.status) : false,
           };
         });
 
@@ -98,7 +93,7 @@ const Settings = ({ userRole = "doctor" }) => {
     } catch (err) {
       console.error("❌ Error fetching settings:", err);
       setErrorMsg("Failed to connect to the server.");
-    } finally {
+    } font-finally {
       setLoading(false);
     }
   };
@@ -132,7 +127,7 @@ const Settings = ({ userRole = "doctor" }) => {
   };
 
   // ----------------------------------------------------
-  // 💾 SAVE SETTINGS
+  // 💾 SAVE SETTINGS (FIXED)
   // ----------------------------------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -141,12 +136,22 @@ const Settings = ({ userRole = "doctor" }) => {
 
     try {
       const token = localStorage.getItem("token");
+
+      // FIX 1: Clean and pass weekly schedule inside payload
+      const formattedWeekly = formData.weeklySchedule.map(item => ({
+        day: String(item.day),
+        start: String(item.start || ""),
+        end: String(item.end || ""),
+        status: Boolean(item.status)
+      }));
+
       const payload = {
         name: formData.name,
         experience: formData.experience,
         fee: formData.consultationFee,
         contactNo: formData.phone,
         specification: formData.specialization,
+        weekly: formattedWeekly // 👈 Added missing weekly schedule to payload
       };
 
       const res = await fetch(`${API_BASE_URL}/api/doctors/settings`, {

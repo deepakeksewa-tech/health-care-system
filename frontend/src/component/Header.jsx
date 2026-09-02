@@ -12,10 +12,15 @@ const Header = () => {
 
   // Logout handler
   const handleLogout = async() => {
-    await fetch('/api/logout', { 
+   const response= await fetch('/api/logout', { 
     method: 'POST', 
     credentials: 'include' // Important: cross-origin requests ke liye
   });
+  const data=await response.json();
+  if(data.success){
+    console.log(data.message);
+    
+  }
     navigate('/')
   }
 

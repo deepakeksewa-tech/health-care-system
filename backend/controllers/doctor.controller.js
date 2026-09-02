@@ -109,11 +109,11 @@ export const createBasicDoctor = async (req, res) => {
         });
         
         const token = jwt.sign(
-            { id: doctor._id,role:doctor.role },
+            { id: doctor._id,role:"Doctor" }, 
             process.env.JWT_TOKEN,
             { expiresIn: "1d" }
         );
-     
+        
         res.cookie("token", token, {
             httpOnly: true,
             secure: true,

@@ -11,18 +11,28 @@ const Header = () => {
   }
 
   // Logout handler
-  const handleLogout = async() => {
-   const response= await fetch('/api/logout', { 
-    method: 'POST', 
-    credentials: 'include' // Important: cross-origin requests ke liye
-  });
-  const data=await response.json();
-  if(data.success){
-    console.log(data.message);
+const handleLogout = async () => {
+  try {
+    const response = await fetch('/api/logout', { 
+      method: 'GET', // Backend me app.get hai toh yahan bhi GET karein
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    });
+
+    const data = await response.json();
+    console.log(data);
     
+    if (data.success) {
+      console.log(data.message);
+      // 'replace: true' se browser back history clean ho jati hai
+      navigate('/', { replace: true }); 
+    }
+  } catch (error) {
+    console.error("Logout error:", error);
   }
-    navigate('/')
-  }
+};
 
   // Logo home redirect
   const handleHomeRedirect = () => {

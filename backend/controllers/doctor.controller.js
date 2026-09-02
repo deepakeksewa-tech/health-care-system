@@ -517,8 +517,7 @@ export const updateDoctorSettings = async (req, res) => {
         return res.status(500).json({ success: false, message: err.message });
     }
 };
-
-// 🔄 Update Weekly Schedule Controller
+// 🔄 Update Weekly Schedule Controller (Fixed Status & Time Logic)
 export const updateWeeklyOff = async (req, res) => {
     try {
         const doctorBasicId = req.id;
@@ -539,25 +538,41 @@ export const updateWeeklyOff = async (req, res) => {
             });
         }
 
-        // Standard days order
         const standardDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-        // Clean & validate each item with default fallback values
+        // Clean & process weekly data properly
         const sanitizedWeekly = standardDays.map((dayName) => {
-            // Match input item by day
+            // Day matching
             const foundItem = weekly.find(
-                (item) => item && item.day && item.day.toLowerCase() === dayName.toLowerCase()
+                (item) => item && item.day && item.day.trim().toLowerCase() === dayName.toLowerCase()
             );
 
+            if (foundItem) {
+                // Exact status evaluation (handles string "true", boolean true, number 1)
+                const isStatusTrue = 
+                    foundItem.status === true || 
+                    foundItem.status === "true" || 
+                    foundItem.status === 1 || 
+                    foundItem.status === "1";
+
+                return {
+                    day: dayName,
+                    start: foundItem.start !== undefined && foundItem.start !== null ? String(foundItem.start) : "",
+                    end: foundItem.end !== undefined && foundItem.end !== null ? String(foundItem.end) : "",
+                    status: isStatusTrue // 👈 Properly resolves True / False
+                };
+            }
+
+            // Fallback for missing days
             return {
-                day: dayName, // Always guarantees valid day string
-                start: foundItem ? String(foundItem.start || "") : "",
-                end: foundItem ? String(foundItem.end || "") : "",
-                status: foundItem ? Boolean(foundItem.status) : false
+                day: dayName,
+                start: "",
+                end: "",
+                status: false
             };
         });
 
-        // Database update operation
+        // Database Update Query
         const updatedSchedule = await DoctorWeekly.findOneAndUpdate(
             { doctorId: doctorBasic._id },
             { $set: { weekly: sanitizedWeekly } },

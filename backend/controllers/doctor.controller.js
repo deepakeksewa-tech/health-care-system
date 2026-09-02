@@ -517,8 +517,7 @@ export const updateDoctorSettings = async (req, res) => {
         return res.status(500).json({ success: false, message: err.message });
     }
 };
-
-/// 🔄 Update Weekly Schedule Controller (Updated)
+// 🔄 Update Weekly Schedule (Strict Data Parsing Fix)
 export const updateWeeklyOff = async (req, res) => {
     try {
         const doctorBasicId = req.id;
@@ -527,7 +526,7 @@ export const updateWeeklyOff = async (req, res) => {
         if (!weekly || !Array.isArray(weekly)) {
             return res.status(400).json({ 
                 success: false, 
-                message: "Weekly array format expected in request body" 
+                message: "Weekly schedule must be an array" 
             });
         }
 
@@ -539,17 +538,24 @@ export const updateWeeklyOff = async (req, res) => {
             });
         }
 
-        // Upsert operation to save weekly schedules
-        const updatedSchedule = await DoctorWeekly.findOneAndUpdate(
+        // Data clean & normalize conversion
+        const cleanedWeekly = weekly.map(item => ({
+            day: String(item.day || ""),
+            start: String(item.start || ""),
+            end: String(item.end || ""),
+            status: Boolean(item.status === true || item.status === "true")
+        }));
+
+        const doctorWeekly = await DoctorWeekly.findOneAndUpdate(
             { doctorId: doctorBasic._id },
-            { $set: { weekly: weekly } },
+            { $set: { weekly: cleanedWeekly } },
             { new: true, upsert: true, runValidators: true }
         );
 
         return res.status(200).json({ 
             success: true, 
             message: "Weekly schedule updated successfully", 
-            weekly: updatedSchedule.weekly 
+            weekly: doctorWeekly.weekly 
         });
     } catch (err) {
         console.error("Weekly schedule update error:", err);

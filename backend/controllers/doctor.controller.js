@@ -109,7 +109,7 @@ export const createBasicDoctor = async (req, res) => {
         });
         
         const token = jwt.sign(
-            { id: doctor._id },
+            { id: doctor._id,role:doctor.role },
             process.env.JWT_TOKEN,
             { expiresIn: "1d" }
         );

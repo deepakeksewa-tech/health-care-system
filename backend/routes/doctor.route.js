@@ -222,7 +222,7 @@ router.post("/DoctorLogin", DoctorLogin);
  *       400:
  *         description: Doctor not found or location already set
  */
-router.post("/Doctorlocation",authMiddleware , LocationSetup);
+router.post("/Doctorlocation", DoctorMiddleware, LocationSetup);
 
 /**
  * @swagger

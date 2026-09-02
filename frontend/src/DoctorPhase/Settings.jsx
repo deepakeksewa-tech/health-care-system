@@ -58,7 +58,7 @@ const Settings = ({ userRole = "doctor" }) => {
   const fetchDoctorSettings = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE_URL}/settings`, {
+      const res = await fetch(`${API_BASE_URL}/api/doctors/settings`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -175,7 +175,7 @@ const Settings = ({ userRole = "doctor" }) => {
   // Schedule Sync with Backend API using Fetch
   const syncWeeklyOffToBackend = async (scheduleToSync) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/weekly-off`, {
+      const res = await fetch(`${API_BASE_URL}/api/doctors/weekly-off`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -209,7 +209,7 @@ const Settings = ({ userRole = "doctor" }) => {
 
       console.log("📤 Sending Settings Payload:", payload);
 
-      const res = await fetch(`${API_BASE_URL}/settings`, {
+      const res = await fetch(`${API_BASE_URL}/api/doctors/settings`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

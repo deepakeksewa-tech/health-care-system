@@ -44,12 +44,13 @@ app.use("/Med/Seller",sellerMedicineRoutes)
 
 app.get("/api/logout", (req, res) => {
   res.clearCookie("token", {
+    path: "/", // Path add karna ZARURI hai
     httpOnly: true,
-    secure: true, // Set to true in production
+    secure: true, // Express/Node local localhost par bina HTTPS ke Secure cookies clear nahi karta
     sameSite: "strict",
   });
   res.status(200).json({ success: true, message: "Logged out successfully" });
-}); 
+});
 
 
 const PORT = process.env.PORT || 5000;

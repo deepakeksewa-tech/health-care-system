@@ -455,22 +455,28 @@ export const creditedMoney = async(req,res)=>{
 }
 
 // 📥 Get Doctor Settings (Fixed find -> findOne)
+// 📥 Get Doctor Settings (Populates gmail from DoctorRegistration)
 export const getDoctorSettings = async (req, res) => {
     try {
-        const doctorBasicId = req.id; 
+        const doctorRegId = req.id; 
 
-        const doctorBasic = await DoctorBasic.findOne({ doctorId: doctorBasicId });
+        // 1. Fetch DoctorBasic by DoctorRegistration ID
+        const doctorBasic = await DoctorBasic.findOne({ doctorId: doctorRegId });
         if (!doctorBasic) {
-            return res.status(404).json({ success: false, message: "Doctor not found" });
+            return res.status(404).json({ success: false, message: "Doctor profile details not found" });
         }
 
+        // 2. Fetch Gmail from DoctorRegistration (Fixes undefined email bug)
+        const doctorRegistration = await DoctorRegistration.findById(doctorRegId);
+
+        // 3. Fetch DoctorWeekly Schedule
         const doctorWeekly = await DoctorWeekly.findOne({ doctorId: doctorBasic._id });
 
         return res.status(200).json({
             success: true,
             data: {
                 name: doctorBasic.name,
-                gmail: doctorBasic.gmail,
+                gmail: doctorRegistration ? doctorRegistration.gmail : "",
                 contactNo: doctorBasic.contactNo,
                 specification: doctorBasic.specification,
                 experience: doctorBasic.experience,

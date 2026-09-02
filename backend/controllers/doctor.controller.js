@@ -518,17 +518,16 @@ export const updateDoctorSettings = async (req, res) => {
     }
 };
 
-
-// 🔄 Update Weekly Schedule Controller (Validation Fix)
+// 🔄 Update Weekly Schedule Controller
 export const updateWeeklyOff = async (req, res) => {
     try {
         const doctorBasicId = req.id;
         const { weekly } = req.body; 
 
-        if (!weekly || !Array.isArray(weekly) || weekly.length === 0) {
+        if (!weekly || !Array.isArray(weekly)) {
             return res.status(400).json({ 
                 success: false, 
-                message: "Weekly array cannot be empty or missing" 
+                message: "Weekly array is required and must be an array" 
             });
         }
 
@@ -540,23 +539,28 @@ export const updateWeeklyOff = async (req, res) => {
             });
         }
 
-        // Key mapping validation fallback
-        const formattedWeekly = weekly.map((item, index) => {
-            const dayName = item.day || item.Day;
-            if (!dayName) {
-                throw new Error(`Day name is missing at position ${index}`);
-            }
+        // Standard days order
+        const standardDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+        // Clean & validate each item with default fallback values
+        const sanitizedWeekly = standardDays.map((dayName) => {
+            // Match input item by day
+            const foundItem = weekly.find(
+                (item) => item && item.day && item.day.toLowerCase() === dayName.toLowerCase()
+            );
+
             return {
-                day: String(dayName),
-                start: String(item.start || ""),
-                end: String(item.end || ""),
-                status: Boolean(item.status)
+                day: dayName, // Always guarantees valid day string
+                start: foundItem ? String(foundItem.start || "") : "",
+                end: foundItem ? String(foundItem.end || "") : "",
+                status: foundItem ? Boolean(foundItem.status) : false
             };
         });
 
+        // Database update operation
         const updatedSchedule = await DoctorWeekly.findOneAndUpdate(
             { doctorId: doctorBasic._id },
-            { $set: { weekly: formattedWeekly } },
+            { $set: { weekly: sanitizedWeekly } },
             { new: true, upsert: true, runValidators: true }
         );
 
@@ -567,6 +571,9 @@ export const updateWeeklyOff = async (req, res) => {
         });
     } catch (err) {
         console.error("Weekly schedule update error:", err);
-        return res.status(400).json({ success: false, message: err.message });
+        return res.status(400).json({ 
+            success: false, 
+            message: err.message 
+        });
     }
 };

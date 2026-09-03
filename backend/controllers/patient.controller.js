@@ -298,8 +298,6 @@ export const PatientAppointment = async (req, res) => {
   }
 );
 
-const result = await meet.json();
-
 console.log(result.meetingLink);
 
     // 1. Double Booking Check

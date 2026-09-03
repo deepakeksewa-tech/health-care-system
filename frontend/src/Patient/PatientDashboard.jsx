@@ -29,7 +29,7 @@ const PatientDashboard = () => {
 
   async function getDetails() {
     try {
-      const response = await fetch(`http://localhost:8000/api/patient/get/bookingDetails`, {
+      const response = await fetch(`https://health-care-system-vv00.onrender.com/api/patient/get/bookingDetails`, {
         method: "GET",
         credentials: "include",
         headers: {

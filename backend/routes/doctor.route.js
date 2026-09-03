@@ -272,7 +272,7 @@ router.get("/get/name/image", DoctorMiddleware, getName);
 
 /**
  * @swagger
- * /api/doctors/settings:
+ * /api/doctors/profile:
  *   get:
  *     summary: Get doctor profile settings and schedule
  *     tags: [Doctor Profile & Setup]
@@ -313,9 +313,10 @@ router.get("/get/name/image", DoctorMiddleware, getName);
  *       404:
  *         description: Doctor not found
  */
+router.get('/profile', DoctorMiddleware, getDoctorSettings);
+router.put('/profile', DoctorMiddleware, updateDoctorSettings);
 router.get('/settings', DoctorMiddleware, getDoctorSettings);
 router.put('/settings', DoctorMiddleware, updateDoctorSettings);
-
 /**
  * @swagger
  * /api/doctors/weekly-off:

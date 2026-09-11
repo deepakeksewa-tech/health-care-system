@@ -12,6 +12,8 @@ import paymentRoutes from "./routes/payment.route.js"; // <-- Added payment rout
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./swagger.js";
 import sellerMedicineRoutes from './routes/sellerMed.route.js';
+import connectSMTP from "./config/smtp.js";
+connectSMTP();
 connectDB();
 
 

@@ -397,7 +397,6 @@ const Settings = ({ userRole = "doctor" }) => {
               {saving ? <FiLoader className="w-4 h-4 animate-spin" /> : <FiSave className="w-4 h-4" />} Save Settings
             </button>
           </div>
-
         </form>
       </div>
     </div>

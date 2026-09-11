@@ -5,6 +5,7 @@ import crypto from "crypto";
 import {ForgetPassword} from '../models/forgetPassword.model.js';
 import { userModel } from '../models/patient.model.js';
 import { AdminModel } from '../models/admin.model.js';
+import { transporter } from '../config/smtp.js';
 const sendingGmail=process.env.N8N_WEBHOOK;
 export const password=async(req,res)=>{
   const find=await DoctorRegistration.findOne({gmail:req.body.gmail});
@@ -150,6 +151,22 @@ export const Patientpassword=async(req,res)=>{
     userId:find._id,otp
   })
  
+  let info =await transporter.sendMail({
+    from: process.env.SMTP_USER,
+    to: find.gmail,
+    subject: "Password Reset OTP – User Account",
+    text: `
+Hello ${find.name},
+We received a request to reset the password for your account.
+Your 6-digit verification OTP is:
+${otp}
+This OTP is valid for 5 minutes. Please do not share this OTP with anyone.
+If you did not request a password reset, you can safely ignore this email.
+Regards,
+Support Team
+    `,
+  });
+  
   
   const sendMail=await fetch(`${sendingGmail}`,{
     method:"POST",
@@ -185,6 +202,7 @@ Support Team
 
   return  res.status(200).send({
   success:true,
+  info:info.messageId,
   message:"the otp send successfully",
   })
 }
@@ -278,7 +296,23 @@ export const Adminpassword=async(req,res)=>{
     userId:find._id,otp
   })
  
-  
+  let info =await transporter.sendMail({
+    from: process.env.SMTP_USER,
+    to: find.gmail,
+    subject: "Password Reset OTP – Admin Account",
+    text: `
+Hello ${find.name},
+We received a request to reset the password for your admin account.
+Your 6-digit verification OTP is:
+${otp}
+This OTP is valid for 5 minutes. Please do not share this OTP with anyone.
+If you did not request a password reset, you can safely ignore this email.
+Regards,
+Support Team
+    `,
+  }); 
+
+  console.log("Message sent: %s", info.messageId);
 const sendMail = await fetch(
   "https://n8n-szld.onrender.com/webhook/93b107e3-5adc-4a2d-9de9-38f5cda40792",
   {

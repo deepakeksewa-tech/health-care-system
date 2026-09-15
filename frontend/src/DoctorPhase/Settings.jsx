@@ -10,7 +10,7 @@ import {
   FiClock
 } from 'react-icons/fi';
 
-const API_BASE_URL = "https://health-care-system-vv00.onrender.com";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const Settings = ({ userRole = "doctor" }) => {
   const navigate = useNavigate();

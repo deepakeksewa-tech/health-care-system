@@ -298,9 +298,9 @@ export const PatientAppointment = async (req, res) => {
   }
 );
 
-const result = await meet.json();
+const result = "";
 
-console.log(result.meetingLink);
+
 
     // 1. Double Booking Check
     const existingBooking = await Patient.findOne({
@@ -369,7 +369,7 @@ console.log(result.meetingLink);
       razorpayOrderId,
       razorpayPaymentId,
       razorpaySignature,
-      meetingLink:result.meetingLink
+      meetingLink:""
     });
 
     // 5. Update Doctor Payment Earnings

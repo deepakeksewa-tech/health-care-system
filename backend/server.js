@@ -12,8 +12,7 @@ import paymentRoutes from "./routes/payment.route.js"; // <-- Added payment rout
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./swagger.js";
 import sellerMedicineRoutes from './routes/sellerMed.route.js';
-import connectSMTP from "./config/smtp.js";
-connectSMTP();
+
 connectDB();
 
 
@@ -21,7 +20,7 @@ const app = express();
 app.use(cookieParser());
 
 app.use(cors({
-  origin:["https://health-care-system-sooty.vercel.app","http://localhost:5173"],
+  origin:["https://health-care-system-sooty.vercel.app","http://localhost:5174","http://localhost:5173"],
   credentials: true
 }));
 app.use(express.json());

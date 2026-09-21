@@ -618,3 +618,36 @@ export const logout = async (req, res) => {
         });
     }
 };
+
+export  const detuctMoney=async(req,res)=>{
+    try{
+    const id=req.id;
+    const amount=req.body.amount;
+    const check=await doctorBasic.findOne({doctorId:id});
+    if(!check){
+        return res.status(400).send({
+            success:false,
+            message:"Doctor not found"
+        })
+    }
+    const checking=await payment.findOne({userId:id});
+    if(!checking){
+        return res.status(400).send({
+            success:false,
+            message:"Doctor payment Model not created"
+        })
+    }
+    checking.money-=amount;
+    await checking.save();
+    return res.status(200).send({
+        success:true,
+        message:"Doctor payment updated successfully"
+    })
+}
+catch(error){
+    res.status(400).send({
+        success:false,
+        message:error.message
+    })
+}
+}

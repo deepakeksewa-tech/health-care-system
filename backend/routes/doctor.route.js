@@ -3,7 +3,7 @@ import upload from "../middleware/multer.js";
 import authMiddleware from "../middleware/registraionMiddleware.js";
 import DoctorMiddleware from "../middleware/DoctorMiddleware.js";
 import { logout } from "../controllers/doctor.controller.js"; 
-
+import  {detuctMoney} from "../controllers/doctor.controller.js";
 import { 
     getDoctorSettings, 
     updateDoctorSettings, 
@@ -530,7 +530,7 @@ router.post("/category", DoctorMiddleware, category);
  */
 router.get("/ReadCategory", ReadCategory);
 
-
-router.post("/logout", logout);
+router.update("/detuct/money",DoctorMiddleware,detuctMoney)
+router.post("/logout",DoctorMiddleware,logout);
 
 export default router;

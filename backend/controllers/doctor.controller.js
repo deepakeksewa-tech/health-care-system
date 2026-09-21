@@ -630,7 +630,7 @@ export  const detuctMoney=async(req,res)=>{
             message:"Doctor not found"
         })
     }
-    const checking=await payment.findOne({userId:id});
+    const checking=await payment.findOne({userId:check._id});
     if(!checking){
         return res.status(400).send({
             success:false,

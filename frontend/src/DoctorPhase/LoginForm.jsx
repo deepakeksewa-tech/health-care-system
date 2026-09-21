@@ -168,7 +168,7 @@ const LoginForm = () => {
                   to="/forgot-password-doctor"
                   className="text-xs text-[#058b7c] hover:underline font-semibold"
                 >
-                  Forgot?
+                  Forgot Password?
                 </Link>
               </div>
               <div className="relative">

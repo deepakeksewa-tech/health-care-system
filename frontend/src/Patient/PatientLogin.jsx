@@ -166,7 +166,7 @@ const PatientLogin = () => {
                   to="/forgot-password-patient"
                   className="text-xs text-[#058b7c] hover:underline font-semibold"
                 >
-                  Forgot?
+                  Forgot Password?
                 </Link>
               </div>
               <div className="relative">

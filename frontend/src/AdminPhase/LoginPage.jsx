@@ -167,7 +167,7 @@ const LoginPage = () => {
                   to="/forgot-password-admin"
                   className="text-xs text-[#058b7c] hover:underline font-semibold"
                 >
-                  Forgot?
+                  Forgot Password?
                 </Link>
               </div>
               <div className="relative">

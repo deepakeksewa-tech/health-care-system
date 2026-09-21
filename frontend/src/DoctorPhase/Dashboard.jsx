@@ -57,7 +57,6 @@ const Header = ({ onLogout, onSettingsClick }) => (
   </header>
 );
 
-
 const onLogout = async () => {
   try {
     const call = await fetch(`${api}/api/doctors/logout`, {
@@ -242,7 +241,9 @@ const Dashboard = () => {
   };
 
   const safeAppointmentsList = Array.isArray(appointments) ? appointments : [];
-  const totalEarnings = safeAppointmentsList.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+  const totalEarnings = safeAppointmentsList
+    .filter((item) => (item.status || "Pending").toLowerCase() !== "cancelled")
+    .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
   const totalPatients = safeAppointmentsList.length;
 
   const filteredAppointments = safeAppointmentsList.filter((item) => {

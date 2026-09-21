@@ -295,6 +295,6 @@ router.get("/get/AllDoctor/:id", adminMiddleware, doctorHistory);
 
 
 
-router.post("/logout", logout);
+router.post("/logout",adminMiddleware, logout);
 router.get("/get/All/Medicine/Seller",adminMiddleware,GetAllMedSeller);
 export default router;

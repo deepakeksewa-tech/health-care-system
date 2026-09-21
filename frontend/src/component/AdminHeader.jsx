@@ -34,7 +34,7 @@ const AdminHeader = () => {
     console.error("Logout failed:", error);
   }
 }
-    navigate('/Admin/Login')
+    navigate('/Admin/LoginPage')
   }
 
   // Logo home redirect

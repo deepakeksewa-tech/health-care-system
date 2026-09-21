@@ -96,6 +96,13 @@ export const createBasicDoctor = async (req, res) => {
             })
         }
         const getname=await DoctorRegistration.findById(req.id);
+        if(!getname){
+            return res.status(400).json({
+                success:false,
+                message:"the doctor is not registered yet"
+            }
+            )
+        }
         const doctor = await DoctorBasic.create({
             doctorId: req.id,
             name: getname.name,
@@ -261,8 +268,8 @@ export const getName = async(req,res)=>{
 
 // ----- add specialization
 export const specialization = async(req,res)=>{
-    const special = req.body.Specialization.toLowerCase();
-    const check = await Specialization.findOne({specilization: special});
+    const special = req.body.specification.toLowerCase();
+    const check = await Specialization.findOne({specification: special});
     if(check){
         return res.status(400).send({
             success:false,
@@ -278,7 +285,7 @@ export const specialization = async(req,res)=>{
 
 // ------------- category -------------------
 export const category = async(req,res)=>{
-    const cat = req.body.Category.toLowerCase();
+    const cat = req.body.category.toLowerCase();
     const check = await Category.findOne({category: cat});
     if(check){
         return res.status(400).send({
@@ -582,3 +589,5 @@ export const updateWeeklyOff = async (req, res) => {
         });
     }
 };
+
+

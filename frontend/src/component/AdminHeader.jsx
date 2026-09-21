@@ -29,11 +29,12 @@ const AdminHeader = () => {
       // Yahan tum user ko login page par redirect kar sakte ho
       // window.location.href = "/login";
     }
+    
+    navigate('/Admin/LoginPage')
   } catch (error) {
     console.error("Logout failed:", error);
   }
 
-    navigate('/Admin/LoginPage')
   }
 
   // Logo home redirect

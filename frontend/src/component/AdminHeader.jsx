@@ -13,7 +13,7 @@ const AdminHeader = () => {
   // Logout handler
   const handleLogout = async () => {
   try {
-    const call = await fetch(`${api}/api/admin/logout`, {
+    const call = await fetch(`https://health-care-system-vv00.onrender.com/api/admin/logout`, {
       method: "POST",
       headers: {
         "content-type": "application/json"

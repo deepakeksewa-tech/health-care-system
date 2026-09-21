@@ -57,28 +57,6 @@ const Header = ({ onLogout, onSettingsClick }) => (
   </header>
 );
 
-const onLogout = async () => {
-  try {
-    const call = await fetch(`${api}/api/doctors/logout`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json"
-      },
-      // Yeh line sabse zaruri hai cookie delete/modify karne ke liye
-      credentials: "include" 
-    });
-
-    const response = await call.json();
-
-    if (response.success) {
-      console.log("Logged out successfully");
-      // Yahan tum user ko login page par redirect kar sakte ho
-      // window.location.href = "/login";
-    }
-  } catch (error) {
-    console.error("Logout failed:", error);
-  }
-}
 const Dashboard = () => {
   const navigate = useNavigate();
   
@@ -120,21 +98,35 @@ const Dashboard = () => {
     }
   };
 
-  // Status Change Handler
+  // Status Change Handler with Wallet & Total Earnings Deduction
   const handleStatusChange = async (appointmentId, newStatus) => {
     try {
       const targetAppointment = appointments.find(
         (item) => (item._id || item.id) === appointmentId
       );
 
+      const amountToDeduct = Number(targetAppointment?.amount) || 0;
+
+      // Agar slot Cancelled mark ho rahi hai aur pehle se cancelled nahi thi:
       if (targetAppointment && newStatus === "Cancelled" && targetAppointment.status !== "Cancelled") {
-        setwalletMoney((prev) => Math.max(0, prev - (Number(targetAppointment.amount) || 0)));
+        setwalletMoney((prev) => Math.max(0, prev - amountToDeduct));
       }
 
+      // Agar kisi wajah se Cancelled se wapas kisi active state me jaye:
+      if (targetAppointment && targetAppointment.status === "Cancelled" && newStatus !== "Cancelled") {
+        setwalletMoney((prev) => prev + amountToDeduct);
+      }
+
+      // Update appointments list state
       setAppointments((prev) =>
         prev.map((item) =>
           (item._id || item.id) === appointmentId ? { ...item, status: newStatus } : item
         )
+      );
+
+      // Agar modal open hai toh modal ka current preview bhi sync rakho
+      setSelectedAppointment((prev) =>
+        prev && (prev._id || prev.id) === appointmentId ? { ...prev, status: newStatus } : prev
       );
 
       await fetch(`${API_BASE_URL}/api/doctors/update/status`, {
@@ -249,9 +241,12 @@ const Dashboard = () => {
   };
 
   const safeAppointmentsList = Array.isArray(appointments) ? appointments : [];
+  
+  // Exclude cancelled appointments from Total Revenue
   const totalEarnings = safeAppointmentsList
     .filter((item) => (item.status || "Pending").toLowerCase() !== "cancelled")
     .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+
   const totalPatients = safeAppointmentsList.length;
 
   const filteredAppointments = safeAppointmentsList.filter((item) => {
@@ -568,7 +563,7 @@ const Dashboard = () => {
             )}
           </div>
 
-          {/* PAGINATION CONTROLS */}
+          {/* Pagination Controls */}
           {filteredAppointments.length > 0 && (
             <div className="px-6 py-4 bg-slate-50/80 border-t border-slate-200 flex items-center justify-between">
               <span className="text-xs text-slate-500 font-medium">
@@ -770,7 +765,7 @@ const Dashboard = () => {
                 </p>
               </div>
 
-              {/* Meeting Link Section - Visible ONLY if status is Pending or Ongoing */}
+              {/* Meeting Link Section */}
               {selectedAppointment.meetingLink && 
                (selectedAppointment.status === "Pending" || selectedAppointment.status === "Ongoing" || !selectedAppointment.status) && (
                 <div className="bg-teal-50/60 p-4 rounded-2xl border border-teal-100 space-y-2">
@@ -801,10 +796,7 @@ const Dashboard = () => {
 
                 {(!selectedAppointment.status || selectedAppointment.status === "Pending") && (
                   <button
-                    onClick={() => {
-                      handleStatusChange(selectedAppointment._id || selectedAppointment.id, "Ongoing");
-                      setSelectedAppointment(prev => ({ ...prev, status: "Ongoing" }));
-                    }}
+                    onClick={() => handleStatusChange(selectedAppointment._id || selectedAppointment.id, "Ongoing")}
                     className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
                   >
                     Mark Ongoing
@@ -813,10 +805,7 @@ const Dashboard = () => {
 
                 {selectedAppointment.status === "Ongoing" && (
                   <button
-                    onClick={() => {
-                      handleStatusChange(selectedAppointment._id || selectedAppointment.id, "Completed");
-                      setSelectedAppointment(prev => ({ ...prev, status: "Completed" }));
-                    }}
+                    onClick={() => handleStatusChange(selectedAppointment._id || selectedAppointment.id, "Completed")}
                     className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
                   >
                     Mark Completed

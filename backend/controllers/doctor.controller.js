@@ -623,7 +623,8 @@ export  const detuctMoney=async(req,res)=>{
     try{
     const id=req.id;
     const amount=req.body.amount;
-    const check=await doctorBasic.findOne({doctorId:id});
+    console.log(id);
+    const check=await doctorBasic.findOne({_id:id});
     if(!check){
         return res.status(400).send({
             success:false,

@@ -530,7 +530,7 @@ router.post("/category", DoctorMiddleware, category);
  */
 router.get("/ReadCategory", ReadCategory);
 
-router.post("/detuct/money",DoctorMiddleware,detuctMoney)
+router.post("/deduct/money",DoctorMiddleware,detuctMoney)
 router.post("/logout",DoctorMiddleware,logout);
 
 export default router;

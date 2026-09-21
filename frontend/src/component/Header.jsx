@@ -11,14 +11,36 @@ const Header = () => {
   }
 
   // Logout handler
-  const handleLogout = () => {
-    localStorage.clear()
-    navigate('/')
+  const handleLogout = async() => {
+      try {
+    const call = await fetch(`https://health-care-system-vv00.onrender.com/api/admin/logout`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json"
+      },
+      // Yeh line sabse zaruri hai cookie delete/modify karne ke liye
+      credentials: "include" 
+    });
+
+    const response = await call.json();
+
+    if (response.success) {
+      console.log("Logged out successfully");
+      navigate('/Admin/LoginPage')
+      // Yahan tum user ko login page par redirect kar sakte ho
+      // window.location.href = "/login";
+    }
+    
+    
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
+
   }
 
   // Logo home redirect
   const handleHomeRedirect = () => {
-    navigate('/')
+    navigate('/Admin/Dashboard')
   }
 
   return (

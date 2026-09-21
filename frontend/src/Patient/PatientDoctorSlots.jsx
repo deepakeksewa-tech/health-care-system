@@ -19,13 +19,11 @@ const Header = () => {
       const data = await response.json();
       if (data.success) {
         toast.success('Logged out successfully!');
+            navigate('/Patient/Login');
       }
     } catch (error) {
       console.error('Logout error:', error);
-    } finally {
-      localStorage.clear();
-      navigate('/Patient/Login');
-    }
+    } 
   };
 
   const handleHomeRedirect = () => {

@@ -73,9 +73,29 @@ const PatientDoctorList = () => {
     setFilteredDoctors(temp);
   }, [searchTerm, doctors]);
 
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate('/Patient/Login');
+  const handleLogout = async () => {
+  try {
+    const call = await fetch(`${api}/api/doctors/logout`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json"
+      },
+      // Yeh line sabse zaruri hai cookie delete/modify karne ke liye
+      credentials: "include" 
+    });
+
+    const response = await call.json();
+
+    if (response.success) {
+      console.log("Logged out successfully");
+      // Yahan tum user ko login page par redirect kar sakte ho
+      // window.location.href = "/login";
+       navigate('/Patient/Login');
+    }
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
+   
   };
 
   const handleHomeRedirect = () => {

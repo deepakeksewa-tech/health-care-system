@@ -11,6 +11,7 @@ import {
   GetSingleDoctor,
   PatientMedicineDetails,
   savePatientMedicineDetails,
+  logout,
 } from "../controllers/patient.controller.js";
 import { AddItem, DecreaseQuantity, removeMedicine, searching } from "../controllers/MedUser.controller.js";
 
@@ -371,5 +372,5 @@ router.get('/get/All/Medicine',UserMiddleware,searching);
 router.post('/med/user/cart/:medicineId',UserMiddleware,AddItem);
 router.post("/med/user/cart/:medicineId/decrease",UserMiddleware,DecreaseQuantity)
 router.delete('/med/user/cart/:medicineId',UserMiddleware,removeMedicine);
-
+router.post('/logout',UserMiddleware,logout);
 export default router;

@@ -532,3 +532,32 @@ export const savePatientMedicineDetails = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message || "Internal Server Error" });
   }
 };
+
+
+
+export const logout = async (req, res) => {
+    try {
+        // Cookie ko clear karna
+        res.clearCookie("token", {
+            path: "/",
+            httpOnly: true,
+            // Agar backend Render (https) par hai aur frontend Vercel/Netlify par,
+            // toh yeh dono settings bohot zaruri hain cookie delete/set hone ke liye:
+            secure: true, 
+            sameSite: "none" 
+        });
+
+        return res.status(200).send({
+            success: true,
+            message: "Logged out successfully"
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({
+            success: false,
+            message: "Error in logout API",
+            error: error.message
+        });
+    }
+};

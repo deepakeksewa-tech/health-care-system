@@ -63,9 +63,28 @@ const PatientDashboard = () => {
   }, [])
 
   // Direct Logout Handler (No alert confirmation)
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate('/Patient/Login');
+  const handleLogout =async () => {
+  try {
+    const call = await fetch(`${api}/api/patient/logout`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json"
+      },
+      // Yeh line sabse zaruri hai cookie delete/modify karne ke liye
+      credentials: "include" 
+    });
+
+    const response = await call.json();
+
+    if (response.success) {
+      console.log("Logged out successfully");
+      navigate('/patient/login')
+      // Yahan tum user ko login page par redirect kar sakte ho
+      // window.location.href = "/login";
+    }
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
   };
 
   // Click on MED SEWA logo to go back to dashboard

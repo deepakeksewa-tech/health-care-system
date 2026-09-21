@@ -65,7 +65,7 @@ const PatientDashboard = () => {
   // Direct Logout Handler (No alert confirmation)
   const handleLogout =async () => {
   try {
-    const call = await fetch(`${api}/api/patient/logout`, {
+    const call = await fetch(`https://health-care-system-vv00.onrender.com/api/patient/logout`, {
       method: "POST",
       headers: {
         "content-type": "application/json"

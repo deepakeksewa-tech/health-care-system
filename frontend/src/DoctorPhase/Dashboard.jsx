@@ -57,6 +57,29 @@ const Header = ({ onLogout, onSettingsClick }) => (
   </header>
 );
 
+
+const onLogout = async () => {
+  try {
+    const call = await fetch(`${api}/api/doctors/logout`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json"
+      },
+      // Yeh line sabse zaruri hai cookie delete/modify karne ke liye
+      credentials: "include" 
+    });
+
+    const response = await call.json();
+
+    if (response.success) {
+      console.log("Logged out successfully");
+      // Yahan tum user ko login page par redirect kar sakte ho
+      // window.location.href = "/login";
+    }
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
+}
 const Dashboard = () => {
   const navigate = useNavigate();
   

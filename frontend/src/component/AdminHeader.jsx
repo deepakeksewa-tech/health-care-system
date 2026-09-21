@@ -11,8 +11,7 @@ const AdminHeader = () => {
   }
 
   // Logout handler
-  const handleLogout = () => {
-    const onLogout = async () => {
+  const handleLogout = async () => {
   try {
     const call = await fetch(`${api}/api/admin/logout`, {
       method: "POST",
@@ -33,7 +32,7 @@ const AdminHeader = () => {
   } catch (error) {
     console.error("Logout failed:", error);
   }
-}
+
     navigate('/Admin/LoginPage')
   }
 

@@ -15,6 +15,7 @@ import {
   GetAllMedSeller
 } from "../controllers/admin.controller.js";
 import adminMiddleware from "../middleware/AdminMiddleware.js";
+import { logout } from "../controllers/admin.controller.js"; 
 
 const router = express.Router();
 
@@ -293,5 +294,7 @@ router.get("/get/AllPatients/:id", adminMiddleware, getAllPatients);
 router.get("/get/AllDoctor/:id", adminMiddleware, doctorHistory);
 
 
+
+router.post("/logout", logout);
 router.get("/get/All/Medicine/Seller",adminMiddleware,GetAllMedSeller);
 export default router;

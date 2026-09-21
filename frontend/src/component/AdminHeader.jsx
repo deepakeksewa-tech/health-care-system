@@ -12,13 +12,34 @@ const AdminHeader = () => {
 
   // Logout handler
   const handleLogout = () => {
-    localStorage.clear()
-    navigate('/Patient/Login')
+    const onLogout = async () => {
+  try {
+    const call = await fetch(`${api}/api/admin/logout`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json"
+      },
+      // Yeh line sabse zaruri hai cookie delete/modify karne ke liye
+      credentials: "include" 
+    });
+
+    const response = await call.json();
+
+    if (response.success) {
+      console.log("Logged out successfully");
+      // Yahan tum user ko login page par redirect kar sakte ho
+      // window.location.href = "/login";
+    }
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
+}
+    navigate('/Admin/Login')
   }
 
   // Logo home redirect
   const handleHomeRedirect = () => {
-    navigate('/Patient/Dashboard')
+    navigate('/Admin/Dashboard')
   }
 
   return (

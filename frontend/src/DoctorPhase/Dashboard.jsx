@@ -98,7 +98,7 @@ const Dashboard = () => {
     }
   };
 
-  // Status Change Handler with Wallet & Total Earnings Deduction
+  // Status Change Handler with direct frontend payment deduction call
   const handleStatusChange = async (appointmentId, newStatus) => {
     try {
       const targetAppointment = appointments.find(
@@ -107,28 +107,39 @@ const Dashboard = () => {
 
       const amountToDeduct = Number(targetAppointment?.amount) || 0;
 
-      // Agar slot Cancelled mark ho rahi hai aur pehle se cancelled nahi thi:
+      // 1. Agar appointment status Cancelled ho raha hai toh wallet deduct karein (Negative balance allowed)
       if (targetAppointment && newStatus === "Cancelled" && targetAppointment.status !== "Cancelled") {
-        setwalletMoney((prev) => Math.max(0, prev - amountToDeduct));
+        setwalletMoney((prev) => prev - amountToDeduct);
+
+        // Frontend direct call to adjust/deduct money from backend wallet
+        try {
+          await fetch(`${API_BASE_URL}/api/doctors/deduct/money`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ 
+              amount: amountToDeduct,
+              appointmentId: appointmentId 
+            }),
+          });
+        } catch (payErr) {
+          console.error("Failed to deduct payment via API:", payErr);
+        }
       }
 
-      // Agar kisi wajah se Cancelled se wapas kisi active state me jaye:
-      if (targetAppointment && targetAppointment.status === "Cancelled" && newStatus !== "Cancelled") {
-        setwalletMoney((prev) => prev + amountToDeduct);
-      }
-
-      // Update appointments list state
+      // 2. Local state update
       setAppointments((prev) =>
         prev.map((item) =>
           (item._id || item.id) === appointmentId ? { ...item, status: newStatus } : item
         )
       );
 
-      // Agar modal open hai toh modal ka current preview bhi sync rakho
+      // 3. Modal preview state sync
       setSelectedAppointment((prev) =>
         prev && (prev._id || prev.id) === appointmentId ? { ...prev, status: newStatus } : prev
       );
 
+      // 4. Status update API call
       await fetch(`${API_BASE_URL}/api/doctors/update/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -312,8 +323,13 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="mt-4 flex items-baseline justify-between">
-              <span className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
-                {checkMoney ? `₹${walletMoney}` : "••••••••"}
+              <span className={`text-2xl sm:text-3xl font-bold tracking-tight ${
+                checkMoney && walletMoney < 0 ? "text-rose-600" : "text-slate-900"
+              }`}>
+                {checkMoney 
+                  ? (walletMoney < 0 ? `-₹${Math.abs(walletMoney)}` : `₹${walletMoney}`)
+                  : "••••••••"
+                }
               </span>
               <span className="text-xs font-semibold text-[#058b7c] group-hover:underline">
                 Tap to View →
@@ -635,11 +651,13 @@ const Dashboard = () => {
 
               {checkMoney ? (
                 <div className="py-2">
-                  <span className="text-4xl font-extrabold text-[#058b7c]">
-                    ₹{walletMoney}
+                  <span className={`text-4xl font-extrabold ${walletMoney < 0 ? "text-rose-600" : "text-[#058b7c]"}`}>
+                    {walletMoney < 0 ? `-₹${Math.abs(walletMoney)}` : `₹${walletMoney}`}
                   </span>
                   <p className="text-xs text-slate-500 mt-2">
-                    Available for direct bank withdrawal.
+                    {walletMoney < 0 
+                      ? "Outstanding balance due to cancellations." 
+                      : "Available for direct bank withdrawal."}
                   </p>
                 </div>
               ) : (
@@ -685,7 +703,8 @@ const Dashboard = () => {
                 </button>
               ) : (
                 <button
-                  className="w-full bg-[#058b7c] hover:bg-[#047266] text-white py-3 rounded-xl font-semibold text-sm transition-colors shadow-xs cursor-pointer"
+                  disabled={walletMoney <= 0}
+                  className="w-full bg-[#058b7c] hover:bg-[#047266] disabled:bg-slate-300 disabled:cursor-not-allowed text-white py-3 rounded-xl font-semibold text-sm transition-colors shadow-xs cursor-pointer"
                   onClick={() => {
                     handlewithdraw();
                     alert("Funds settlement initiated. Direct deposit takes 24 hours.");

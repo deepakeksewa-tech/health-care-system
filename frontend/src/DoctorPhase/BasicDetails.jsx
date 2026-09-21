@@ -152,7 +152,7 @@ const BasicDetails = () => {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ Category: otherCategory.trim() }),
+          body: JSON.stringify({ category: otherCategory.trim() }),
         });
       }
 
@@ -162,7 +162,7 @@ const BasicDetails = () => {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ Specialization: otherSpecialization.trim() }),
+          body: JSON.stringify({ specialization: otherSpecialization.trim() }),
         });
       }
 

@@ -123,6 +123,14 @@ const Dashboard = () => {
   // Status Change Handler
   const handleStatusChange = async (appointmentId, newStatus) => {
     try {
+      const targetAppointment = appointments.find(
+        (item) => (item._id || item.id) === appointmentId
+      );
+
+      if (targetAppointment && newStatus === "Cancelled" && targetAppointment.status !== "Cancelled") {
+        setwalletMoney((prev) => Math.max(0, prev - (Number(targetAppointment.amount) || 0)));
+      }
+
       setAppointments((prev) =>
         prev.map((item) =>
           (item._id || item.id) === appointmentId ? { ...item, status: newStatus } : item

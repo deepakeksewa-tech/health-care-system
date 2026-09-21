@@ -119,7 +119,6 @@ const Dashboard = () => {
             credentials: "include",
             body: JSON.stringify({ 
               amount: amountToDeduct,
-              appointmentId: appointmentId 
             }),
           });
         } catch (payErr) {

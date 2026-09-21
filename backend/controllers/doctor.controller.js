@@ -269,6 +269,7 @@ export const getName = async(req,res)=>{
 // ----- add specialization
 export const specialization = async(req,res)=>{
     const special = req.body.specification.toLowerCase();
+
     const check = await Specialization.findOne({specification: special});
     if(check){
         return res.status(400).send({

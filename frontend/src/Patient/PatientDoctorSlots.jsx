@@ -226,12 +226,17 @@ const PatientDoctorSlots = () => {
         method: 'GET',
         credentials: 'include',
       });
+         if (response.status === 401 || response.status === 403) {
+        navigate('/Patient/login');
+        return;
+      }
       const data = await response.json();
       if (data.success) {
         setDoctorInfo(data.data);
       }
     } catch (error) {
       console.error('Error fetching doctor info:', error);
+      navigate('/Patient/login');
     }
   };
 

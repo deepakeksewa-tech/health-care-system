@@ -191,7 +191,7 @@ const Dashboard = () => {
         credentials: "include",
       });
       if (response.status === 401 || response.status === 403) {
-        navigate('/admin/loginPage');
+        navigate('/login');
         return;
       }
       const resData = await response.json();
@@ -209,7 +209,7 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
-      navigate('/admin/loginPage');
+      navigate('/login');
       setAppointments([]);
     } finally {
       setLoading(false);

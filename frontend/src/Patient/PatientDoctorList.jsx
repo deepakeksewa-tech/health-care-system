@@ -33,6 +33,11 @@ const PatientDoctorList = () => {
         },
       });
 
+        if (response.status === 401 || response.status === 403) {
+        navigate('/Patient/login');
+        return;
+      }
+
       const data = await response.json();
 
       if (response.ok && data.success) {
@@ -43,6 +48,7 @@ const PatientDoctorList = () => {
         setError(data.message || "Failed to fetch doctors list.");
         setDoctors([]);
         setFilteredDoctors([]);
+        navigate('/Patient/login');
       }
     } catch (err) {
       console.error("Error fetching doctor details:", err);

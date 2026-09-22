@@ -1,7 +1,7 @@
 import React from 'react'
 import Header from '../component/Header'
 import {useEffect,useState} from 'react';
-import {useNaviagte, useNavigate} from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
 const DoctorVerification = () => {
   const navigate=useNavigate();
   const api=import.meta.env.VITE_API_URL;
@@ -47,6 +47,10 @@ const DoctorVerification = () => {
       },
       }
     );
+    if (response.status === 401 || response.status === 403) {
+        navigate('/admin/loginPage');
+        return;
+      }
     const data=await  response.json()
     setdoctorVerification(data.data);
   }

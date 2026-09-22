@@ -9,18 +9,12 @@ const UserMiddleware = (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_TOKEN);
     if(decoded.role!=="User"){
-      return res.status(401).send({
-        success:false,
-        message:"You are not authorized to Enter the User Phase"
-      })
+        return res.redirect(`${FRONTEND_URL}/Patient/Login`);
     }
     req.id = decoded.id;
     next();
   } catch (error) {
-    return res.status(401).json({
-      success: false,
-      message: "Invalid Token",
-    });
+     return res.redirect(`${FRONTEND_URL}/Patient/Login`);
   }
 };
 

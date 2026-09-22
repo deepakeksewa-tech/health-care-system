@@ -9,10 +9,7 @@ const DoctorMiddleware = (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_TOKEN);
     if(decoded.role!=="Doctor"){
-      return res.status(401).send({
-        success:false,
-        message:"You are not authorized to Enter the Doctor Phase"
-      })
+       return res.redirect(`${FRONTEND_URL}/login`);
     }
     req.id = decoded.id;
  
@@ -20,10 +17,7 @@ const DoctorMiddleware = (req, res, next) => {
 
     next();
   } catch (error) {
-    return res.status(401).json({
-      success: false,
-      message: "Invalid Token",
-    });
+      return res.redirect(`${FRONTEND_URL}/login`);
   }
 };
 

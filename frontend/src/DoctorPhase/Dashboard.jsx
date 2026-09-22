@@ -190,7 +190,10 @@ const Dashboard = () => {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
       });
-
+      if (response.status === 401 || response.status === 403) {
+        navigate('/admin/loginPage');
+        return;
+      }
       const resData = await response.json();
 
       if (resData.success && Array.isArray(resData.data)) {
@@ -206,6 +209,7 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
+      navigate('/admin/loginPage');
       setAppointments([]);
     } finally {
       setLoading(false);

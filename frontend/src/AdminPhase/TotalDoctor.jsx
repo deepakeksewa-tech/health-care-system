@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../component/Header';
 import toast, { Toaster } from 'react-hot-toast';
-
+import {useNavigate} from 'react-router-dom';
 const TotalDoctor = () => {
   const api = import.meta.env.VITE_API_URL;
-
+  const navigate=useNavigate();
   // States
   const [doctorVerification, setdoctorVerification] = useState([]);
   const [loading, setloading] = useState(false);
@@ -49,12 +49,17 @@ const TotalDoctor = () => {
           "Content-Type": "application/json" // Fixed typo: applicaiton -> application
         }
       });
+       if (response.status === 401 || response.status === 403) {
+        navigate('/admin/loginPage');
+        return;
+      }
       const data = await response.json();
       if (data.data) {
         setdoctorVerification(data.data);
       }
     } catch (error) {
       toast.error(error.message || "Failed to load doctors");
+      navigate('/admin/loginPage');
     } finally {
       setTimeout(() => {
         setloading(false);

@@ -23,13 +23,17 @@ const AdminDashboard = () => {
         }
       });
       const data = await response.json();
+
       if (data.data) {
         settotalAdmin(data.data);
+      }
+      else{
+        navigate('/admin/loginPage')
       }
     } catch (error) {
       console.error("Error fetching admins:", error);
       toast.error("Failed to load admin list");
-      navigate('/admin/login')
+      navigate('/admin/loginPage')
     }
   }
 

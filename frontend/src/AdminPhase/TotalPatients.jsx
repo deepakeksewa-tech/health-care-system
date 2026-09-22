@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../component/Header';
 import toast, { Toaster } from 'react-hot-toast';
-
+import {useNavigate} from 'react-router-dom';
 const TotalPatient = () => {
+  const navigate=useNavigate();
   const api = import.meta.env.VITE_API_URL;
   const [TotalUsers, setTotalUsers] = useState([]);
   const [loading, setloading] = useState(false);
@@ -47,12 +48,17 @@ const TotalPatient = () => {
           "Content-Type": "application/json", // Fix 3: Fixed typo ('applicaiton/json')
         },
       });
+        if (response.status === 401 || response.status === 403) {
+        navigate('/admin/loginPage');
+        return;
+      }
       const data = await response.json();
       if (data.success) {
         setTotalUsers(data.data);
       }
     } catch (error) {
       toast.error("Failed to load users");
+       navigate('/admin/loginPage');
     } finally {
       setloading(false);
     }

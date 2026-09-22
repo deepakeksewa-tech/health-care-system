@@ -81,7 +81,7 @@ const PatientDoctorList = () => {
 
   const handleLogout = async () => {
   try {
-    const call = await fetch(`${api}/api/doctors/logout`, {
+    const call = await fetch(`${api}/api/Patient/logout`, {
       method: "POST",
       headers: {
         "content-type": "application/json"

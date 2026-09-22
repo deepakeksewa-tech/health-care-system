@@ -36,6 +36,10 @@ const PatientDashboard = () => {
           "Content-type": "application/json"
         }
       })
+     if (response.status === 401 || response.status === 403) {
+        navigate('/Patient/login');
+        return;
+      }
       const data = await response.json()
 
       if (data.success && Array.isArray(data.data)) {
@@ -54,7 +58,8 @@ const PatientDashboard = () => {
         setBookingDetails(sortedBookings);
       }
     } catch (error) {
-      console.log("Error fetching booking details:", error)
+      console.log("Error fetching booking details:", error);
+      navigate('/Patient/login');
     }
   }
 

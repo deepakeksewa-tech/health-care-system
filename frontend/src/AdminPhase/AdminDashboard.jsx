@@ -29,6 +29,7 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error("Error fetching admins:", error);
       toast.error("Failed to load admin list");
+      navigate('/admin/login')
     }
   }
 

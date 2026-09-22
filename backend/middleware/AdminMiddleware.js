@@ -1,27 +1,32 @@
 import jwt from "jsonwebtoken";
 
 const adminMiddleware = (req, res, next) => {
-  const loginUrl = `${process.env.FRONTEND_URL || ""}/Admin/LoginPage`;
-
   try {
-    const token = req.cookies?.token;
-
+    const token = req.cookies.token;    
     if (!token) {
-      return res.redirect(loginUrl);
+      return res.status(401).json({
+        success: false,
+        message: "No token provided",
+      });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_TOKEN);
-
-    if (decoded.role !== "Admin") {
-      return res.redirect(loginUrl);
+    if(decoded.role!=="Admin"){
+      return res.status(401).send({
+        success:false,
+        message:"You are not authorized to Enter the Admin Phase"
+      })
     }
-
-    req.user = decoded;
     req.id = decoded.id;
+ 
+    
 
     next();
   } catch (error) {
-    return res.redirect(loginUrl);
+    return res.status(401).json({
+      success: false,
+      message: "Invalid Token",
+    });
   }
 };
 

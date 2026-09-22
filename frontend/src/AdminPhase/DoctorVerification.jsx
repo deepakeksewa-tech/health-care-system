@@ -1,8 +1,9 @@
 import React from 'react'
 import Header from '../component/Header'
 import {useEffect,useState} from 'react';
-
+import {useNaviagte, useNavigate} from 'react-router-dom'
 const DoctorVerification = () => {
+  const navigate=useNavigate();
   const api=import.meta.env.VITE_API_URL;
   const [doctorVerification,setdoctorVerification]=useState([]);
   const [loading, setloading] = useState(false);
@@ -51,6 +52,7 @@ const DoctorVerification = () => {
   }
   catch(error){
     toast.error(error);
+    navigate('/admin/loginPage');
   }
   finally{
     setTimeout(() => {

@@ -470,7 +470,7 @@ export const creditedMoney = async(req,res)=>{
 export const getDoctorSettings = async (req, res) => {
     try {
         const doctorBasicId = req.id; 
-
+console.log(doctorBasicId)
         const doctorBasic = await DoctorBasic.findOne({ _id: doctorBasicId });
         if (!doctorBasic) {
             return res.status(404).json({ success: false, message: "Doctor not found" });

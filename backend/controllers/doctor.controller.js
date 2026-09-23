@@ -471,7 +471,7 @@ export const getDoctorSettings = async (req, res) => {
     try {
         const doctorBasicId = req.id; 
 
-        const doctorBasic = await DoctorBasic.findOne({ doctorId: doctorBasicId });
+        const doctorBasic = await DoctorBasic.findOne({ _id: doctorBasicId });
         if (!doctorBasic) {
             return res.status(404).json({ success: false, message: "Doctor not found" });
         }

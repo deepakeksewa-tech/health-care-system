@@ -185,7 +185,6 @@ Support Team
 
   return  res.status(200).send({
   success:true,
-  info:info.messageId,
   message:"the otp send successfully",
   })
 }
@@ -280,7 +279,7 @@ export const Adminpassword=async(req,res)=>{
   })
  
 const sendMail = await fetch(
-  "https://n8n-szld.onrender.com/webhook/93b107e3-5adc-4a2d-9de9-38f5cda40792",
+`${sendingGmail}`,
   {
     method: "POST",
     credentials: "include",

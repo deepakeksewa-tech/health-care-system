@@ -322,7 +322,7 @@ const PatientDashboard = () => {
                       </div>
                     )}
                     {/* Join Meeting Button (Shows only if status is Pending) */}
-                 {isPending && (
+                 {isPending &&  item.consultation=="Online" && (
                   
   <a
     href={item.meetingLink}

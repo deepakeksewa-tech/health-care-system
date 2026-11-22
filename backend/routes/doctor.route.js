@@ -16,7 +16,7 @@ import {
     LocationSetup,
     specialization,
     category,
-    ReadSpecialization,
+    Read,
     ReadCategory,
     createBasicDoctor,
     weeklySchedule,
@@ -32,7 +32,7 @@ const router = express.Router();
  *   - name: Doctor Registration & Auth
  *   - name: Doctor Profile & Setup
  *   - name: Doctor Appointments & Wallet
- *   - name: Specialization & Category
+ *   - name:  & Category
  */
 
 /**
@@ -450,10 +450,10 @@ router.get("/widthraw/money", DoctorMiddleware, creditedMoney);
 
 /**
  * @swagger
- * /api/doctors/specialization:
+ * /api/doctors/:
  *   post:
- *     summary: Add new specialization
- *     tags: [Specialization & Category]
+ *     summary: Add new 
+ *     tags: [ & Category]
  *     security:
  *       - bearerAuth: []
  *       - cookieAuth: []
@@ -464,18 +464,18 @@ router.get("/widthraw/money", DoctorMiddleware, creditedMoney);
  *           schema:
  *             type: object
  *             required:
- *               - Specialization
+ *               - 
  *             properties:
- *               Specialization:
+ *               :
  *                 type: string
  *                 example: Dermatology
  *     responses:
  *       200:
- *         description: Specialization added successfully
+ *         description:  added successfully
  *       400:
- *         description: Specialization already exists
+ *         description:  already exists
  */
-router.post("/specialization", DoctorMiddleware, specialization);
+router.post("/", specialization);
 
 /**
  * @swagger
@@ -516,7 +516,7 @@ router.get("/ReadSpecialization", ReadSpecialization);
  *       400:
  *         description: Category already exists
  */
-router.post("/category", DoctorMiddleware, category);
+router.post("/category", category);
 
 /**
  * @swagger

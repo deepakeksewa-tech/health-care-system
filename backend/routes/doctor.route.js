@@ -16,7 +16,7 @@ import {
     LocationSetup,
     specialization,
     category,
-    Read,
+    ReadSpecialization,
     ReadCategory,
     createBasicDoctor,
     weeklySchedule,

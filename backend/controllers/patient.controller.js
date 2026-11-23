@@ -285,24 +285,7 @@ export const PatientAppointment = async (req, res) => {
       if (localFilePath && fs.existsSync(localFilePath)) fs.unlinkSync(localFilePath);
       return res.status(400).json({ success: false, message: "Invalid booking amount" });
     }
-   const meet = await fetch(
-  "https://n8n-szld.onrender.com/webhook/37afe49c-f094-4729-8b74-eceeabb6ae61",
-  {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      
-    })
-  }
-);
 
-const result = "";
-
-
-
-    // 1. Double Booking Check
     const existingBooking = await Patient.findOne({
       doctorId,
       bookingDate,
@@ -369,7 +352,7 @@ const result = "";
       razorpayOrderId,
       razorpayPaymentId,
       razorpaySignature,
-      meetingLink:""
+      meetingLink:`https://meet.jit.si/MedSewa-${crypto.randomBytes(8).toString("hex")}`
     });
 
     // 5. Update Doctor Payment Earnings

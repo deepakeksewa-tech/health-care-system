@@ -182,44 +182,53 @@ const Dashboard = () => {
     }
   }
 
-  const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/api/doctors/get/all/appointments`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-      });
-      if (response.status === 401 || response.status === 403) {
-        navigate('/login');
-        return;
-      }
-      const resData = await response.json();
+ const fetchDashboardData = async (silent = false) => {
+  try {
+    if (!silent) setLoading(true);
+    const response = await fetch(`${API_BASE_URL}/api/doctors/get/all/appointments`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    });
+    if (response.status === 401 || response.status === 403) {
+      navigate('/login');
+      return;
+    }
+    const resData = await response.json();
 
-      if (resData.success && Array.isArray(resData.data)) {
-        setAppointments(resData.data);
-      } else if (Array.isArray(resData)) {
-        setAppointments(resData);
-      } else {
-        setAppointments([]);
-      }
+    if (resData.success && Array.isArray(resData.data)) {
+      setAppointments(resData.data);
+    } else if (Array.isArray(resData)) {
+      setAppointments(resData);
+    } else if (!silent) {
+      setAppointments([]);
+    }
 
-      if (resData.doctor) {
-        setDoctorInfo(resData.doctor);
-      }
-    } catch (error) {
-      console.error("Error fetching dashboard data:", error);
+    if (resData.doctor) {
+      setDoctorInfo(resData.doctor);
+    }
+  } catch (error) {
+    console.error("Error fetching dashboard data:", error);
+    if (!silent) {
       navigate('/login');
       setAppointments([]);
-    } finally {
-      setLoading(false);
     }
-  };
+  } finally {
+    if (!silent) setLoading(false);
+  }
+};
 
-  useEffect(() => {
-    fetchDashboardData();
-    getName();
-  }, []);
+ useEffect(() => {
+  fetchDashboardData();
+  getName();
+  const interval = setInterval(() => {
+    if (document.visibilityState === "visible") {
+      fetchDashboardData(true);
+    }
+  }, 30000);
+
+  return () => clearInterval(interval);
+}, []);
 
   const handleVerifyPassword = async () => {
     if (!password) {
@@ -254,7 +263,7 @@ const Dashboard = () => {
     }
   };
 
-  const safeAppointmentsList = Array.isArray(appointments) ? appointments : [];
+const safeAppointmentsList = Array.isArray(appointments) ? [...appointments].reverse() : [];
   
   // Exclude cancelled appointments from Total Revenue
   const totalEarnings = safeAppointmentsList

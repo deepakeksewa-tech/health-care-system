@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Logo from '../assets/Logo.png'
 
 const PatientDashboard = () => {
+   const api = import.meta.env.VITE_API_URL;
   const navigate = useNavigate()
   const [currentSlide, setCurrentSlide] = useState(0)
   const [bookingDetails, setBookingDetails] = useState([])

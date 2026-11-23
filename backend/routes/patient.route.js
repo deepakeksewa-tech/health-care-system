@@ -125,7 +125,7 @@ router.post("/login", login);
  *       200:
  *         description: Available doctors list fetched successfully
  */
-router.get("/alldetails", UserMiddleware, ReadDoctorForPatient);
+router.get("/alldetails", ReadDoctorForPatient);
 
 /**
  * @swagger

@@ -103,7 +103,7 @@ const PatientLogin = () => {
       </div>
 
       {/* Form Section */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
+      <div className="w-full flex-1 lg:flex-none lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
         <div className="w-full max-w-md space-y-8 bg-white p-8 sm:p-10 rounded-3xl border border-slate-200/80 shadow-sm">
           
           {/* Logo Heading */}

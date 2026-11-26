@@ -28,7 +28,6 @@ import MedicineLogin from './Medicine/MedicineLogin'
 import MedicineDashboard from './Medicine/MedicineDashboard'
 import Settings from '../src/DoctorPhase/Settings'
 import Medicine_Section from './Patient/Medicine_Section'
-import ChatWidget from './Patient/ChatWidget'
 const App = () => {
   return (
     <>
@@ -70,8 +69,6 @@ const App = () => {
     <Route path='/Medicine/Dashboard' element={<MedicineDashboard/>}/>
     <Route path='/Medicince/Patient/Dashboard' element={<Medicine_Section/>}/>
       </Routes>
-
-  <ChatWidget/>
     </BrowserRouter>
     
     </>

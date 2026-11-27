@@ -1,6 +1,5 @@
 import { Medicine, MedOrder, userAddress } from "../models/medicine.model.js";
 
-// 1. Search / Fetch All Medicines
 export const searching = async (req, res) => {
   try {
     const { query } = req.query;
@@ -39,7 +38,7 @@ export const searching = async (req, res) => {
   }
 };
 
-// 2. Add / Increment Item in Cart (POST /cart/:medicineId)
+
 export const AddItem = async (req, res) => {
   try {
     const { medicineId } = req.params;
@@ -52,7 +51,7 @@ export const AddItem = async (req, res) => {
       });
     }
 
-    // Database se medicine fetch karein
+    
     const medicine = await Medicine.findById(medicineId);
     if (!medicine) {
       return res.status(404).send({
@@ -61,7 +60,6 @@ export const AddItem = async (req, res) => {
       });
     }
 
-    // Check stock availability
     if (medicine.Stock <= 0) {
       return res.status(400).send({
         success: false,
@@ -77,7 +75,7 @@ export const AddItem = async (req, res) => {
     let order = await MedOrder.findOne({ userId });
 
     if (!order) {
-      // Cart create karein agar exist nahi karta
+    
       const newOrder = await MedOrder.create({
         userId,
         OrderDetails: [
@@ -97,13 +95,13 @@ export const AddItem = async (req, res) => {
         data: newOrder
       });
     } else {
-      // Cart exist karta hai, check karein item pehle se hai ya nahi
+      
       const itemIndex = order.OrderDetails.findIndex(
         (item) => item.medicineId.toString() === medicineId.toString()
       );
 
       if (itemIndex > -1) {
-        // Stock limit boundary check
+      
         if (order.OrderDetails[itemIndex].quantity + 1 > medicine.Stock) {
           return res.status(400).send({
             success: false,
@@ -115,7 +113,7 @@ export const AddItem = async (req, res) => {
         order.OrderDetails[itemIndex].totalItemPrice =
           order.OrderDetails[itemIndex].quantity * effectivePrice;
       } else {
-        // Naya item cart array me push karein
+     
         order.OrderDetails.push({
           medicineId: medicine._id,
           name: medicine.Medicine_name,
@@ -141,7 +139,7 @@ export const AddItem = async (req, res) => {
   }
 };
 
-// 3. Decrease Item Quantity (PATCH /cart/:medicineId/decrease)
+
 export const DecreaseQuantity = async (req, res) => {
   try {
     const { medicineId } = req.params;
@@ -182,7 +180,6 @@ export const DecreaseQuantity = async (req, res) => {
       order.OrderDetails.splice(itemIndex, 1);
     }
 
-    // Cart agar empty ho gaya toh document delete karein
     if (order.OrderDetails.length === 0) {
       await MedOrder.findOneAndDelete({ userId });
       return res.status(200).send({
@@ -207,7 +204,6 @@ export const DecreaseQuantity = async (req, res) => {
   }
 };
 
-// 4. Remove Medicine Completely (DELETE /cart/:medicineId)
 export const removeMedicine = async (req, res) => {
   try {
     const { medicineId } = req.params;

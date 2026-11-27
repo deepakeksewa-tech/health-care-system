@@ -39,7 +39,7 @@ const AdminDashboard = () => {
 
   // Create a new admin
   async function createAdmin(e) {
-    e.preventDefault(); // Prevents page reload
+    e.preventDefault(); 
 
     if (gmail === "" ) {
       return toast.error("Please Enter the Email");
@@ -60,8 +60,8 @@ const AdminDashboard = () => {
       if (response.ok) {
         toast.success("Admin created successfully!");
         setgmail("");
-        setIsAdminModalOpen(false); // Close modal on success
-        listAdmin(); // Refresh the list
+        setIsAdminModalOpen(false); 
+        listAdmin(); 
       } else {
         toast.error(data.message || "Failed to create admin");
       }
@@ -71,9 +71,9 @@ const AdminDashboard = () => {
     }
   }
 
-  // Delete an admin
+  
   async function deleting(id) {
-    // Implement your delete API logic here
+    
     const response=await fetch(`${api}/api/admin/delete/admin/${id}`,
       {
         method:"GET",

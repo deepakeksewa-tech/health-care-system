@@ -19,8 +19,6 @@ import {
 const RegistrationForm = () => {
   const navigate = useNavigate();
   const api = import.meta.env.VITE_API_URL;
-
-  // Form states
   const [name, setName] = useState("");
   const [registrationNumber, setRegistrationNumber] = useState('');
   const [date, setDate] = useState("");
@@ -29,11 +27,7 @@ const RegistrationForm = () => {
   const [password, setPassword] = useState("");
   const [certificate, setCertificate] = useState(null);
   const [loading, setLoading] = useState(false);
-
-  // Dynamic error reporting state
   const [errors, setErrors] = useState({});
-
-  // Central validation checker
   const validate = () => {
     let localErrors = {};
 
@@ -123,8 +117,6 @@ const RegistrationForm = () => {
 
       <main className="max-w-6xl mx-auto px-4 py-8 lg:py-12">
         <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/60 overflow-hidden border border-slate-100 flex flex-col lg:flex-row">
-          
-          {/* Form Side */}
           <div className="w-full lg:w-7/12 p-6 sm:p-10">
             <div className="mb-8">
               <span className="text-xs font-bold uppercase tracking-widest text-[#078475] bg-[#078475]/10 px-3 py-1 rounded-full">
@@ -139,8 +131,6 @@ const RegistrationForm = () => {
             </div>
 
             <form onSubmit={handlePage} className="space-y-5">
-              
-              {/* Row 1: Name & Reg No */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="grid-name" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
@@ -182,8 +172,6 @@ const RegistrationForm = () => {
                   {errors.registrationNumber && <p className="text-rose-500 text-xs mt-1.5">{errors.registrationNumber}</p>}
                 </div>
               </div>
-
-              {/* Row 2: Reg Date & State Council */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="grid-date" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
@@ -221,8 +209,6 @@ const RegistrationForm = () => {
                   {errors.stateCouncilMedical && <p className="text-rose-500 text-xs mt-1.5">{errors.stateCouncilMedical}</p>}
                 </div>
               </div>
-
-              {/* Row 3: Email & Password */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="grid-email" className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
@@ -264,8 +250,6 @@ const RegistrationForm = () => {
                   {errors.password && <p className="text-rose-500 text-xs mt-1.5">{errors.password}</p>}
                 </div>
               </div>
-
-              {/* Certificate Upload Field */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
                   Registration Certificate (PDF/JPG) <span className="text-rose-500">*</span>
@@ -303,8 +287,6 @@ const RegistrationForm = () => {
                 </div>
                 {errors.certificate && <p className="text-rose-500 text-xs mt-1.5">{errors.certificate}</p>}
               </div>
-
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={loading}
@@ -331,8 +313,6 @@ const RegistrationForm = () => {
               </Link>
             </p>
           </div>
-
-          {/* Graphic Side */}
           <div className="hidden lg:flex lg:w-5/12 bg-gradient-to-br from-[#078475] to-[#044c43] p-10 flex-col justify-between relative overflow-hidden">
             <div className="relative z-10">
               <h2 className="text-2xl font-bold text-white mb-2">
@@ -355,8 +335,6 @@ const RegistrationForm = () => {
               <span>Encrypted & Secure</span>
               <span>Healthcare Portal</span>
             </div>
-
-            {/* Background decoration circles */}
             <div className="absolute -top-12 -right-12 w-48 h-48 bg-white/5 rounded-full blur-2xl pointer-events-none" />
             <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-black/10 rounded-full blur-2xl pointer-events-none" />
           </div>

@@ -17,10 +17,9 @@ import {
 import { IoWalletOutline, IoFilterOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 
-// Header Component with Logout Button
 const Header = ({ onLogout, onSettingsClick }) => (
   <header className="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center shadow-xs">
-    {/* Logo Section */}
+    
     <div className="flex items-center space-x-3">
       <img 
         src={Logo} 
@@ -32,9 +31,9 @@ const Header = ({ onLogout, onSettingsClick }) => (
       </span>
     </div>
 
-    {/* Right Section: Doctor Info, Settings & Logout */}
+    
     <div className="flex items-center space-x-3">
-      {/* Settings Button */}
+  
       <button
         onClick={onSettingsClick}
         className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 px-3 py-2 rounded-xl transition-colors cursor-pointer"
@@ -44,7 +43,6 @@ const Header = ({ onLogout, onSettingsClick }) => (
         <span className="hidden md:inline">Settings</span>
       </button>
 
-      {/* Logout Button */}
       <button
         onClick={onLogout}
         className="flex items-center gap-1.5 text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 px-3 py-2 rounded-xl transition-colors cursor-pointer"
@@ -308,7 +306,7 @@ const safeAppointmentsList = Array.isArray(appointments) ? [...appointments].rev
       />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
-        {/* Page Title Header */}
+       
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-200 pb-6">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
@@ -320,7 +318,7 @@ const safeAppointmentsList = Array.isArray(appointments) ? [...appointments].rev
           </div>
         </div>
 
-        {/* Metrics Grid */}
+       
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div
             onClick={() => setWalletModalOpen(true)}
@@ -382,7 +380,7 @@ const safeAppointmentsList = Array.isArray(appointments) ? [...appointments].rev
           </div>
         </div>
 
-        {/* Appointments Table Section */}
+       
         <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
           <div className="px-6 py-5 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
@@ -412,7 +410,6 @@ const safeAppointmentsList = Array.isArray(appointments) ? [...appointments].rev
             </div>
           </div>
 
-          {/* Desktop Table */}
           <div className="hidden lg:block overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -518,7 +515,7 @@ const safeAppointmentsList = Array.isArray(appointments) ? [...appointments].rev
             </table>
           </div>
 
-          {/* Mobile View */}
+         
           <div className="lg:hidden divide-y divide-slate-100">
             {loading ? (
               <p className="text-center py-6 text-slate-500 text-sm">Loading...</p>
@@ -591,7 +588,7 @@ const safeAppointmentsList = Array.isArray(appointments) ? [...appointments].rev
             )}
           </div>
 
-          {/* Pagination Controls */}
+        
           {filteredAppointments.length > 0 && (
             <div className="px-6 py-4 bg-slate-50/80 border-t border-slate-200 flex items-center justify-between">
               <span className="text-xs text-slate-500 font-medium">
@@ -637,7 +634,6 @@ const safeAppointmentsList = Array.isArray(appointments) ? [...appointments].rev
         </div>
       </main>
 
-      {/* Wallet Modal */}
       {walletModalOpen && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex justify-center items-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden border border-slate-100">
@@ -731,7 +727,7 @@ const safeAppointmentsList = Array.isArray(appointments) ? [...appointments].rev
         </div>
       )}
 
-      {/* Appointment Details Modal */}
+    
       {selectedAppointment && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex justify-center items-center z-50 p-4">
           <div className="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden border border-slate-100">
@@ -779,7 +775,7 @@ const safeAppointmentsList = Array.isArray(appointments) ? [...appointments].rev
                     ₹{selectedAppointment.amount || 0}
                   </span>
                 </div>
-                {/* Contact Number Field */}
+               
                 <div className="col-span-2 pt-2 border-t border-slate-200/60">
                   <span className="text-xs text-slate-400 font-medium block">Contact Number</span>
                   <span className="font-semibold text-slate-800">
@@ -788,7 +784,7 @@ const safeAppointmentsList = Array.isArray(appointments) ? [...appointments].rev
                 </div>
               </div>
 
-              {/* Symptoms */}
+         
               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-1">
                 <span className="text-xs text-slate-400 font-medium block">Symptoms / Description</span>
                 <p className="text-slate-700 font-medium text-xs leading-relaxed">
@@ -796,7 +792,7 @@ const safeAppointmentsList = Array.isArray(appointments) ? [...appointments].rev
                 </p>
               </div>
 
-              {/* Meeting Link Section */}
+              
               {selectedAppointment.meetingLink && 
                (selectedAppointment.status === "Pending" || selectedAppointment.status === "Ongoing" || !selectedAppointment.status) && (
                 <div className="bg-teal-50/60 p-4 rounded-2xl border border-teal-100 space-y-2">
@@ -807,12 +803,11 @@ const safeAppointmentsList = Array.isArray(appointments) ? [...appointments].rev
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-[#058b7c] hover:bg-[#047266] px-4 py-2 rounded-xl transition-colors shadow-xs"
                   >
-                    Join Video Call ↗
+                    Join Video Call 
                   </a>
                 </div>
               )}
 
-              {/* Status & Quick Action Note */}
               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center justify-between">
                 <div>
                   <span className="text-xs text-slate-400 font-medium block">Current Status</span>

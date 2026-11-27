@@ -7,9 +7,7 @@ const PatientDashboard = () => {
   const navigate = useNavigate()
   const [currentSlide, setCurrentSlide] = useState(0)
   const [bookingDetails, setBookingDetails] = useState([])
-
-  // Helper function: Time string (e.g. "09:30 AM - 10:00 AM") to start time in minutes
-  const parseSlotToMinutes = (slotTime) => {
+ const parseSlotToMinutes = (slotTime) => {
     if (!slotTime) return 0;
     const startTimeStr = slotTime.split('-')[0]?.trim();
     if (!startTimeStr) return 0;
@@ -44,8 +42,7 @@ const PatientDashboard = () => {
       const data = await response.json()
 
       if (data.success && Array.isArray(data.data)) {
-        // Sort appointments by Date & Time ascending
-        const sortedBookings = [...data.data].sort((a, b) => {
+       const sortedBookings = [...data.data].sort((a, b) => {
           const dateA = new Date(a.bookingDate).setHours(0, 0, 0, 0);
           const dateB = new Date(b.bookingDate).setHours(0, 0, 0, 0);
 
@@ -67,8 +64,7 @@ const PatientDashboard = () => {
   useEffect(() => {
     getDetails()
   }, [])
-
-  // Direct Logout Handler (No alert confirmation)
+  
   const handleLogout =async () => {
   try {
     const call = await fetch(`${api}/api/patient/logout`, {
@@ -76,7 +72,6 @@ const PatientDashboard = () => {
       headers: {
         "content-type": "application/json"
       },
-      // Yeh line sabse zaruri hai cookie delete/modify karne ke liye
       credentials: "include" 
     });
 
@@ -85,22 +80,19 @@ const PatientDashboard = () => {
     if (response.success) {
       console.log("Logged out successfully");
       navigate('/patient/login')
-      // Yahan tum user ko login page par redirect kar sakte ho
-      // window.location.href = "/login";
+      
     }
   } catch (error) {
     console.error("Logout failed:", error);
   }
   };
 
-  // Click on MED SEWA logo to go back to dashboard
+
   const handleHomeRedirect = () => {
-    navigate('/Patient/dashboard'); // Apne exact dashboard path ke according change kar sakte ho
+    navigate('/Patient/dashboard'); 
   };
 
  
-
-  // Healthcare-themed carousel slides
   const slides = [
     {
       url: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80',
@@ -128,7 +120,6 @@ const PatientDashboard = () => {
     navigate('/Patient/DoctorList')
   }
 
-  // Auto-advance carousel every 3 seconds
   useEffect(() => {
     const slideInterval = setInterval(() => {
       setCurrentSlide((prevSlide) =>
@@ -152,14 +143,11 @@ const PatientDashboard = () => {
 };
   return (
     <div className="bg-gray-100 min-h-screen pb-10">
-      
-      {/* Updated Inline Header */}
+     
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-xs">
   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div className="flex items-center justify-between h-16">
-      
-      {/* Left Side: Clickable Logo & MED SEWA Brand */}
-      <div 
+       <div 
         onClick={handleHomeRedirect} 
         className="flex items-center cursor-pointer select-none group"
       >
@@ -168,14 +156,8 @@ const PatientDashboard = () => {
           <span className="text-[#058b7c]">MED</span> SEWA
         </span>
       </div>
-
-      {/* Right Side: Back to Dashboard + Logout Button */}
-      <div className="flex items-center gap-2 sm:gap-3">
-        
-        {/* Back to Dashboard Button */}
-   
-
-        {/* Direct Logout Button */}
+       <div className="flex items-center gap-2 sm:gap-3">
+       
         <button
           onClick={handleLogout}
           className="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-semibold px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm transition-all duration-200 active:scale-95 cursor-pointer shadow-xs"
@@ -192,11 +174,9 @@ const PatientDashboard = () => {
     </div>
   </div>
 </header>
-      {/* Main Content */}
+    
       <main className="max-w-7xl mx-auto p-4 space-y-8">
-        
-        {/* Healthcare Carousel */}
-        <div id="default-carousel" className="relative w-full overflow-hidden rounded-2xl shadow-lg bg-gray-900 h-60 md:h-96">
+       <div id="default-carousel" className="relative w-full overflow-hidden rounded-2xl shadow-lg bg-gray-900 h-60 md:h-96">
           {slides.map((slide, index) => (
             <div
               key={index}
@@ -216,9 +196,7 @@ const PatientDashboard = () => {
               </div>
             </div>
           ))}
-
-          {/* Previous & Next Controls */}
-          <button
+           <button
             onClick={prevSlide}
             className="absolute top-1/2 left-4 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full transition cursor-pointer"
           >
@@ -230,8 +208,6 @@ const PatientDashboard = () => {
           >
             &#10095;
           </button>
-
-          {/* Carousel Indicators */}
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
             {slides.map((_, index) => (
               <button
@@ -245,7 +221,6 @@ const PatientDashboard = () => {
           </div>
         </div>
 
-        {/* Booking Details Section */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-gray-800">Your Appointments</h2>
@@ -266,7 +241,7 @@ const PatientDashboard = () => {
                     key={item._id}
                     className="w-80 md:w-96 flex-shrink-0 snap-start bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between space-y-4"
                   >
-                    {/* Top Bar: Patient & Status */}
+                   
                     <div className="flex items-center justify-between border-b pb-3">
                       <div>
                         <h3 className="text-lg font-bold text-gray-800">{item.patientName}</h3>
@@ -283,7 +258,6 @@ const PatientDashboard = () => {
                       </span>
                     </div>
 
-                    {/* Booking Details Grid */}
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
                         <p className="text-gray-400 text-xs font-medium uppercase">Date</p>
@@ -311,7 +285,7 @@ const PatientDashboard = () => {
                       </div>
                     </div>
 
-                    {/* Symptoms */}
+                    
                     {item.symptoms ? (
                       <div className="bg-gray-50 p-2.5 rounded-lg border border-gray-100 text-xs">
                         <span className="font-semibold text-gray-600">Symptoms: </span>
@@ -322,7 +296,7 @@ const PatientDashboard = () => {
                         No symptoms specified
                       </div>
                     )}
-                    {/* Join Meeting Button (Shows only if status is Pending) */}
+                    
                  {isPending &&  item.consultation=="Online" && (
                   
   <a
@@ -347,9 +321,8 @@ const PatientDashboard = () => {
           )}
         </section>
 
-        {/* Navigation Action Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Doctor Card */}
+         
           <div
             onClick={gotoDoctorSearch}
             className="bg-white border border-blue-200 rounded-2xl p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between"
@@ -376,7 +349,6 @@ const PatientDashboard = () => {
             </button>
           </div>
 
-          {/* Medicine Card */}
           <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
             <div>
               <p className="text-sm font-semibold text-blue-600 uppercase tracking-wider">
@@ -396,7 +368,7 @@ const PatientDashboard = () => {
             </div>
           </div>
 
-          {/* Laboratory Card */}
+        
           <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
             <div>
               <p className="text-sm font-semibold text-blue-600 uppercase tracking-wider">

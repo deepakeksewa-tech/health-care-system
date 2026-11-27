@@ -30,13 +30,10 @@ export default function Medicine_Section() {
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  
-  // Prescription Flow States
   const [isPrescriptionModalOpen, setIsPrescriptionModalOpen] = useState(false);
   const [prescriptionFile, setPrescriptionFile] = useState(null);
   const [patientDetails, setPatientDetails] = useState({ name: '', phone: '', address: '' });
   const [prescriptionSubmitted, setPrescriptionSubmitted] = useState(false);
-  // Checkout Success State
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   const [settings, setSettings] = useState({
     notifications: true,
@@ -132,18 +129,15 @@ export default function Medicine_Section() {
     const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
-  // Handle Prescription Upload Trigger
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       setPrescriptionFile(e.target.files[0]);
       setIsPrescriptionModalOpen(true);
     }
   };
-  // Submit Prescription to Pharmacist
   const handlePrescriptionSubmit = (e) => {
     e.preventDefault();
     setPrescriptionSubmitted(true);
-    // Automatically add a consultation or prescription fulfillment item to cart
     const rxItem = {
       id: 999,
       name: 'Prescription Based Medicines (Reviewing)',
@@ -161,7 +155,6 @@ export default function Medicine_Section() {
   };
   return (
     <div className="bg-[#f8fafc] text-slate-900 min-h-screen font-sans selection:bg-teal-600 selection:text-white relative">
-        {/* 1. PROFESSIONAL TOP NAVBAR */}
       <header className="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200/80 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
           
@@ -212,7 +205,6 @@ export default function Medicine_Section() {
 
         </div>
       </header>
-      {/* 2. HERO BANNER & INTERACTIVE PRESCRIPTION UPLOAD */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div className="bg-gradient-to-br from-teal-800 via-teal-700 to-teal-600 rounded-3xl p-8 md:p-12 text-white flex flex-col md:flex-row items-center justify-between shadow-xl relative overflow-hidden">
           <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-white/5 pointer-events-none"></div>
@@ -261,7 +253,7 @@ export default function Medicine_Section() {
           </div>
         </div>
       </section>
-      {/* 3. CATEGORIES SECTION */}
+     
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl md:text-2xl font-bold tracking-tight">Browse by Category</h2>
@@ -294,7 +286,6 @@ export default function Medicine_Section() {
         </div>
       </section>
 
-      {/* 4. PRODUCT LISTING SECTION */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8 mb-20">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl md:text-2xl font-bold tracking-tight">
@@ -345,9 +336,7 @@ export default function Medicine_Section() {
           ))}
         </div>
       </section>
-
-      {/* 5. PRESCRIPTION VERIFICATION & PATIENT DETAILS MODAL (NEXT STEP AFTER UPLOAD) */}
-      {isPrescriptionModalOpen && (
+       {isPrescriptionModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs" onClick={() => setIsPrescriptionModalOpen(false)}></div>
           
@@ -454,7 +443,7 @@ export default function Medicine_Section() {
           </div>
         </div>
       )}
-      {/* 6. SLIDE-OVER CART DRAWER */}
+      
       {isCartOpen && (
         <div className="fixed inset-0 z-50 overflow-hidden">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" onClick={() => setIsCartOpen(false)}></div>   
@@ -537,7 +526,7 @@ export default function Medicine_Section() {
           </div>
         </div>
       )}
-      {/* 7. SETTINGS MODAL */}
+     
       {isSettingsOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs" onClick={() => setIsSettingsOpen(false)}></div>      

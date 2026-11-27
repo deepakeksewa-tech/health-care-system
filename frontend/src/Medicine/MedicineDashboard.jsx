@@ -27,26 +27,18 @@ import {
 } from 'lucide-react';
 
 const MedicineDashboard = () => {
-  const [activeTab, setActiveTab] = useState('orders'); // 'orders' ya 'products'
+  const [activeTab, setActiveTab] = useState('orders'); 
   const [search, setSearch] = useState('');
   const [orderFilter, setOrderFilter] = useState('All');
-
-  // Modals state
   const [billingModalOrder, setBillingModalOrder] = useState(null);
   const [viewImageModal, setViewImageModal] = useState(null);
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
-
-  // Pagination for Products
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-
-  // Manual Billing Dynamic Items State
   const [manualBillItems, setManualBillItems] = useState([]);
   const [billDeliveryFee, setBillDeliveryFee] = useState(30);
   const [billDiscount, setBillDiscount] = useState(0);
-
-  // Add Product Form State
   const [newProductForm, setNewProductForm] = useState({
     name: '',
     category: 'Antibiotics',
@@ -58,8 +50,6 @@ const MedicineDashboard = () => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
   };
-
-  // 1. INVENTORY STATE
   const [products, setProducts] = useState([
     { id: '#PRD101', name: 'Nullacin 500mg', category: 'Antibiotics', qty: 120, price: 180, status: 'In stock' },
     { id: '#PRD102', name: 'Medicanox Syrup 100ml', category: 'Respiratory', qty: 0, price: 140, status: 'Out Of stock' },
@@ -70,15 +60,13 @@ const MedicineDashboard = () => {
     { id: '#PRD107', name: 'Cetirizine 10mg', category: 'Allergy', qty: 90, price: 45, status: 'In stock' },
     { id: '#PRD108', name: 'Azithromycin 500mg', category: 'Antibiotics', qty: 40, price: 120, status: 'In stock' },
   ]);
-
-  // 2. CUSTOMER ORDERS (Both Direct & Prescription/Image Uploads)
-  const [customerOrders, setCustomerOrders] = useState([
+ const [customerOrders, setCustomerOrders] = useState([
     {
       orderId: '#ORD-9841',
       customerName: 'Rahul Sharma',
       phone: '+91 98765-43210',
       address: 'House 42, Green Avenue, Amritsar',
-      type: 'prescription_upload', // Requires manual pricing
+      type: 'prescription_upload', 
       uploadedImage: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=400',
       prescriptionText: 'Dr. Verma Rx: 1 Strip Nullacin + 1 Theralief Gel',
       items: [
@@ -94,7 +82,7 @@ const MedicineDashboard = () => {
       customerName: 'Priya Verma',
       phone: '+91 98111-22334',
       address: 'Flat 302, Palm Heights, Delhi',
-      type: 'direct_order', // Already priced
+      type: 'direct_order', 
       uploadedImage: null,
       items: [
         { name: 'CP-0004 Multivitamin', qty: 1, unitPrice: 350 }
@@ -131,7 +119,6 @@ const MedicineDashboard = () => {
     }
   ]);
 
-  // Open Billing Modal & Pre-fill items
   const handleOpenBillingModal = (order) => {
     setBillingModalOrder(order);
     setManualBillItems(
@@ -145,24 +132,20 @@ const MedicineDashboard = () => {
     setBillDeliveryFee(30);
   };
 
-  // Add Item inside Billing Modal
   const handleAddManualItem = () => {
     setManualBillItems([...manualBillItems, { name: '', qty: 1, unitPrice: '' }]);
   };
 
-  // Remove Item inside Billing Modal
+   
   const handleRemoveManualItem = (index) => {
     setManualBillItems(manualBillItems.filter((_, idx) => idx !== index));
   };
-
-  // Update item field inside Billing Modal
   const handleItemFieldChange = (index, field, value) => {
     const updated = [...manualBillItems];
     updated[index][field] = value;
     setManualBillItems(updated);
   };
 
-  // Calculated Bill Total
   const calculatedTotal = useMemo(() => {
     const subtotal = manualBillItems.reduce((acc, it) => {
       const q = Number(it.qty) || 0;
@@ -174,7 +157,7 @@ const MedicineDashboard = () => {
     return { subtotal, discountAmt, finalTotal: Math.round(finalTotal) };
   }, [manualBillItems, billDiscount, billDeliveryFee]);
 
-  // Submit Bill and Send to Customer
+  
   const handleSendBillToCustomer = (e) => {
     e.preventDefault();
     if (!billingModalOrder) return;
@@ -209,17 +192,13 @@ const MedicineDashboard = () => {
     triggerToast(`Bill of ₹${calculatedTotal.finalTotal} & Payment Request sent to ${billingModalOrder.customerName}!`);
     setBillingModalOrder(null);
   };
-
-  // Order Lifecycle Status Updater
-  const handleUpdateOrderStatus = (orderId, newStatus) => {
+ const handleUpdateOrderStatus = (orderId, newStatus) => {
     setCustomerOrders(
       customerOrders.map((ord) => (ord.orderId === orderId ? { ...ord, status: newStatus } : ord))
     );
     triggerToast(`Order ${orderId} updated to: ${newStatus}`);
   };
-
-  // Add Product to Inventory
-  const handleAddNewProduct = (e) => {
+ const handleAddNewProduct = (e) => {
     e.preventDefault();
     if (!newProductForm.name || !newProductForm.qty || !newProductForm.price) return;
 
@@ -239,16 +218,13 @@ const MedicineDashboard = () => {
     triggerToast(`"${newProd.name}" added to inventory!`);
   };
 
-  // Delete Product
   const handleDeleteProduct = (id) => {
     if (window.confirm('Delete this product from inventory?')) {
       setProducts(products.filter((p) => p.id !== id));
       triggerToast('Product deleted from inventory.');
     }
   };
-
-  // Products Filtering and Pagination Logic
-  const filteredProducts = useMemo(() => {
+ const filteredProducts = useMemo(() => {
     return products.filter(
       (p) =>
         p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -263,8 +239,7 @@ const MedicineDashboard = () => {
     return filteredProducts.slice(start, start + rowsPerPage);
   }, [filteredProducts, currentPage, rowsPerPage]);
 
-  // Filtered Orders
-  const filteredOrders = useMemo(() => {
+ const filteredOrders = useMemo(() => {
     return customerOrders.filter((o) => {
       const matchSearch =
         o.customerName.toLowerCase().includes(search.toLowerCase()) ||
@@ -278,7 +253,7 @@ const MedicineDashboard = () => {
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-sans pb-16">
       
-      {/* Toast Notification Alert */}
+   
       {toastMessage && (
         <div className="fixed bottom-6 right-6 bg-teal-900 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-xl flex items-center gap-2.5 z-50 animate-bounce">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -286,11 +261,9 @@ const MedicineDashboard = () => {
         </div>
       )}
 
-      {/* 1. TOP NAVBAR */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
           
-          {/* Logo & Navigation Tabs */}
           <div className="flex items-center gap-6">
             <div 
               onClick={() => { setActiveTab('orders'); setSearch(''); }} 
@@ -305,7 +278,6 @@ const MedicineDashboard = () => {
               </div>
             </div>
 
-            {/* Segmented Control Switcher */}
             <div className="flex items-center bg-slate-100 p-1 rounded-xl gap-1">
               <button
                 onClick={() => { setActiveTab('orders'); setSearch(''); }}
@@ -339,7 +311,6 @@ const MedicineDashboard = () => {
             </div>
           </div>
 
-          {/* Search Input */}
           <div className="relative w-52 sm:w-64">
             <input
               type="text"
@@ -354,16 +325,10 @@ const MedicineDashboard = () => {
         </div>
       </header>
 
-      {/* 2. MAIN CONTENT CONTAINER */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-8 py-6 space-y-6">
+       <main className="max-w-7xl mx-auto px-4 sm:px-8 py-6 space-y-6">
 
-        {/* ============================================================ */}
-        {/* VIEW 1: CUSTOMER ORDERS & PRESCRIPTION BILLING FLOW          */}
-        {/* ============================================================ */}
-        {activeTab === 'orders' && (
+         {activeTab === 'orders' && (
           <div className="space-y-6">
-            
-            {/* Top Summary Metrics */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="bg-white p-4 rounded-xl border border-slate-200 flex items-center justify-between">
                 <div>
@@ -406,7 +371,6 @@ const MedicineDashboard = () => {
               </div>
             </div>
 
-            {/* Filter Pills */}
             <div className="flex flex-wrap gap-2">
               {['All', 'Needs Pricing', 'Bill Sent', 'Out for Delivery', 'Delivered'].map((st) => (
                 <button
@@ -422,16 +386,13 @@ const MedicineDashboard = () => {
                 </button>
               ))}
             </div>
-
-            {/* Orders Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {filteredOrders.map((order) => (
                 <div
                   key={order.orderId}
                   className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4 hover:border-teal-300 transition-all flex flex-col justify-between"
                 >
                   <div className="space-y-3">
-                    {/* Header */}
                     <div className="flex items-start justify-between">
                       <div>
                         <div className="flex items-center gap-2">
@@ -456,7 +417,7 @@ const MedicineDashboard = () => {
                       </span>
                     </div>
 
-                    {/* Customer Contact */}
+                   
                     <div className="bg-slate-50 p-3 rounded-xl text-xs space-y-1 text-slate-600">
                       <div className="flex items-center gap-2">
                         <Phone className="w-3.5 h-3.5 text-teal-700 shrink-0" />
@@ -468,7 +429,6 @@ const MedicineDashboard = () => {
                       </div>
                     </div>
 
-                    {/* Uploaded Prescription / Image Preview Box */}
                     {order.uploadedImage && (
                       <div className="border border-amber-200 bg-amber-50/50 p-3 rounded-xl flex items-center justify-between gap-3 text-xs">
                         <div className="flex items-center gap-2.5">
@@ -493,7 +453,6 @@ const MedicineDashboard = () => {
                       </div>
                     )}
 
-                    {/* Ordered Medicines Breakdown */}
                     <div className="space-y-1 text-xs">
                       <span className="font-semibold text-slate-500 text-[11px]">Medicines Summary:</span>
                       <div className="border border-slate-100 rounded-xl p-2.5 bg-slate-50/50 divide-y divide-slate-100">
@@ -511,7 +470,6 @@ const MedicineDashboard = () => {
                     </div>
                   </div>
 
-                  {/* Order Footer & Actions */}
                   <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 text-xs">
                     <div>
                       {order.bill ? (
@@ -524,9 +482,7 @@ const MedicineDashboard = () => {
                       )}
                     </div>
 
-                    {/* Action Triggers based on Order Stage */}
                     <div className="flex gap-2">
-                      {/* Step 1: Generate / Edit Bill for Uploaded Rx or Direct Order */}
                       {(!order.bill || order.status === 'Needs Pricing') && (
                         <button
                           onClick={() => handleOpenBillingModal(order)}
@@ -535,9 +491,7 @@ const MedicineDashboard = () => {
                           <Receipt className="w-3.5 h-3.5" /> Generate & Send Bill
                         </button>
                       )}
-
-                      {/* Step 2: Bill Sent -> Move to Dispatch */}
-                      {order.status.includes('Bill Sent') && (
+                     {order.status.includes('Bill Sent') && (
                         <button
                           onClick={() => handleUpdateOrderStatus(order.orderId, 'Out for Delivery')}
                           className="px-3.5 py-2 bg-purple-700 hover:bg-purple-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs"
@@ -546,7 +500,6 @@ const MedicineDashboard = () => {
                         </button>
                       )}
 
-                      {/* Step 3: Out for Delivery -> Delivered */}
                       {order.status === 'Out for Delivery' && (
                         <button
                           onClick={() => handleUpdateOrderStatus(order.orderId, 'Delivered')}
@@ -571,13 +524,8 @@ const MedicineDashboard = () => {
           </div>
         )}
 
-        {/* ============================================================ */}
-        {/* VIEW 2: PRODUCT LIST INVENTORY WITH PAGINATION & ADD OPTION */}
-        {/* ============================================================ */}
         {activeTab === 'products' && (
           <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
-            
-            {/* Table Header Controls */}
             <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-slate-100">
               <div>
                 <h3 className="text-base font-bold text-slate-900">Pharmacy Product Catalog</h3>
@@ -591,9 +539,7 @@ const MedicineDashboard = () => {
                 >
                   <Plus className="w-4 h-4" /> Add New Medicine
                 </button>
-
-                {/* Rows per page selector */}
-                <div className="flex items-center gap-1 text-xs text-slate-500">
+             <div className="flex items-center gap-1 text-xs text-slate-500">
                   <span>Rows:</span>
                   <select
                     value={rowsPerPage}
@@ -607,9 +553,7 @@ const MedicineDashboard = () => {
                 </div>
               </div>
             </div>
-
-            {/* Inventory Table */}
-            <div className="overflow-x-auto">
+           <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-slate-100 text-slate-400 uppercase text-[10px] font-semibold">
@@ -665,9 +609,7 @@ const MedicineDashboard = () => {
                 </tbody>
               </table>
             </div>
-
-            {/* Pagination Controls */}
-            <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-100 text-xs">
+             <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-100 text-xs">
               <span className="text-slate-500">
                 Showing {paginatedProducts.length > 0 ? (currentPage - 1) * rowsPerPage + 1 : 0} to{' '}
                 {Math.min(currentPage * rowsPerPage, filteredProducts.length)} of {filteredProducts.length} entries
@@ -698,10 +640,6 @@ const MedicineDashboard = () => {
         )}
 
       </main>
-
-      {/* ============================================================ */}
-      {/* 3. MODAL: MANUAL BILLING & PRICING GENERATOR                  */}
-      {/* ============================================================ */}
       {billingModalOrder && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative border border-slate-100 max-h-[90vh] overflow-y-auto">
@@ -723,9 +661,7 @@ const MedicineDashboard = () => {
             </div>
 
             <form onSubmit={handleSendBillToCustomer} className="py-4 space-y-4 text-xs">
-              
-              {/* Prescribed Item Rows (Editable) */}
-              <div className="space-y-2">
+             <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-slate-700">Enter Prescribed Medicines & Rates:</span>
                   <button
@@ -782,9 +718,7 @@ const MedicineDashboard = () => {
                   ))}
                 </div>
               </div>
-
-              {/* Delivery Fee & Discount */}
-              <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="font-semibold text-slate-600 block mb-1">Discount (%)</label>
                   <input
@@ -807,9 +741,7 @@ const MedicineDashboard = () => {
                   />
                 </div>
               </div>
-
-              {/* Bill Summary Box */}
-              <div className="bg-teal-50/70 border border-teal-200 rounded-xl p-3.5 space-y-1 text-slate-700">
+            <div className="bg-teal-50/70 border border-teal-200 rounded-xl p-3.5 space-y-1 text-slate-700">
                 <div className="flex justify-between">
                   <span>Subtotal:</span>
                   <span className="font-bold">₹{calculatedTotal.subtotal}</span>
@@ -830,7 +762,6 @@ const MedicineDashboard = () => {
                 </div>
               </div>
 
-              {/* Action Buttons */}
               <div className="pt-2 flex gap-3">
                 <button
                   type="button"
@@ -851,11 +782,7 @@ const MedicineDashboard = () => {
           </div>
         </div>
       )}
-
-      {/* ============================================================ */}
-      {/* 4. MODAL: ADD PRODUCT FORM                                    */}
-      {/* ============================================================ */}
-      {isAddProductOpen && (
+        {isAddProductOpen && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative border border-slate-100">
             <button
@@ -941,10 +868,6 @@ const MedicineDashboard = () => {
           </div>
         </div>
       )}
-
-      {/* ============================================================ */}
-      {/* 5. MODAL: PRESCRIPTION IMAGE VIEWER                          */}
-      {/* ============================================================ */}
       {viewImageModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-4 shadow-2xl relative">

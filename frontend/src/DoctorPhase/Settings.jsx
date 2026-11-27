@@ -37,9 +37,6 @@ const Settings = ({ userRole = "doctor" }) => {
     }))
   });
 
-  // ----------------------------------------------------
-  // 📥 FETCH SETTINGS ON MOUNT
-  // ----------------------------------------------------
   useEffect(() => {
     if (userRole === "doctor") {
       fetchDoctorSettings();
@@ -99,9 +96,6 @@ const Settings = ({ userRole = "doctor" }) => {
     }
   };
 
-  // ----------------------------------------------------
-  // ✏️ HANDLERS
-  // ----------------------------------------------------
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -133,9 +127,6 @@ const Settings = ({ userRole = "doctor" }) => {
     setFormData((prev) => ({ ...prev, weeklySchedule: updatedSchedule }));
   };
 
-  // ----------------------------------------------------
-  // 💾 SAVE SETTINGS (CALLING 2 SEPARATE APIs)
-  // ----------------------------------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -148,7 +139,6 @@ const Settings = ({ userRole = "doctor" }) => {
         "Authorization": `Bearer ${token}`
       };
 
-      // 1️⃣ Payload for Doctor Profile Info
       const profilePayload = {
         name: formData.name,
         experience: formData.experience,
@@ -157,7 +147,7 @@ const Settings = ({ userRole = "doctor" }) => {
         specification: formData.specialization
       };
 
-      // 2️⃣ Payload for Weekly Off Schedule
+     
       const formattedWeekly = formData.weeklySchedule.map(item => ({
         day: String(item.day),
         start: String(item.start || (item.status ? "10:00 AM" : "")),
@@ -169,8 +159,6 @@ const Settings = ({ userRole = "doctor" }) => {
         weekly: formattedWeekly
       };
 
-      // 🚀 Both APIs calling in Parallel via Promise.all
-      // Note: Endpoint URLs apne backend routes ke hisab se confirm kar lena
       const [profileRes, weeklyRes] = await Promise.all([
         fetch(`${API_BASE_URL}/api/doctors/profile`, {
           method: "PUT",
@@ -216,8 +204,6 @@ const Settings = ({ userRole = "doctor" }) => {
   return (
     <div className="min-h-screen bg-gray-50/50 p-4 md:p-8">
       <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-        
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-white sticky top-0 z-10">
           <div className="flex items-center space-x-3">
             <button
@@ -246,10 +232,8 @@ const Settings = ({ userRole = "doctor" }) => {
           </div>
         )}
 
-        {/* Main Form */}
         <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-8">
-          
-          {/* Section 1: Profile Info */}
+  
           <div>
             <div className="flex items-center space-x-2 text-[#058b7c] font-bold text-base mb-6">
               <span className="p-2 bg-[#058b7c]/10 rounded-lg"><FiUser className="w-5 h-5" /></span>
@@ -330,7 +314,6 @@ const Settings = ({ userRole = "doctor" }) => {
 
           <hr className="border-gray-100" />
 
-          {/* Section 2: Timings */}
           <div>
             <div className="flex items-center space-x-2 text-[#058b7c] font-bold text-base mb-6">
               <span className="p-2 bg-[#058b7c]/10 rounded-lg"><FiCalendar className="w-5 h-5" /></span>
@@ -387,7 +370,6 @@ const Settings = ({ userRole = "doctor" }) => {
             </div>
           </div>
 
-          {/* Action Footer */}
           <div className="flex justify-end pt-4 border-t border-gray-100">
             <button
               type="submit"

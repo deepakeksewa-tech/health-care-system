@@ -102,8 +102,6 @@ else{
       <div className="max-w-7xl mx-auto p-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-          {/* Left Image */}
-
           <div>
             <div className="p-5 font-bold text-3xl">Dr {name} </div>
             <img
@@ -112,9 +110,6 @@ else{
               className="w-full h-[80%] object-center  rounded-3xl shadow-lg"
             />
           </div>
-
-          {/* Right Section */}
-
           <div className="lg:col-span-2" >
 
             <div className="bg-white rounded-3xl shadow-lg p-3 ">
@@ -131,12 +126,11 @@ else{
     }`}
   >
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 items-center">
-      {/* Day */}
+   
       <div className="lg:col-span-2">
         <h3 className="font-semibold text-lg">{item.day}</h3>
       </div>
 
-      {/* Toggle */}
       <div className="lg:col-span-2">
         <div className="flex bg-gray-200 rounded-full overflow-hidden w-full ">
           <button
@@ -163,7 +157,6 @@ else{
         </div>
       </div>
 
-      {/* Start Time */}
       {item.status===true && 
       <div className="lg:col-span-4">
         <label className="block text-xs text-gray-500 mb-1">
@@ -183,7 +176,7 @@ else{
 
         }
      
-      {/* End Time */}
+      
          {item.status==true && 
       <div className="lg:col-span-4">
         <label className="block text-xs text-gray-500 mb-1">

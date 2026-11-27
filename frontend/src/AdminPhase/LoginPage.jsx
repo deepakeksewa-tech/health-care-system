@@ -8,16 +8,14 @@ const LoginPage = () => {
   const api = import.meta.env.VITE_API_URL
   const navigate = useNavigate()
 
-  // Form State
   const [gmail, setGmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  // Validation Error State
   const [errors, setErrors] = useState({})
 
-  // Field Validation Logic
+ 
   const validate = () => {
     const newErrors = {}
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -81,7 +79,6 @@ const LoginPage = () => {
     <div className="w-full min-h-screen bg-slate-50 flex flex-col lg:flex-row antialiased">
       <Toaster position="top-right" />
 
-      {/* Hero Visual Section */}
       <div className="hidden lg:flex lg:w-1/2 relative bg-slate-900 overflow-hidden items-center justify-center">
         <img
           className="absolute inset-0 h-full w-full object-cover opacity-60"

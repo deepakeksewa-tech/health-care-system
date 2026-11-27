@@ -58,12 +58,12 @@ const App = () => {
       <Route path='/Patient/Dashboard' element={<PatientDashboard/>}/>
       <Route path='/Patient/DoctorList' element={<PatientDoctorList/>}/>
       <Route path='/Patient/DoctorSlot/:id' element={<PatientDoctorSlots/>}/>
-        {/* ---------------Forget Password ---------------*/}
+       //Forget Password
     <Route path='/forgot-password-doctor' element={<DoctorPassword/>}/>
     <Route path='/forgot-password-patient' element={<PatientPassword/>}/>
     <Route path='/forgot-password-admin' element={<AdminPassword/>}/>
 
-    {/* ---------------- Medicine --------------------- */}
+   // Medicine
     <Route path='/Medicine/Signup' element={<MedicineSignup/>}/>
     <Route path='/Medicine/Login' element={<MedicineLogin/>}/>
     <Route path='/Medicine/Dashboard' element={<MedicineDashboard/>}/>

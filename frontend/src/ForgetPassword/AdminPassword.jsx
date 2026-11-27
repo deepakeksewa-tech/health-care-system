@@ -4,10 +4,7 @@ import {useNavigate} from 'react-router-dom'
 const AdminPassword = () => {
   const navigate=useNavigate();
   const api= import.meta.env.VITE_API_URL
-  // Step tracker: 1 = Enter Email, 2 = Enter OTP, 3 = Reset Password, 4 = Success
   const [step, setStep] = useState(1);
-  
-  // Form states
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -17,7 +14,6 @@ const AdminPassword = () => {
   function gotoLoginPage(){
     navigate('/Admin/LoginPage')
   }
-  // Step 1: Send OTP handler
   const handleSendOtp = async (e) => {
     e.preventDefault();
     if (!email) return alert('Please enter your email address');
@@ -26,8 +22,6 @@ const AdminPassword = () => {
     setMessage('');
 
     try {
-      // Simulate API call to send OTP
-      // await axios.post('/api/send-otp', { email });
       console.log("hi");
       
      const response=await fetch(`${api}/api/forget/admin/get/otp/toVerify`,
@@ -47,10 +41,7 @@ const AdminPassword = () => {
      
      const data=await response.json();
      console.log(data);
-     
-
-      // Move to next step on success
-      setStep(2);
+       setStep(2);
       setMessage('OTP has been sent to your email.');
     } catch (error) {
       alert(error);
@@ -58,9 +49,7 @@ const AdminPassword = () => {
       setLoading(false);
     }
   };
-
-  // Step 2: Verify OTP handler
-  const handleVerifyOtp = async (e) => {
+ const handleVerifyOtp = async (e) => {
     e.preventDefault();
     if (!otp) return alert('Please enter the OTP');
 
@@ -68,8 +57,6 @@ const AdminPassword = () => {
     setMessage('');
 
     try {
-      // Simulate API call to verify OTP
-      // await axios.post('/api/verify-otp', { email, otp });
        
      const response=await fetch(`${api}/api/forget/admin/post/Otp`,
       {
@@ -86,7 +73,6 @@ const AdminPassword = () => {
      )
      const data=await response.json();
      if(data.success){
-      // Move to next step on succes
       setStep(3);
       setMessage('OTP verified successfully!');
      }
@@ -101,7 +87,6 @@ const AdminPassword = () => {
     }
   };
 
-  // Step 3: Reset Password handler
   const handleResetPassword = async (e) => {
     e.preventDefault();
     if (!newPassword) return alert('Please enter a new password');
@@ -110,8 +95,6 @@ const AdminPassword = () => {
     setMessage('');
 
     try {
-      // Simulate API call to change password
-      // await axios.post('/api/reset-password', { email, newPassword });
       const response=await fetch(`${api}/api/forget/admin/change/password`,
       {
         method:"POST",
@@ -154,9 +137,7 @@ const AdminPassword = () => {
           {message}
         </div>
       )}
-
-      {/* STEP 1: Enter Email & Send OTP */}
-      {step === 1 && (
+  {step === 1 && (
         <form onSubmit={handleSendOtp}>
           <div style={{ marginBottom: '15px' }}>
             <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px' }}>Email Address</label>
@@ -179,7 +160,7 @@ const AdminPassword = () => {
         </form>
       )}
 
-      {/* STEP 2: Enter OTP */}
+    
       {step === 2 && (
         <form onSubmit={handleVerifyOtp}>
           <div style={{ marginBottom: '15px' }}>
@@ -210,7 +191,7 @@ const AdminPassword = () => {
         </form>
       )}
 
-      {/* STEP 3: Change Password */}
+    
       {step === 3 && (
         <form onSubmit={handleResetPassword}>
           <div style={{ marginBottom: '15px' }}>
@@ -234,7 +215,6 @@ const AdminPassword = () => {
         </form>
       )}
 
-      {/* STEP 4: Completed State */}
       {step === 4 && (
         <div style={{ textAlign: 'center' }}>
           <p style={{ color: '#16a34a', fontWeight: 'bold' }}>All set! Your password has been reset.</p>

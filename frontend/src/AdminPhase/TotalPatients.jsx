@@ -9,12 +9,11 @@ const TotalPatient = () => {
   const [loading, setloading] = useState(false);
   const [TotalPatient, setTotalPatient] = useState([]);
   const [History, setHistory] = useState(false);
-  const [selectedUser, setselectedUser] = useState(null); // Fixed initial state to null
+  const [selectedUser, setselectedUser] = useState(null); 
 
   async function findHistory(user) {
     try {
-      setselectedUser(user); // Fix 1: Store selected user object for Modal header
-      setloading(true);
+      setselectedUser(user); 
 
       const response = await fetch(`${api}/api/admin/get/AllPatients/${user._id}`, {
         method: "GET",
@@ -34,7 +33,7 @@ const TotalPatient = () => {
       console.log(error);
       toast.error("Error fetching history");
     } finally {
-      setloading(false); // Fix 2: Direct loading state update without unnecessary delay
+      setloading(false); 
     }
   }
 
@@ -45,7 +44,7 @@ const TotalPatient = () => {
         method: "GET",
         credentials: "include",
         headers: {
-          "Content-Type": "application/json", // Fix 3: Fixed typo ('applicaiton/json')
+          "Content-Type": "application/json",  
         },
       });
         if (response.status === 401 || response.status === 403) {
@@ -67,7 +66,7 @@ const TotalPatient = () => {
   async function deleting(id) {
     try {
       const response = await fetch(`${api}/api/admin/delete/doctor/${id}`, {
-        method: "DELETE", // Changed GET to DELETE standard method
+        method: "DELETE",  
         credentials: "include",
         headers: {
           "Content-Type": "application/json"
@@ -261,7 +260,7 @@ const TotalPatient = () => {
                       <td className="px-6 py-4">
                         <button
                           onClick={() => {
-                            findHistory(item); // Fix 4: Pass entire item to populate modal header details
+                            findHistory(item); 
                             setHistory(true);
                           }}
                           className="cursor-pointer bg-green-600 text-white px-4 py-2 text-sm rounded-lg hover:bg-green-700 transition"
@@ -295,7 +294,7 @@ const TotalPatient = () => {
                   <div className="flex gap-3 mt-4">
                     <button
                       onClick={() => {
-                        findHistory(item); // Fix 5: Changed item.id to pass full item object
+                        findHistory(item); 
                         setHistory(true);
                       }}
                       className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition w-full"

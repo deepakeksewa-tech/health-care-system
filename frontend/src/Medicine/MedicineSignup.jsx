@@ -7,8 +7,6 @@ import { User, Mail, Phone, Lock, Eye, EyeOff, Store, CheckCircle2 } from 'lucid
 const MedicineSignup = () => {
   const api = import.meta.env.VITE_API_URL
   const navigate = useNavigate()
-
-  // Form State
   const [gmail, setGmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
@@ -16,23 +14,16 @@ const MedicineSignup = () => {
   const [contact, setContact] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-
-  // Verification States (Reset to initial default states)
-  const [emailOtpSent, setEmailOtpSent] = useState(false)
+ const [emailOtpSent, setEmailOtpSent] = useState(false)
   const [emailOtp, setEmailOtp] = useState('')
   const [isEmailVerified, setIsEmailVerified] = useState(false)
   const [emailLoading, setEmailLoading] = useState(false)
-
   const [phoneOtpSent, setPhoneOtpSent] = useState(false)
   const [phoneOtp, setPhoneOtp] = useState('')
   const [isPhoneVerified, setIsPhoneVerified] = useState(false)
   const [phoneLoading, setPhoneLoading] = useState(false)
-
-  // Validation Error State
-  const [errors, setErrors] = useState({})
-
-  // Field-level Validation Function
-  const validate = () => {
+ const [errors, setErrors] = useState({})
+const validate = () => {
     const newErrors = {}
 
     if (!name.trim()) {
@@ -73,7 +64,7 @@ const MedicineSignup = () => {
     return Object.keys(newErrors).length === 0
   }
 
-  // Handle Static Send Email OTP
+  
   const handleSendEmailOtp = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!gmail.trim() || !emailRegex.test(gmail)) {
@@ -89,7 +80,7 @@ const MedicineSignup = () => {
     }, 600)
   }
 
-  // Handle Static Verify Email OTP
+  
   const handleVerifyEmailOtp = () => {
     if (!emailOtp) {
       toast.error('Enter the email verification code.')
@@ -104,7 +95,6 @@ const MedicineSignup = () => {
     }
   }
 
-  // Handle Static Send Phone OTP
   const handleSendPhoneOtp = () => {
     const phoneRegex = /^[0-9]{10}$/
     if (!contact.trim() || !phoneRegex.test(contact)) {
@@ -120,7 +110,6 @@ const MedicineSignup = () => {
     }, 600)
   }
 
-  // Handle Static Verify Phone OTP
   const handleVerifyPhoneOtp = () => {
     if (!phoneOtp) {
       toast.error('Enter the phone verification code.')
@@ -182,8 +171,6 @@ const MedicineSignup = () => {
   return (
     <div className="w-full min-h-screen bg-slate-50 flex flex-col lg:flex-row antialiased">
       <Toaster position="top-right" />
-
-      {/* Hero Visual Section */}
       <div className="hidden lg:flex lg:w-1/2 relative bg-slate-900 overflow-hidden items-center justify-center">
         <img
           className="absolute inset-0 h-full w-full object-cover opacity-60"
@@ -203,12 +190,9 @@ const MedicineSignup = () => {
           </p>
         </div>
       </div>
-
-      {/* Form Section */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
         <div className="w-full max-w-md space-y-6 bg-white p-8 sm:p-10 rounded-3xl border border-slate-200/80 shadow-sm">
-          
-          {/* Logo Heading */}
+      
           <div className="space-y-2 text-center">
             <div className="inline-flex items-center justify-center gap-2">
               <img
@@ -230,10 +214,8 @@ const MedicineSignup = () => {
             </p>
           </div>
 
-          {/* Signup Form */}
           <form onSubmit={handleSignup} noValidate className="space-y-4">
             
-            {/* Full Name Input */}
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-700 block">Full Name</label>
               <div className="relative">
@@ -254,7 +236,6 @@ const MedicineSignup = () => {
               {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
             </div>
 
-            {/* Shop Name Input */}
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-700 block">Shop Name</label>
               <div className="relative">
@@ -275,7 +256,6 @@ const MedicineSignup = () => {
               {errors.shopName && <p className="text-red-500 text-xs mt-1">{errors.shopName}</p>}
             </div>
 
-            {/* Email Input with Verification */}
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-700 block">Email Address</label>
               <div className="flex gap-2">
@@ -312,7 +292,6 @@ const MedicineSignup = () => {
               </div>
               {errors.gmail && <p className="text-red-500 text-xs mt-1">{errors.gmail}</p>}
 
-              {/* Email OTP Input Box */}
               {emailOtpSent && !isEmailVerified && (
                 <div className="flex flex-col gap-1 mt-2">
                   <div className="flex gap-2">
@@ -337,7 +316,6 @@ const MedicineSignup = () => {
               )}
             </div>
 
-            {/* Contact Input with Verification */}
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-700 block">Phone Number</label>
               <div className="flex gap-2">
@@ -374,7 +352,6 @@ const MedicineSignup = () => {
               </div>
               {errors.contact && <p className="text-red-500 text-xs mt-1">{errors.contact}</p>}
 
-              {/* Phone OTP Input Box */}
               {phoneOtpSent && !isPhoneVerified && (
                 <div className="flex flex-col gap-1 mt-2">
                   <div className="flex gap-2">
@@ -399,7 +376,6 @@ const MedicineSignup = () => {
               )}
             </div>
 
-            {/* Password Input */}
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-700 block">Password</label>
               <div className="relative">
@@ -427,7 +403,6 @@ const MedicineSignup = () => {
               {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
@@ -444,7 +419,6 @@ const MedicineSignup = () => {
             </button>
           </form>
 
-          {/* Footer Link */}
           <div className="text-center pt-2">
             <p className="text-xs text-slate-500">
               Already have an account?{' '}

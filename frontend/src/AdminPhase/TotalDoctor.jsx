@@ -5,13 +5,12 @@ import {useNavigate} from 'react-router-dom';
 const TotalDoctor = () => {
   const api = import.meta.env.VITE_API_URL;
   const navigate=useNavigate();
-  // States
   const [doctorVerification, setdoctorVerification] = useState([]);
   const [loading, setloading] = useState(false);
   const [History, setHistory] = useState(false);
   const [Doctor, setDoctor] = useState([]);
-  const [TotalPatient, setTotalPatient] = useState([]); // Added missing state
-  const [selectedUser, setSelectedUser] = useState(null); // Added missing state
+  const [TotalPatient, setTotalPatient] = useState([]); 
+  const [selectedUser, setSelectedUser] = useState(null); 
 
   async function handleHistory(id) {
     try {
@@ -35,7 +34,7 @@ const TotalDoctor = () => {
     } finally {
       setTimeout(() => {
         setloading(false);
-      }, 500); // 3 seconds spinner delay reduced for better UX
+      }, 500); 
     }
   }
 
@@ -46,7 +45,7 @@ const TotalDoctor = () => {
         method: "GET",
         credentials: "include",
         headers: {
-          "Content-Type": "application/json" // Fixed typo: applicaiton -> application
+          "Content-Type": "application/json" 
         }
       });
        if (response.status === 401 || response.status === 403) {

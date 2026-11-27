@@ -7,32 +7,21 @@ const BasicDetails = () => {
   const navigate = useNavigate();
   const api = import.meta.env.VITE_API_URL;
   const { token } = useParams();
-
-  // Form Field States
   const [experience, setExperience] = useState("");
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [specialization, setSpecialization] = useState("");
   const [otherSpecialization, setOtherSpecialization] = useState("");
   const [loading, setLoading] = useState(false);
-
-  // Multi-language States
   const [languageInput, setLanguageInput] = useState("");
   const [languages, setLanguages] = useState([]);
-
   const [contactNo, setContactNo] = useState("");
   const [category, setCategory] = useState("");
   const [otherCategory, setOtherCategory] = useState("");
   const [fee, setFee] = useState("");
-
-  // Fetched Dropdown Data
   const [specializationList, setSpecializationList] = useState([]);
   const [categoryList, setCategoryList] = useState([]);
-
-  // Errors
   const [errors, setErrors] = useState({});
-
-  // File Change & Preview Handler
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -49,7 +38,6 @@ const BasicDetails = () => {
     }
   };
 
-  // Language Tag Handlers
   const handleLanguageKeyDown = (e) => {
     if (e.key === 'Enter' || e.key === ',') {
       e.preventDefault();
@@ -146,7 +134,6 @@ const BasicDetails = () => {
     try {
       setLoading(true);
 
-      // Agar user ne Category me "Other" bhara hai, toh pehle database me save karo
       if (category === "Other" && otherCategory.trim()) {
         await fetch(`${api}/api/doctors/category`, {
           method: "POST",
@@ -156,7 +143,6 @@ const BasicDetails = () => {
         });
       }
 
-      // Agar user ne Specialization me "Other" bhara hai, toh pehle database me save karo
       if (specialization === "Other" && otherSpecialization.trim()) {
         await fetch(`${api}/api/doctors/specialization`, {
           method: "POST",

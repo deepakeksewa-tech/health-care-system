@@ -2,10 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import Logo from '../assets/Logo.png';
-
-// -------------------------------------------------------------
-// UPDATED HEADER COMPONENT
-// -------------------------------------------------------------
 const Header = () => {
   const navigate = useNavigate();
   const api = import.meta.env.VITE_API_URL;
@@ -38,8 +34,6 @@ const Header = () => {
    <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-xs">
      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
        <div className="flex items-center justify-between h-16">
-         
-         {/* Left Side: Clickable Logo & MED SEWA Brand */}
          <div 
            onClick={handleHomeRedirect} 
            className="flex items-center cursor-pointer select-none group"
@@ -49,12 +43,8 @@ const Header = () => {
              <span className="text-[#058b7c]">MED</span> SEWA
            </span>
          </div>
-   
-         {/* Right Side: Back to Dashboard + Logout Button */}
-         <div className="flex items-center gap-2 sm:gap-3">
-           
-           {/* Back to Dashboard Button */}
-           <button
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button
              onClick={handleGoToDashboard}
              className="flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm transition-all duration-200 active:scale-95 cursor-pointer"
              title="Go to Dashboard"
@@ -65,7 +55,6 @@ const Header = () => {
              <span>Dashboard</span>
            </button>
    
-           {/* Direct Logout Button */}
            <button
              onClick={handleLogout}
              className="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-semibold px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm transition-all duration-200 active:scale-95 cursor-pointer shadow-xs"
@@ -86,7 +75,6 @@ const Header = () => {
   );
 };
 
-// Helper function to dynamically load Razorpay script
 const loadRazorpayScript = () => {
   return new Promise((resolve) => {
     if (window.Razorpay) {
@@ -111,9 +99,7 @@ const PatientDoctorSlots = () => {
   const dateFromQuery = searchParams.get('date');
 
   const getTodayString = () => new Date().toISOString().split('T')[0];
-
-  // Doctor Info & Schedule State
-  const [doctorInfo, setDoctorInfo] = useState({
+ const [doctorInfo, setDoctorInfo] = useState({
     _id: '',
     name: '',
     image: '',
@@ -132,8 +118,6 @@ const PatientDoctorSlots = () => {
   const [bookedSlots, setBookedSlots] = useState([]);
   const [generatedSlots, setGeneratedSlots] = useState([]);
   const [loadingSchedule, setLoadingSchedule] = useState(true);
-
-  // Selected Date state
   const [selectedDate, setSelectedDate] = useState(dateFromQuery || getTodayString());
 
   const [patientName, setPatientName] = useState('');
@@ -151,11 +135,7 @@ const PatientDoctorSlots = () => {
       setSelectedDate(dateFromQuery);
     }
   }, [dateFromQuery]);
-
-  // -------------------------------------------------------------
-  // TIME CONVERSION HELPERS
-  // -------------------------------------------------------------
-  const parseTimeToMinutes = (timeStr) => {
+ const parseTimeToMinutes = (timeStr) => {
     if (!timeStr) return 0;
     const cleanStr = timeStr.trim().toUpperCase();
     const isPM = cleanStr.includes('PM');
@@ -216,11 +196,7 @@ const PatientDoctorSlots = () => {
     }
     return slots;
   };
-
-  // -------------------------------------------------------------
-  // API CALLS
-  // -------------------------------------------------------------
-  const fetchDoctorDetails = async () => {
+const fetchDoctorDetails = async () => {
     try {
       const response = await fetch(`${api}/api/patient/GetSingleDoctor/${id}`, {
         method: 'GET',
@@ -326,10 +302,6 @@ const PatientDoctorSlots = () => {
     }
     return true;
   };
-
-  // -------------------------------------------------------------
-  // PAYMENT & BOOKING LOGIC
-  // -------------------------------------------------------------
   const handleBooking = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -444,7 +416,7 @@ const PatientDoctorSlots = () => {
       <Header />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 space-y-6">
-        {/* Doctor Info Card */}
+       
         <div className="bg-white rounded-2xl shadow-md p-4 sm:p-6 flex flex-col sm:flex-row items-center sm:items-start gap-6">
           <div className="w-32 h-32 sm:w-40 sm:h-40 flex-shrink-0">
             <img
@@ -493,7 +465,6 @@ const PatientDoctorSlots = () => {
           </div>
         </div>
 
-        {/* Date Display & Available Slots Section */}
         <div className="bg-white rounded-2xl shadow-md p-4 sm:p-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-gray-100 mb-5">
             <div>
@@ -505,7 +476,6 @@ const PatientDoctorSlots = () => {
               )}
             </div>
 
-            {/* Static Date Display Badge */}
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold text-gray-700">Date:</span>
               <div className="bg-[#078475]/10 border border-[#078475]/30 text-[#078475] px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shadow-sm">
@@ -565,7 +535,6 @@ const PatientDoctorSlots = () => {
           )}
         </div>
 
-        {/* Patient Form */}
         <div className="bg-white rounded-2xl shadow-md p-4 sm:p-6 lg:p-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl sm:text-2xl font-bold text-[#078475]">Patient Details</h2>

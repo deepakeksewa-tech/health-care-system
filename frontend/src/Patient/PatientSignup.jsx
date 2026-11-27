@@ -7,38 +7,26 @@ import { User, Mail, Phone, Lock, Eye, EyeOff } from 'lucide-react'
 const PatientSignup = () => {
   const api = import.meta.env.VITE_API_URL
   const navigate = useNavigate()
-
-  // Form State
-  const [gmail, setGmail] = useState('')
+ const [gmail, setGmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
   const [contact, setContact] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-
-  // Validation Error State
   const [errors, setErrors] = useState({})
-
-  // Field-level Validation Function
-  const validate = () => {
+ const validate = () => {
     const newErrors = {}
-
-    // Name Validation
-    if (!name.trim()) {
+if (!name.trim()) {
       newErrors.name = 'Full name is required.'
     } else if (name.trim().length < 3) {
       newErrors.name = 'Name must be at least 3 characters long.'
     }
-
-    // Email Validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!gmail.trim()) {
       newErrors.gmail = 'Email address is required.'
     } else if (!emailRegex.test(gmail)) {
       newErrors.gmail = 'Please enter a valid email address.'
     }
-
-    // Phone/Contact Validation
     const phoneRegex = /^[0-9]{10}$/
     if (!contact.trim()) {
       newErrors.contact = 'Phone number is required.'
@@ -46,7 +34,7 @@ const PatientSignup = () => {
       newErrors.contact = 'Please enter a valid 10-digit phone number.'
     }
 
-    // Password Validation
+
     if (!password) {
       newErrors.password = 'Password is required.'
     } else if (password.length < 6) {
@@ -104,7 +92,7 @@ const PatientSignup = () => {
     <div className="w-full min-h-screen bg-slate-50 flex flex-col lg:flex-row antialiased">
       <Toaster position="top-right" />
 
-      {/* Hero Visual Section */}
+      
       <div className="hidden lg:flex lg:w-1/2 relative bg-slate-900 overflow-hidden items-center justify-center">
         <img
           className="absolute inset-0 h-full w-full object-cover opacity-60"
@@ -125,11 +113,9 @@ const PatientSignup = () => {
         </div>
       </div>
 
-      {/* Form Section */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
         <div className="w-full max-w-md space-y-8 bg-white p-8 sm:p-10 rounded-3xl border border-slate-200/80 shadow-sm">
-          
-          {/* Logo Heading */}
+        
           <div className="space-y-3 text-center">
             <div className="inline-flex items-center justify-center gap-2">
               <img
@@ -151,10 +137,8 @@ const PatientSignup = () => {
             </p>
           </div>
 
-          {/* Signup Form */}
           <form onSubmit={handleSignup} noValidate className="space-y-4">
             
-            {/* Full Name Input */}
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-700 block">
                 Full Name
@@ -181,7 +165,6 @@ const PatientSignup = () => {
               )}
             </div>
 
-            {/* Email Input */}
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-700 block">
                 Email Address
@@ -208,7 +191,6 @@ const PatientSignup = () => {
               )}
             </div>
 
-            {/* Contact Input */}
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-700 block">
                 Phone Number
@@ -235,7 +217,6 @@ const PatientSignup = () => {
               )}
             </div>
 
-            {/* Password Input */}
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-700 block">
                 Password
@@ -269,7 +250,6 @@ const PatientSignup = () => {
               )}
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
@@ -286,7 +266,6 @@ const PatientSignup = () => {
             </button>
           </form>
 
-          {/* Footer Link */}
           <div className="text-center pt-2">
             <p className="text-xs text-slate-500">
               Already have an account?{' '}

@@ -18,9 +18,6 @@ import iconUrl from "leaflet/dist/images/marker-icon.png";
 import iconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
 import shadowUrl from "leaflet/dist/images/marker-shadow.png";
 
-// ==========================================
-// Fix Leaflet Marker Icon
-// ==========================================
 delete L.Icon.Default.prototype._getIconUrl;
 
 L.Icon.Default.mergeOptions({
@@ -29,9 +26,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl,
 });
 
-// ==========================================
-// Map Click Handler
-// ==========================================
 const MapClickHandler = ({ onMapClick }) => {
   useMapEvents({
     click(e) {
@@ -42,9 +36,6 @@ const MapClickHandler = ({ onMapClick }) => {
   return null;
 };
 
-// ==========================================
-// Recenter Map
-// ==========================================
 const RecenterMap = ({ position }) => {
   const map = useMap();
 
@@ -61,40 +52,24 @@ const RecenterMap = ({ position }) => {
   return null;
 };
 
-// ==========================================
-// Main Component
-// ==========================================
+
 const LocationSetup = () => {
   const api = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
-
-  // Address states
   const [streetAddress, setStreetAddress] = useState("");
   const [address, setAddress] = useState("");
   const [landmark, setLandmark] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [zipCode, setZipCode] = useState("");
-
-  // Loading states
   const [loading, setLoading] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
-
-  // Accuracy
   const [accuracy, setAccuracy] = useState(null);
-
-  // Errors
   const [errors, setErrors] = useState({});
-
-  // Default Amritsar location
   const [position, setPosition] = useState({
     lat: 31.6340,
     lng: 74.8723,
   });
-
-  // ==========================================
-  // Validation
-  // ==========================================
   const validate = () => {
     const localErrors = {};
 
@@ -128,10 +103,6 @@ const LocationSetup = () => {
 
     return Object.keys(localErrors).length === 0;
   };
-
-  // ==========================================
-  // Reverse Geocoding
-  // ==========================================
   const getAddress = async (lat, lng) => {
     try {
       const response = await fetch(
@@ -150,7 +121,6 @@ const LocationSetup = () => {
         setAddress(data.display_name);
       }
 
-      // Auto-fill city/state/pincode if available
       if (data?.address) {
         const addressData = data.address;
 
@@ -185,9 +155,6 @@ const LocationSetup = () => {
     }
   };
 
-  // ==========================================
-  // Get Current Location
-  // ==========================================
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
       toast.error("Geolocation is not supported by your browser");
@@ -197,7 +164,6 @@ const LocationSetup = () => {
     setLocationLoading(true);
 
     navigator.geolocation.getCurrentPosition(
-      // SUCCESS
       (pos) => {
         const latitude = pos.coords.latitude;
         const longitude = pos.coords.longitude;
@@ -225,7 +191,6 @@ const LocationSetup = () => {
         setLocationLoading(false);
       },
 
-      // ERROR
       (error) => {
         console.error("Geolocation Error:", error);
 
@@ -257,7 +222,6 @@ const LocationSetup = () => {
         setLocationLoading(false);
       },
 
-      // IMPORTANT OPTIONS
       {
         enableHighAccuracy: true,
         timeout: 15000,
@@ -266,16 +230,11 @@ const LocationSetup = () => {
     );
   };
 
-  // ==========================================
-  // Get Location When Page Loads
-  // ==========================================
+ 
   useEffect(() => {
     getCurrentLocation();
   }, []);
 
-  // ==========================================
-  // Handle Map Click
-  // ==========================================
   const handleMapClick = (latlng) => {
     const newLocation = {
       lat: latlng.lat,
@@ -287,16 +246,12 @@ const LocationSetup = () => {
 
     setPosition(newLocation);
 
-    // User manually selected location,
-    // so GPS accuracy is no longer relevant.
+  
     setAccuracy(null);
 
     getAddress(latlng.lat, latlng.lng);
   };
 
-  // ==========================================
-  // Submit Location
-  // ==========================================
   async function handlePage(e) {
     e.preventDefault();
 
@@ -363,7 +318,6 @@ const LocationSetup = () => {
 
       <Toaster />
 
-      {/* Main Loading */}
       {loading && (
         <div className="fixed inset-0 flex justify-center items-center bg-black/30 z-50">
           <div className="w-12 h-12 border-4 border-[#078475] border-t-transparent rounded-full animate-spin"></div>
@@ -377,9 +331,6 @@ const LocationSetup = () => {
 
         <div className="bg-white rounded-2xl shadow p-5">
 
-          {/* ================================= */}
-          {/* Map */}
-          {/* ================================= */}
 
           <div className="w-full h-[500px] rounded-[20px] overflow-hidden z-0 relative">
 
@@ -414,9 +365,6 @@ const LocationSetup = () => {
             </MapContainer>
           </div>
 
-          {/* ================================= */}
-          {/* Current Location Button */}
-          {/* ================================= */}
 
           <button
             type="button"
@@ -428,10 +376,6 @@ const LocationSetup = () => {
               ? "Detecting Location..."
               : "Use My Current Location"}
           </button>
-
-          {/* ================================= */}
-          {/* Coordinates */}
-          {/* ================================= */}
 
           <div className="mt-4 bg-gray-100 p-4 rounded-xl">
 
@@ -454,16 +398,8 @@ const LocationSetup = () => {
 
           </div>
 
-          {/* ================================= */}
-          {/* Address */}
-          {/* ================================= */}
 
           <div className="mt-5">
-
-            
-
-            
-
             <div className="border-b border-gray-200 pb-12 mt-6">
 
               <h2 className="text-base font-semibold text-black mb-4">
@@ -473,8 +409,6 @@ const LocationSetup = () => {
               <form onSubmit={handlePage}>
 
                 <div className="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
-
-                  {/* Street Address */}
 
                   <div className="col-span-full">
 
@@ -505,9 +439,6 @@ const LocationSetup = () => {
                     )}
 
                   </div>
-
-                  {/* Landmark */}
-
                   <div className="col-span-full">
 
                     <label className="block text-sm font-medium text-black">
@@ -537,8 +468,6 @@ const LocationSetup = () => {
                     )}
 
                   </div>
-
-                  {/* City */}
 
                   <div className="sm:col-span-2">
 
@@ -570,8 +499,6 @@ const LocationSetup = () => {
 
                   </div>
 
-                  {/* State */}
-
                   <div className="sm:col-span-2">
 
                     <label className="block text-sm font-medium text-black">
@@ -602,7 +529,6 @@ const LocationSetup = () => {
 
                   </div>
 
-                  {/* ZIP */}
 
                   <div className="sm:col-span-2">
 
@@ -633,8 +559,6 @@ const LocationSetup = () => {
                     )}
 
                   </div>
-
-                  {/* Submit */}
 
                   <div className="col-span-full text-center mt-4">
 

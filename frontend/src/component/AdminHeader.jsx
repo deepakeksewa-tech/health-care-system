@@ -5,12 +5,10 @@ import Logo from '../assets/Logo.png'
 const AdminHeader = () => {
   const navigate = useNavigate()
 
-  // Dynamic back navigation (Goes back 1 step in history)
   const handleGoBack = () => {
     navigate(-1)
   }
 
-  // Logout handler
   const handleLogout = async () => {
   try {
     const call = await fetch(`https://health-care-system-vv00.onrender.com/api/admin/logout`, {
@@ -18,7 +16,6 @@ const AdminHeader = () => {
       headers: {
         "content-type": "application/json"
       },
-      // Yeh line sabse zaruri hai cookie delete/modify karne ke liye
       credentials: "include" 
     });
 
@@ -27,8 +24,6 @@ const AdminHeader = () => {
     if (response.success) {
       console.log("Logged out successfully");
       navigate('/Admin/LoginPage')
-      // Yahan tum user ko login page par redirect kar sakte ho
-      // window.location.href = "/login";
     }
     
     
@@ -38,7 +33,6 @@ const AdminHeader = () => {
 
   }
 
-  // Logo home redirect
   const handleHomeRedirect = () => {
     navigate('/Admin/Dashboard')
   }
@@ -47,8 +41,6 @@ const AdminHeader = () => {
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          
-          {/* Left Side: Clickable Logo & MED SEWA Brand */}
           <div 
             onClick={handleHomeRedirect} 
             className="flex items-center cursor-pointer select-none group"

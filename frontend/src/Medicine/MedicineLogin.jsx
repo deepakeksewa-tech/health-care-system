@@ -12,15 +12,12 @@ import {
 const MedicineLogin = () => {
   const api = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
-
-  // Form State
   const [gmail, setGmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // Form Validation Logic
   const validate = () => {
     const newErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -84,7 +81,6 @@ const MedicineLogin = () => {
     <div className="w-full min-h-screen bg-slate-50 flex flex-col lg:flex-row antialiased">
       <Toaster position="top-right" />
 
-      {/* Hero Visual Section */}
       <div className="hidden lg:flex lg:w-1/2 relative bg-slate-900 overflow-hidden items-center justify-center">
         <img
           className="absolute inset-0 h-full w-full object-cover opacity-60"
@@ -104,12 +100,9 @@ const MedicineLogin = () => {
           </p>
         </div>
       </div>
-
-      {/* Interactive Form Section */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
         <div className="w-full max-w-md space-y-8 bg-white p-8 sm:p-10 rounded-3xl border border-slate-200/80 shadow-sm">
-          
-          {/* Logo Heading */}
+        
           <div className="space-y-3 text-center">
             <div className="inline-flex items-center justify-center gap-2">
               <img
@@ -132,7 +125,7 @@ const MedicineLogin = () => {
           </div>
 
           <form onSubmit={credentialsChecking} noValidate className="space-y-5">
-            {/* Email Field */}
+         
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-700 block">
                 Email Address
@@ -159,7 +152,7 @@ const MedicineLogin = () => {
               )}
             </div>
 
-            {/* Password Field */}
+          
             <div className="space-y-1">
               <div className="flex justify-between items-center">
                 <label className="text-xs font-semibold text-slate-700">
@@ -202,7 +195,6 @@ const MedicineLogin = () => {
               )}
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
@@ -219,7 +211,6 @@ const MedicineLogin = () => {
             </button>
           </form>
 
-          {/* Footer Registration Link */}
           <div className="text-center pt-2">
             <p className="text-xs text-slate-500">
               Don't have an account?{" "}

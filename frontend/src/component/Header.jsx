@@ -4,13 +4,10 @@ import Logo from '../assets/Logo.png'
 
 const Header = () => {
   const navigate = useNavigate()
-
-  // Dynamic back navigation (Goes back 1 step in history)
   const handleGoBack = () => {
     navigate(-1)
   }
 
-  // Logout handler
   const handleLogout = async() => {
       try {
     const call = await fetch(`https://health-care-system-vv00.onrender.com/api/admin/logout`, {
@@ -18,7 +15,6 @@ const Header = () => {
       headers: {
         "content-type": "application/json"
       },
-      // Yeh line sabse zaruri hai cookie delete/modify karne ke liye
       credentials: "include" 
     });
 
@@ -27,8 +23,6 @@ const Header = () => {
     if (response.success) {
       console.log("Logged out successfully");
       navigate('/Admin/LoginPage')
-      // Yahan tum user ko login page par redirect kar sakte ho
-      // window.location.href = "/login";
     }
     
     
@@ -38,7 +32,6 @@ const Header = () => {
 
   }
 
-  // Logo home redirect
   const handleHomeRedirect = () => {
     navigate('/Admin/Dashboard')
   }
@@ -48,7 +41,6 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           
-          {/* Left Side: Clickable Logo & MED SEWA Brand */}
           <div 
             onClick={handleHomeRedirect} 
             className="flex items-center cursor-pointer select-none group"
@@ -63,10 +55,9 @@ const Header = () => {
             </span>
           </div>
 
-          {/* Right Side: Back Button (-1) + Logout Button */}
+      
           <div className="flex items-center gap-2 sm:gap-3">
-            
-            {/* Back Button (-1) */}
+          
             <button
               onClick={handleGoBack}
               className="flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm transition-all duration-200 active:scale-95 cursor-pointer"
@@ -79,7 +70,7 @@ const Header = () => {
               <span>Back</span>
             </button>
 
-            {/* Logout Button */}
+         
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-semibold px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm transition-all duration-200 active:scale-95 cursor-pointer shadow-xs"

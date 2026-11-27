@@ -30,6 +30,6 @@ router.get("/get/AllDoctor/BasicDetails", adminMiddleware, ReadBasicDetails);
 router.get("/get/AllUsers", adminMiddleware, getAllUsers);
 router.get("/get/AllPatients/:id", adminMiddleware, getAllPatients);
 router.get("/get/AllDoctor/:id", adminMiddleware, doctorHistory);
-router.post("/logout",adminMiddleware, logout);
+router.post("/logout", logout);
 router.get("/get/All/Medicine/Seller",adminMiddleware,GetAllMedSeller);
 export default router;

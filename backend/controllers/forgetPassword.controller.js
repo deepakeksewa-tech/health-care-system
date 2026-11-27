@@ -128,7 +128,6 @@ export const createPassword=async(req,res)=>{
 
 
 
-// ------------------- patient -------------------
 
 export const Patientpassword=async(req,res)=>{
   const find=await userModel.findOne({gmail:req.body.gmail});
@@ -254,8 +253,6 @@ export const PatientcreatePassword=async(req,res)=>{
 
 
 
-
-// ---------------- admin ----------------
 
 export const Adminpassword=async(req,res)=>{
   const find=await AdminModel.findOne({gmail:req.body.gmail});

@@ -75,7 +75,7 @@ const PatientSchema = new mongoose.Schema(
     },
     uploadReports: {
       type: String,
-      default: "", // Cloudinary or S3 URL
+      default: "", // Cloudinary 
     },
     symptoms: {
       type: String,
@@ -104,11 +104,11 @@ const PatientSchema = new mongoose.Schema(
       enum: ["Pending", "Paid", "Failed"],
     },
     amount: {
-      type: Number, // Storing consultation fee
+      type: Number, 
       required: true,
     },
 
-    // Razorpay Integration Details
+   
     razorpayOrderId: {
       type: String,
       default: null,

@@ -5,8 +5,7 @@ import jwt from 'jsonwebtoken';
 import { Patient, userModel } from '../models/patient.model.js';
 import { Medicine, MedicineSeller } from "../models/medicine.model.js";
 
-// --------------------------- Doctor Data -------------------------------------------------
-// list of pending verification doctor list 
+
 const api=process.env.N8N_WEBHOOK;
 export const ReadRegistration=async(req,res)=>{
   const  data=await DoctorRegistration.find({verificationStatus:"Pending"}).select("-password");
@@ -22,7 +21,7 @@ export const ReadRegistration=async(req,res)=>{
     data
   })
 }
-// -------------------------- rejected  --------------------------------------------------
+
 export const RejectRegistration=async(req,res)=>{
   const DoctorId=req.params.id;
   const check=await DoctorRegistration.findById(DoctorId);
@@ -77,7 +76,7 @@ const data = await sendingMail.json();
   })
 
 }
-// --------------------- Accept ------------------------------------
+
 export const AcceptRegistration=async(req,res)=>{
   const doctorId=req.params.id;
   const check = await DoctorRegistration.findById(doctorId);
@@ -139,7 +138,7 @@ Doctor Consultancy Platform`,
     message:"the doctor verification accepted successfully"
   })
 }
-// list of basic details of the doctor
+
 export const ReadBasicDetails=async(req,res)=>{
   const data=await DoctorBasic.find();
   if(data.length==0){
@@ -175,8 +174,7 @@ export const deletingDoctor=async(req,res)=>{
 }
 
 
-// ---------------------------------------- Admin phase -----------------------
-// admin create,login password and gmail checking ,All admin List
+
 export const AdminCreate=async(req,res)=>{
   const gmail=req.body.gmail.toLowerCase();
   const check =await AdminModel.findOne({gmail});
@@ -272,7 +270,7 @@ export const checkPassword=async(req,res)=>{
 
   res.cookie("token", token, {
     httpOnly: true,
-    secure: true, // true in production with HTTPS
+    secure: true, 
     sameSite: "none",
     maxAge: 24 * 60 * 60 * 1000,
   });
@@ -357,7 +355,7 @@ export const doctorHistory=async(req,res)=>{
     })
 }
 
-//  get all Medicine Seller
+
 export const GetAllMedSeller=async(req,res)=>{
   const finding=await MedicineSeller.find();
   if(!finding){
@@ -380,8 +378,6 @@ export const logout = async (req, res) => {
         res.clearCookie("token", {
             path: "/",
             httpOnly: true,
-            // Agar backend Render (https) par hai aur frontend Vercel/Netlify par,
-            // toh yeh dono settings bohot zaruri hain cookie delete/set hone ke liye:
             secure: true, 
             sameSite: "none" 
         });

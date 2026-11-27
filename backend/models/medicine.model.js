@@ -165,7 +165,6 @@ const UserAddressSchema=new mongoose.Schema({
   ]
 })
 
-// Compile and export models safely
 const MedicineSeller = mongoose.models.MedicineSeller || mongoose.model("MedicineSeller", MedicineSellerSchema);
 const Medicine = mongoose.models.Medicine || mongoose.model("Medicine", MedicineSchema);
 const MedOrder = mongoose.models.MedOrder || mongoose.model("MedOrder", MedUserSchema);

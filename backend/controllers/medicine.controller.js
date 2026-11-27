@@ -1,10 +1,7 @@
-//  MedicineSeller, Medicine, MedOrder
-
 import { MedicineSeller,Medicine, MedCategory } from "../models/medicine.model.js";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-// Medicine Seller Medicine
 export const MedSellerSignup=async(req,res)=>{
   try{
   const name=req.body.name;
@@ -66,7 +63,6 @@ catch(error){
 }
 
 
-// Medicine Seller Login (cookie left)
 export const MedSellerLogin=async(req,res)=>{
   try{
   const gmail=req.body.gmail;
@@ -103,7 +99,7 @@ export const MedSellerLogin=async(req,res)=>{
     );
     res.cookie("token", token, {
     httpOnly: true,
-    secure: true, // true in production with HTTPS
+    secure: true, 
     sameSite: "none",
     maxAge: 24 * 60 * 60 * 1000,
   });
@@ -122,7 +118,6 @@ catch(error){
 
 
 
-// Add a single Medicine
 export const AddMedicine=async(req,res)=>{
   try{
     const Medicine_name=req.body.Medicine_name;
@@ -210,7 +205,6 @@ export const AddMedicine=async(req,res)=>{
 }
 
 
-// Get All Medicine With SellerId
 export const getSellerMedicine=async(req,res)=>{
   try{
   const SellerId=req.id;
@@ -243,7 +237,6 @@ catch(error){
 }
 
 
-// Get Specific Medicine of The Seller
 export const GetSingleMedicine=async(req,res)=>{
   try{
   const SellerId=req.id;
@@ -276,7 +269,7 @@ catch(error){
 }
 }
 
-// Update The Single medicine
+
 export const UpdateMedicine=async(req,res)=>{
   try{
   const SellerId=req.id;
@@ -353,7 +346,6 @@ catch(error){
 }
 
 
-// Delete a single medicine
 export const DeleteMedicine=async(req,res)=>{
   try{
   const SellerId=req.id;
@@ -386,7 +378,6 @@ catch(error){
 }
 
 
-//Get Seller Details where status true
 export const GetSellerDetails=async(req,res)=>{
   try{
   const SellerId=req.id;
@@ -412,7 +403,6 @@ export const GetSellerDetails=async(req,res)=>{
 }
 
 
-// update seller details
 export const UpdateSellerDetails=async(req,res)=>{
   try{
 const SellerId=req.id;

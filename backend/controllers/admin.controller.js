@@ -375,11 +375,12 @@ export const GetAllMedSeller=async(req,res)=>{
 export const logout = async (req, res) => {
     try {
         // Cookie ko clear karna
-        res.clearCookie("token", {
+        res.cookie("token", "", {
             path: "/",
             httpOnly: true,
-            secure: true, 
-            sameSite: "none" 
+            secure: true,
+            sameSite: "none",
+            expires: new Date(0) 
         });
 
         return res.status(200).send({

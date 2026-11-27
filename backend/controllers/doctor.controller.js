@@ -6,7 +6,6 @@ import jwt from 'jsonwebtoken'
 import { Patient, userModel } from "../models/patient.model.js";
 import { payment } from "../models/payment.model.js";
 
-// create the row for the registration details for the doctor 
 export const createRegistrationDoctor = async (req, res) => {
     try {
         if (!req.file) {
@@ -74,7 +73,7 @@ export const createRegistrationDoctor = async (req, res) => {
     }
 };
 
-// create the row of the basic details of the doctor
+
 export const createBasicDoctor = async (req, res) => {
     try {
         if (!req.file) {
@@ -140,7 +139,6 @@ export const createBasicDoctor = async (req, res) => {
     }
 };
 
-// Doctor Hospital Location
 export const LocationSetup = async(req,res)=>{
     const doctorId = req.id;
     const { longitude, latitude, streetAddress, landmark, city, state, zip } = req.body;
@@ -172,7 +170,6 @@ export const LocationSetup = async(req,res)=>{
     })
 }
 
-// Doctor Weekly Schedule
 export const weeklySchedule = async(req,res)=>{
     const doctorId = req.id;
     const exist = await DoctorBasic.findById(doctorId);
@@ -200,7 +197,7 @@ export const weeklySchedule = async(req,res)=>{
     })
 }
 
-// Doctor Login
+
 export const DoctorLogin = async(req,res)=>{
     const { gmail, password } = req.body;
     const finding = await DoctorRegistration.findOne({gmail});
@@ -248,7 +245,6 @@ export const DoctorLogin = async(req,res)=>{
     })
 }
 
-// ------ get doctor name ---------------
 export const getName = async(req,res)=>{
     const id = req.id;
     const exist = await DoctorBasic.findById(id);
@@ -266,7 +262,6 @@ export const getName = async(req,res)=>{
     })
 }
 
-// ----- add specialization
 export const specialization = async(req,res)=>{
     const special = req.body.specification.toLowerCase();
 
@@ -284,7 +279,6 @@ export const specialization = async(req,res)=>{
     })
 }
 
-// ------------- category -------------------
 export const category = async(req,res)=>{
     const cat = req.body.category.toLowerCase();
     const check = await Category.findOne({category: cat});
@@ -301,7 +295,6 @@ export const category = async(req,res)=>{
     })
 }
 
-// ----------------- Read Specialization ---------------
 export const ReadSpecialization = async(req,res)=>{
     const read = await Specialization.find();
     return res.status(200).send({
@@ -310,7 +303,6 @@ export const ReadSpecialization = async(req,res)=>{
     })
 }
 
-// ----------------- Read Category ----------------------
 export const ReadCategory = async(req,res)=>{
     const read = await Category.find();
     return res.status(200).send({
@@ -320,7 +312,6 @@ export const ReadCategory = async(req,res)=>{
     })
 }
 
-// ---- get appointment -----
 export const getAppointment = async(req,res)=>{
     const id = req.id;
     const check = await DoctorBasic.findOne({doctorId: id});
@@ -346,7 +337,6 @@ export const getAppointment = async(req,res)=>{
     })
 }
 
-// ---- update appointment status (With Completed/Cancelled guard) -----
 export const updateAppointmentStatus = async (req, res) => {
     try {
         const { id, status } = req.body;
@@ -374,7 +364,6 @@ export const updateAppointmentStatus = async (req, res) => {
             });
         }
 
-        // GUARD: Block changes if already Completed or Cancelled
         if (appointment.status === "Completed" || appointment.status === "Cancelled") {
             return res.status(403).json({
                 success: false,
@@ -400,7 +389,6 @@ export const updateAppointmentStatus = async (req, res) => {
     }
 };
 
-// ------ verify password ------
 export const verifyPassword = async(req,res)=>{
     const id = req.id;
     const password = req.body.password;
@@ -466,7 +454,6 @@ export const creditedMoney = async(req,res)=>{
     })
 }
 
-// 📥 Get Doctor Settings (Fixed find -> findOne)
 export const getDoctorSettings = async (req, res) => {
     try {
         const doctorBasicId = req.id; 
@@ -497,7 +484,6 @@ export const getDoctorSettings = async (req, res) => {
     }
 };
 
-// 💾 Update General Settings
 export const updateDoctorSettings = async (req, res) => {
     try {
         const doctorBasicId = req.id;
@@ -526,10 +512,6 @@ export const updateDoctorSettings = async (req, res) => {
     }
 };
 
-
-
-
-// 🔄 Update Weekly Schedule Controller
 export const updateWeeklyOff = async (req, res) => {
     try {
         const doctorBasicId = req.id;
@@ -556,15 +538,13 @@ export const updateWeeklyOff = async (req, res) => {
             const foundItem = weekly.find(
                 (item) => item && item.day && item.day.trim().toLowerCase() === dayName.toLowerCase()
             );
-
-            // Boolean status check (Handles boolean true, string "true", or number 1)
+        
             const isWorking = foundItem 
                 ? (foundItem.status === true || foundItem.status === "true" || foundItem.status === 1) 
                 : false;
 
             return {
                 day: dayName,
-                // Backend level default fallback if timing is empty
                 start: foundItem ? String(foundItem.start || (isWorking ? "10:00 AM" : "")) : "",
                 end: foundItem ? String(foundItem.end || (isWorking ? "06:00 PM" : "")) : "",
                 status: isWorking
@@ -594,13 +574,11 @@ export const updateWeeklyOff = async (req, res) => {
 
 export const logout = async (req, res) => {
     try {
-        // Cookie ko clear karna
+        
         res.clearCookie("token", {
             path: "/",
             httpOnly: true,
-            // Agar backend Render (https) par hai aur frontend Vercel/Netlify par,
-            // toh yeh dono settings bohot zaruri hain cookie delete/set hone ke liye:
-            secure: true, 
+             secure: true, 
             sameSite: "none" 
         });
 

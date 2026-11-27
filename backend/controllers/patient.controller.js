@@ -10,7 +10,7 @@ import { DoctorRegistration, DoctorBasic, DoctorWeekly, DoctorLocation } from '.
 import { Patient, userModel, PatientMedicine } from '../models/patient.model.js';
 import cloudinary from '../config/cloudinary.js';
 
-// Helper: Secure Timing-Safe String Comparison
+
 const safeCompare = (a, b) => {
   if (typeof a !== 'string' || typeof b !== 'string') return false;
   const bufA = Buffer.from(a);
@@ -19,9 +19,7 @@ const safeCompare = (a, b) => {
   return crypto.timingSafeEqual(bufA, bufB);
 };
 
-// ==========================================
-// 1. SIGNUP CONTROLLER
-// ==========================================
+
 export const signup = async (req, res) => {
   try {
     const { name, contact, password } = req.body;
@@ -40,7 +38,7 @@ export const signup = async (req, res) => {
       password: hashedPassword
     });
 
-    // Webhook (non-blocking)
+    
     if (process.env.N8N_WEBHOOK) {
       fetch(process.env.N8N_WEBHOOK, {
         method: "POST",
@@ -59,9 +57,6 @@ export const signup = async (req, res) => {
   }
 };
 
-// ==========================================
-// 2. LOGIN CONTROLLER
-// ==========================================
 export const login = async (req, res) => {
   try {
     const gmail = (req.body.gmail || "").toLowerCase().trim();
@@ -91,9 +86,6 @@ export const login = async (req, res) => {
   }
 };
 
-// ==========================================
-// 3. READ DOCTORS FOR PATIENT (BY DATE)
-// ==========================================
 export const ReadDoctorForPatient = async (req, res) => {
   try {
     const { date } = req.query;
@@ -104,7 +96,6 @@ export const ReadDoctorForPatient = async (req, res) => {
       // YYYY-MM-DD only
       formattedDateStr = date.split("T")[0];
     } else {
-      // Current date in India
       formattedDateStr = new Intl.DateTimeFormat("en-CA", {
         timeZone: "Asia/Kolkata",
         year: "numeric",
@@ -113,11 +104,9 @@ export const ReadDoctorForPatient = async (req, res) => {
       }).format(new Date());
     }
 
-    // IMPORTANT:
-    // YYYY-MM-DD ko UTC date ke roop mein parse karo
+   
     const targetDate = new Date(`${formattedDateStr}T00:00:00.000Z`);
 
-    // Weekday UTC se nikalo
     const targetDay = targetDate.toLocaleDateString("en-US", {
       weekday: "long",
       timeZone: "UTC",
@@ -171,9 +160,7 @@ export const ReadDoctorForPatient = async (req, res) => {
   }
 };
 
-// ==========================================
-// 4. GET SINGLE DOCTOR
-// ==========================================
+
 export const GetSingleDoctor = async (req, res) => {
   try {
     const { id } = req.params;
@@ -188,9 +175,6 @@ export const GetSingleDoctor = async (req, res) => {
   }
 };
 
-// ==========================================
-// 5. GET SCHEDULE DOCTOR (BY DATE & BOOKED SLOTS)
-// ==========================================
 export const GetScheduleDoctor = async (req, res) => {
   try {
     const { id } = req.params;
@@ -210,13 +194,13 @@ export const GetScheduleDoctor = async (req, res) => {
 
     const targetDay = targetDate.toLocaleDateString("en-US", { weekday: "long" });
 
-    // 1. Doctor ka Weekly Schedule dhoondhein
+   
     const doctorSchedule = await DoctorWeekly.findOne({ doctorId: id });
     if (!doctorSchedule) {
       return res.status(400).json({ success: false, message: "Doctor schedule is not set", data: [] });
     }
 
-    // 2. Us day ka active schedule filter karein
+  
     const daySchedule = doctorSchedule.weekly.find(
       s => s.day.toLowerCase() === targetDay.toLowerCase() && s.status === true
     );
@@ -230,7 +214,7 @@ export const GetScheduleDoctor = async (req, res) => {
       });
     }
 
-    // 3. Selected Date par pehle se book hue slots fetch karein
+    
     const existingBookings = await Patient.find({
       doctorId: id,
       bookingDate: formattedDateStr,
@@ -253,9 +237,7 @@ export const GetScheduleDoctor = async (req, res) => {
   }
 };
 
-// ==========================================
-// 6. CREATE PATIENT APPOINTMENT
-// ==========================================
+
 export const PatientAppointment = async (req, res) => {
   let localFilePath = req.file?.path;
 
@@ -301,7 +283,7 @@ export const PatientAppointment = async (req, res) => {
       });
     }
 
-    // 2. Verify Payment Signature BEFORE external side effects
+  
     if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
       if (localFilePath && fs.existsSync(localFilePath)) fs.unlinkSync(localFilePath);
       return res.status(400).json({
@@ -324,7 +306,7 @@ export const PatientAppointment = async (req, res) => {
       });
     }
 
-    // 3. Upload file to Cloudinary after verification passes
+   
     let reportUrl = "";
     if (localFilePath) {
       const uploadedReport = await cloudinary.uploader.upload(localFilePath, { folder: "Patients" });
@@ -332,7 +314,7 @@ export const PatientAppointment = async (req, res) => {
       if (fs.existsSync(localFilePath)) fs.unlinkSync(localFilePath);
     }
 
-    // 4. Save Appointment
+
     const save = await Patient.create({
       userId,
       doctorId,
@@ -355,7 +337,7 @@ export const PatientAppointment = async (req, res) => {
       meetingLink:`https://meet.jit.si/MedSewa-${crypto.randomBytes(8).toString("hex")}`
     });
 
-    // 5. Update Doctor Payment Earnings
+   
     let pay = await payment.findOne({ userId: doctorId });
     if (!pay) {
       await payment.create({ userId: doctorId, money: bookingAmount });
@@ -364,7 +346,7 @@ export const PatientAppointment = async (req, res) => {
       await pay.save();
     }
 
-    // 6. Fetch Metadata & Trigger Webhook
+    
     const location = await DoctorLocation.findOne({ doctorId }).populate('doctorId');
     const user = await userModel.findById(userId);
 
@@ -385,7 +367,6 @@ export const PatientAppointment = async (req, res) => {
     const isOnline = consultation?.toLowerCase().includes("online") || consultation?.toLowerCase().includes("video");
 
    if (process.env.N8N_WEBHOOK) {
-  // 1. Patient Email Webhook
   const patientWebhook = fetch(process.env.N8N_WEBHOOK, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -402,7 +383,7 @@ export const PatientAppointment = async (req, res) => {
     })
   });
 
-  // 2. Doctor Email Webhook
+ 
   const doctorWebhook = fetch(process.env.N8N_WEBHOOK, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -419,7 +400,7 @@ export const PatientAppointment = async (req, res) => {
     })
   });
 
-  // Dono requests ko parallelly fire kar do aur errors catch kar lo
+  
   Promise.all([patientWebhook, doctorWebhook])
     .catch(err => console.error("n8n Webhook Error:", err));
 }
@@ -437,9 +418,7 @@ export const PatientAppointment = async (req, res) => {
   }
 };
 
-// ==========================================
-// 7. BOOKING DETAILS CONTROLLER
-// ==========================================
+
 export const bookingDetails = async (req, res) => {
   try {
     const id = req.id;
@@ -453,9 +432,7 @@ export const bookingDetails = async (req, res) => {
   }
 };
 
-// ==========================================
-// 8. PATIENT MEDICINE DETAILS CONTROLLERS
-// ==========================================
+
 export const PatientMedicineDetails = async (req, res) => {
   try {
     const id = req.id;
@@ -520,12 +497,10 @@ export const savePatientMedicineDetails = async (req, res) => {
 
 export const logout = async (req, res) => {
     try {
-        // Cookie ko clear karna
+        
         res.clearCookie("token", {
             path: "/",
             httpOnly: true,
-            // Agar backend Render (https) par hai aur frontend Vercel/Netlify par,
-            // toh yeh dono settings bohot zaruri hain cookie delete/set hone ke liye:
             secure: true, 
             sameSite: "none" 
         });
